@@ -1,0 +1,245 @@
+#!/usr/bin/php -q
+<?php
+#############################################################################
+# Asterisk set user auto-logout time existing user(s)
+#
+# Aastra SIP Phones 1.4.2 or better
+#
+# Copyright 2007-2010 Aastra Telecom Ltd
+#
+# Supported Aastra Phones
+#   All phones but phones running 1.4
+#
+# ./script user1,user2... [Autologout time]
+#
+# Autologout time in 24h format HHMM, if omitted the autologout is set to 
+# "no autologout".
+#############################################################################
+
+#############################################################################
+# PHP customization for includes and warnings
+#############################################################################
+chdir(dirname(__FILE__)); 
+$os=strtolower(PHP_OS);
+if(strpos($os, 'win') === false) ini_set('include_path',ini_get('include_path').':include:../include');
+else ini_set('include_path',ini_get('include_path').';include;..\include');
+error_reporting(E_ERROR | E_PARSE);
+
+#############################################################################
+# Includes
+#############################################################################
+require_once('AastraAsterisk.php');
+
+#############################################################################
+# Private functions
+#############################################################################
+function user_exists($user)
+{
+# No by default
+$return=False;
+
+# Connect to AGI
+$as=new AGI_AsteriskManager();
+$res=$as->connect();
+
+# Get value in the database
+$test=$as->database_get('AMPUSER',$user.'/cidnum');
+
+# Disconnect properly	
+$as->disconnect();
+
+# Test user
+if($test!='') $return=True;
+
+# Return result
+return($return);
+}
+
+function display($title,$result,$comment)
+{
+echo str_pad($title.'  ',30,'.');
+echo '  ';
+switch($result)
+	{
+	case '0':
+		echo 'FAILED';
+		break;
+	case '1':
+		echo 'Done';
+		break;
+	case '2':
+		echo 'WARNING';
+		break;
+	}
+echo "\n";
+foreach($comment as $value) echo '-> '.$value."\n";
+}
+
+function test_time($time)
+{
+$return=True;
+
+# Test length
+if($return)
+	{
+	if(strlen($time)!=4) $return=False;
+	}
+
+# Test if numeric
+if($return)
+	{
+	if(!is_numeric($time)) $return=False;
+	}
+
+# Test hours
+if($return)
+	{
+	$hours=substr($time,0,2);
+	if($hours>23) $return=False;
+	}
+
+# Test minutes
+if($return)
+	{
+	$minutes=substr($time,-2);
+	if($minutes>59) $return=False;
+	}
+
+# Return result
+return($return);
+}
+
+function format_time($input)
+{
+Global $AA_FORMAT_DT;
+
+# Split the input
+$timepart=substr($input,0,5);
+list($hour,$minute)=explode('-',$timepart);
+if($AA_FORMAT_DT=='US')  
+	{
+	switch($hour)
+		{
+		case '00':
+		case '0':
+			$hour='12';
+			$ampm='AM';
+			break;
+		case '12':
+			$ampm='PM';
+			break;
+		default:
+			if($hour>12)
+				{
+				$hour-=12;
+				$ampm='PM';
+				}
+			else $ampm='AM';
+			break;
+		}
+	$return=$hour.':'.$minute.' '.$ampm;
+	}
+else $return=$hour.':'.$minute;
+
+# Return formatted text
+return($return);
+}
+
+#############################################################################
+# Active code
+#############################################################################
+
+# Test input parameters
+if($argc<2)
+	{
+	echo "Usage: ./".basename(__FILE__)." user1,user2... [HHMM]\n";
+	exit;
+	}
+
+# Check freePBX mode
+if($AA_FREEPBX_MODE!='1')
+	{
+	echo "Error: this tool is designed only for 'extensions' freePBX mode\n";
+	exit;
+	}
+
+# Check Autologout
+if(!$AA_AUTOLOGOUT)
+	{
+	echo "Error: the auto-logout feature is not enabled on your platform\n";
+	exit;
+	}
+
+# Retrieve time
+if($argv[2]!='')
+	{
+	if(!test_time($argv[2]))
+		{
+		echo "Error: auto-logout time must be 24h format HHMM\n";
+		exit;
+		}
+	else $time=substr($argv[2],0,2).'-'.substr($argv[2],-2);
+	}
+else $time='';
+
+# Retrieve users
+$users=explode(',',$argv[1]);
+
+# Load startup_asterisk.cfg
+$user_array=Aastra_read_HDconfig_file(AASTRA_PATH_CACHE.'startup_asterisk.cfg');
+
+# Process each user
+foreach($users as $extension)
+	{
+	# Init results
+	$title='Processing user '.$extension;
+	$result='1';
+	$comment='';
+
+	# User exists
+	if(user_exists($extension))
+		{
+		# Check phone type
+		if($user_array[$extension]!=NULL)
+			{
+			if(!Aastra_is_sip_notify_supported($user_array[$extension]))
+				{
+				$result='0';
+				$comment[]='The user phone does not support auto-logout';
+				}
+			}
+
+		# Update autologout
+		if($result=='1') 
+			{
+			# Update database
+			Aastra_manage_presence_Asterisk($extension,'set','logout',$time);
+			$logout=Aastra_manage_presence_Asterisk($extension,'logout');
+			if($logout!='') $comment[]='Auto-logout set to '.format_time($logout);
+			else $comment[]='Auto-logout disabled';
+
+			# Send SIP notify
+			if($AA_AUTOLOGOUT_MSG)
+				{
+				if(Aastra_is_user_registered_Asterisk($extension)) 
+					{
+					# Send to a single user
+					$notify=Aastra_get_user_context($extension,'notify');
+					$notify['auto_logout']='1';
+					Aastra_save_user_context($extension,'notify',$notify);
+					Aastra_send_SIP_notify_Asterisk('aastra-xml',array($extension));
+					$comment[]='Phone idle screen updated';
+					}
+				}
+			}
+		}
+	else 
+		{
+		$result='0';
+		$comment[]='Extension '.$extension.' not configured';
+		}
+	display($title,$result,$comment);
+	}
+
+exit;
+?>

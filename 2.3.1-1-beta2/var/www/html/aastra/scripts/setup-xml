@@ -1,0 +1,2058 @@
+#!/bin/sh
+#
+# Copyright (C) 2007 Fonality Inc. (fonality.com)
+# Copyright (C) 2009 Aastra Telecom
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+################################################################
+# Global variables
+################################################################
+XML_DIRECTORY=aastra
+TFTP_ROOT=/tftpboot
+
+################################################################
+# Functions
+################################################################
+function create_config_file {
+cat > $TFTP_ROOT/aastra.cfg <<EOF
+# Aastra default config file for use with XML scripts
+# Generated using setup-aastra-xml
+#
+# Copyright (C) 2009 Aastra Telecom
+#
+
+# Setup DHCP mode
+dhcp: 1
+
+# Setup TFTP server address
+tftp server: $IPADDR
+
+# SIP Proxy/Registrar
+dynamic sip: 1
+sip line1 user name: XXNAXX
+sip line1 proxy ip: $IPADDR
+sip line1 registrar ip: 0.0.0.0
+
+# Time server
+time server disabled: 0
+time server1: pool.ntp.org
+time server2: $IPADDR
+
+# Time Zone
+time zone name: $TZ_NAME
+time zone code: $TZ_CODE
+
+# Date and time format
+time format: $TIME_FORMAT
+date format: $DATE_FORMAT
+
+# Localization
+tone set: $TONE_SET
+language 1: $LANGUAGE_1
+language 2: $LANGUAGE_2
+language 3: $LANGUAGE_3
+language 4: $LANGUAGE_4
+language: $DEFAULT_LANGUAGE
+input language: $INPUT_LANGUAGE
+web language: $DEFAULT_LANGUAGE
+
+# Localization XML Scripts
+ask_language: $ASK_LANGUAGE
+ask_tz: $ASK_TZ
+
+# Global Park
+sprecode: asterisk;$PARKING
+
+# Call forward disables
+call forward disabled:1
+
+# Digit timeout
+sip digit timeout: 6
+
+# GRUU and instance id not needed for Asterisk
+sip gruu: 0
+sip instance id: 0
+
+# Allow XML push
+xml application post list: $IPADDR
+xml get timeout: 30
+
+# Startup URI
+action uri startup: http://$IPADDR/$XML_DIRECTORY/asterisk/startup.php
+
+# BLF customization
+sip accept out of order requests: 1
+sip blf subscription period: 600
+
+# Bypass Asterisk SIP non compliancy
+sip contact matching: 2
+
+# Unlock keys on 6730i, 6731i and 6753i
+prgkey1 locked: 0
+prgkey2 locked: 0
+prgkey5 locked: 0
+prgkey6 locked: 0
+
+# Force one key
+softkey1 type: xml
+softkey1 label: Startup
+softkey1 value: http://$IPADDR/$XML_DIRECTORY/asterisk/startup.php
+prgkey1 type: xml
+prgkey1 value: http://$IPADDR/$XML_DIRECTORY/asterisk/startup.php
+EOF
+
+if [ -f $TFTP_ROOT/aastra_custom.cfg ]; then
+  cat /$TFTP_ROOT/aastra_custom.cfg >> /$TFTP_ROOT/aastra.cfg
+fi
+
+chmod 666 $TFTP_ROOT/aastra.cfg
+chown asterisk:asterisk $TFTP_ROOT/aastra.cfg
+}
+
+################################################################
+# Main code
+################################################################
+
+clear
+echo "Aastra Phone Setup Tool (XML scripts)"
+echo "====================================="
+
+############ Network Interface selection ############
+IFCONFIG=`which ifconfig 2>/dev/null||echo /sbin/ifconfig`
+ROUTE=`which route 2>/dev/null||echo /sbin/route`
+IFACES=(`$ROUTE|gawk '{if(c~"true") {print $8} else{ if($8 ~ "Iface") {c="true"}}}'|sort -u`)
+
+echo ""  
+echo "Network Interface"
+echo "================="
+echo ""
+if ((${#IFACES[*]} > 1)) 
+then
+  	echo "More than one network interface has been detected on your server."
+	echo "Please select the voice LAN interface to use."
+	echo ""
+  	for (( i=0; i < ${#IFACES[*]}; i++ ))
+	do 
+		echo "[$i] ${IFACES[i]}"
+	done
+	echo "[q] quit"
+	echo ""
+	while :; 
+	do
+		echo -n "Select Interface: [0] "
+    		read ipif
+		case "$ipif" in
+			"q" |"Q" )
+			echo "Exiting."
+			exit 0
+			;;
+			"")
+			ipif=0
+			break
+			;;
+			* )
+			if [ $(echo "$ipif" | grep -E "^[0-9]+$") ]
+			then
+				if (($ipif >= 0 && $ipif < ${#IFACES[*]} ))
+				then 
+					break
+				else
+					echo "Sorry, try again."
+				fi
+			else
+				echo "Sorry, try again."
+			fi
+			;;
+		esac
+  	done
+  	IFACE=${IFACES[$ipif]}
+	IPADDR=`$IFCONFIG $IFACE|gawk '/inet addr/{print $2}'|gawk -F: '{print $2}'`
+else
+  	IFACE=${IFACES[0]}
+	IPADDR=`$IFCONFIG $IFACE|gawk '/inet addr/{print $2}'|gawk -F: '{print $2}'`
+	echo "$IFACE has been detected as the only network interface on your server."
+fi
+echo "$IPADDR is used as the Server IP address."
+
+############ Language selection ############
+
+# Skip this step if no language files found
+if ls $TFTP_ROOT/lang_*.txt > /dev/null 2>&1
+then
+	while true
+	do
+		echo ""
+		echo ""  
+		echo "Additional Languages Support"
+		echo "============================"
+		echo ""
+		echo "Do you want to install additional languages on your phones?"
+		echo ""
+		echo "[0] English only"
+		echo "[1] Multi-Language Support"
+		echo "[q] Quit"
+		echo ""
+		echo -n "Install additional languages?: [0] "
+		read m_lang_support
+		case "$m_lang_support" in
+			"" | "0")
+			multi_language_support="0"
+			break
+			;;
+			"1" )
+			multi_language_support="1"
+			break
+			;;
+			"q" |"Q" )
+			echo "Exiting."
+			exit 0
+			;;
+			* )
+			echo ""
+			echo "Sorry, try again."
+			;;
+		esac
+	done
+
+if [ "$multi_language_support" = "1" ]
+then
+	while true 
+	do
+		echo ""
+		echo ""  
+		echo "Phone Type Selection"
+		echo "===================="
+		echo ""
+		echo "Are you using Classic IP Phones 480i/480iCT/9112i/9133i?"
+		echo "Note that on those phones, the language options are limited." 
+		echo ""
+		echo "[0] No, I'm solely using 9xxxi and 67xxi (former 5xi) phones."
+		echo "[1] Yes, I'm also using Classic IP Phones."
+		echo "[q] Quit"
+		echo ""
+		echo -n "Install additional languages?: [0] "
+		read classic_phones
+		case "$classic_phones" in
+			"" | "0")
+			classic_phones_support="0"
+			break;
+			;;
+			"1" )
+			classic_phones_support="1"
+			break
+			;;
+			"q" |"Q" )
+			echo "Exiting."
+			exit 0
+			;;
+			* )
+			echo ""
+			echo "Sorry, try again."
+			;;
+		esac
+	done
+		
+	if [ "$classic_phones_support" = "1" ]
+	then
+		# Use fix language assignement
+		lang_file_array[1]="lang_fr.txt"
+		lang_name_array[1]="French"
+		lang_file_array[2]="lang_es.txt"
+		lang_name_array[2]="Spanish"
+		lang_file_array[3]="lang_de.txt"
+		lang_name_array[3]="German"
+		lang_file_array[4]="lang_it.txt"
+		lang_name_array[4]="Italian"
+	else 
+		# no classic phone support
+		while true
+		do
+			echo ""
+			echo ""  
+			echo "Language Selection"
+			echo "=================="
+			echo ""
+			echo "English is available by default. Select up to 4 additional languages to install."
+			echo "You will be able to choose the language during the login process on the phone."
+			echo "Separate by space."
+			echo "Example: 3 1 4 5 --> Will install German, French, Italian and Spanish. "
+			echo ""
+			echo "1: French (Europe)"
+			echo "2: French (Canada)"
+			echo "3: German"
+			echo "4: Italian"
+			echo "5: Spanish (Europe)"
+			echo "6: Spanish (Mexico)"
+			echo "7: Portuguese (Europe)"
+			echo "8: Portuguese (Brazil)"
+			echo "q: Quit"
+			
+			echo ""
+			echo -n "Select additional languages to install: "
+			read languages
+			
+			if [ "$languages" = "q" ] || [ "$languages" = "Q" ]; then
+				echo "Exiting."
+				exit 0
+			fi
+			
+			IFS=" ,;-"
+			lang_array=($languages)
+						
+			if [ "${lang_array[0]}" = "" ]; then
+					continue
+			fi		
+						
+			for i in 1 2 3 4;
+      			do
+			      	case "${lang_array[$i-1]}" in
+					"1" )
+					lang_file_array[$i]="lang_fr.txt"
+					lang_name_array[$i]="French (Europe)"
+					;;
+					"2" )
+					lang_file_array[$i]="lang_fr_ca.txt"
+					lang_name_array[$i]="French (Canada)"
+					;;
+					"3" )
+					lang_file_array[$i]="lang_de.txt"
+					lang_name_array[$i]="German"
+					;;
+					"4" )
+					lang_file_array[$i]="lang_it.txt"
+					lang_name_array[$i]="Italian"
+					;;
+					"5" )
+					lang_file_array[$i]="lang_es.txt"
+					lang_name_array[$i]="Spanish (Europe)"
+					;;
+					"6" )
+					lang_file_array[$i]="lang_es_mx.txt"
+					lang_name_array[$i]="Spanish (Mexico)"
+					;;
+					"7" )
+					lang_file_array[$i]="lang_pt.txt"
+					lang_name_array[$i]="Portuguese (Europe)"
+					;;
+					"8" )
+					lang_file_array[$i]="lang_pt_br.txt"
+					lang_name_array[$i]="Portuguese (Brazil)"
+					;;
+					*)
+					# invalid language index: ignore
+				esac
+      			done    
+			echo ""
+			echo ""
+			echo "Your selection:"
+			echo ""
+			if [ "${lang_name_array[1]}" != "" ]; then
+				echo "1: ${lang_name_array[1]}"
+			fi
+			if [ "${lang_name_array[2]}" != "" ]; then
+				echo "2: ${lang_name_array[2]}"
+			fi
+			if [ "${lang_name_array[3]}" != "" ]; then
+				echo "3: ${lang_name_array[3]}"
+			fi
+			if [ "${lang_name_array[4]}" != "" ]; then
+				echo "4: ${lang_name_array[4]}"
+			fi
+		
+			echo ""
+			echo "OK?"
+			echo ""
+			echo "[y]: Yes, proceed"
+			echo "[n]: No, select again"
+			echo ""
+			echo -n "Enter y or n: [y] "
+			read language_confirm
+			case "$language_confirm" in
+				"" | "y" | "Y")
+				break
+				;;
+				*)
+				lang_file_array[1]=""
+				lang_name_array[1]=""
+				lang_file_array[2]=""
+				lang_name_array[2]=""
+				lang_file_array[3]=""
+				lang_name_array[3]=""
+				lang_file_array[4]=""
+				lang_name_array[4]=""
+			esac
+		
+		done
+	fi
+		
+	# assign
+	LANGUAGE_1=${lang_file_array[1]}
+	LANGUAGE_1_NAME=${lang_name_array[1]}
+	LANGUAGE_2=${lang_file_array[2]}
+	LANGUAGE_2_NAME=${lang_name_array[2]}
+	LANGUAGE_3=${lang_file_array[3]}
+	LANGUAGE_3_NAME=${lang_name_array[3]}
+	LANGUAGE_4=${lang_file_array[4]}
+	LANGUAGE_4_NAME=${lang_name_array[4]}
+		
+	while true
+	do
+		echo ""
+		echo ""
+		echo "Default Language"
+		echo "================"
+		echo ""
+		echo "Select default language."
+		echo ""
+		echo "[0] English"
+		
+		if [ "${lang_name_array[1]}" != "" ]; then
+			echo "[1] ${lang_name_array[1]}"
+		fi
+		if [ "${lang_name_array[2]}" != "" ]; then
+			echo "[2] ${lang_name_array[2]}"
+		fi
+		if [ "${lang_name_array[3]}" != "" ]; then
+			echo "[3] ${lang_name_array[3]}"
+		fi
+		if [ "${lang_name_array[4]}" != "" ]; then
+			echo "[4] ${lang_name_array[4]}"
+		fi		
+			
+		echo "[q] Quit"
+		echo ""
+		echo -n "Select default language: [0] "
+		read def_language
+		case "$def_language" in
+			"" | "0")
+			DEFAULT_LANGUAGE=0
+			break
+			;;
+			"1" )
+			DEFAULT_LANGUAGE=1
+			break
+			;;
+			"2" )
+			DEFAULT_LANGUAGE=2
+			break
+			;;
+			"3" )
+			DEFAULT_LANGUAGE=3
+			break
+			;;
+			"4" )
+			DEFAULT_LANGUAGE=4
+			break
+			;;
+			"q" |"Q" )
+			echo "Exiting."
+			exit 0
+			;;
+			* )
+			echo ""
+			echo "Sorry, try again."
+			;;
+		esac
+	done
+
+	# Input language
+	while true
+	do
+		echo ""
+		echo ""
+		echo "Input Language"
+		echo "=============="
+		echo ""
+		echo "Select input language (for entering text via phone keypad)."
+		echo ""
+		echo "[0] English"
+		echo "[1] French"
+		echo "[2] German"
+		echo "[3] Italian"
+		echo "[4] Spanish"
+		echo "[5] Portuguese"
+		echo "[q] Quit"
+		echo ""
+		echo -n "Select input language: [0] "
+		read input_language
+		case "$input_language" in
+			"" | "0")
+			INPUT_LANGUAGE="English"
+			break
+			;;
+			"1" )
+			INPUT_LANGUAGE="French"
+			break
+			;;
+			"2" )
+			INPUT_LANGUAGE="German"
+			break
+			;;
+			"3" )
+			INPUT_LANGUAGE="Italian"
+			break
+			;;
+			"4" )
+			INPUT_LANGUAGE="Spanish"
+			break
+			;;
+			"5" )
+			INPUT_LANGUAGE="Portuguese"
+			break
+			;;
+			"q" |"Q" )
+			echo "Exiting."
+			exit 0
+			;;
+			* )
+			echo ""
+			echo "Sorry, try again."
+			;;
+		esac
+	done
+
+	while true; do
+	echo ""
+	echo ""
+	echo "User language selection"
+	echo "======================="
+	echo ""
+	echo "Do you want the user to select the language during the login process?"
+	echo ""
+	echo "[y] Yes"
+	echo "[n] No"
+	echo "[q] Quit"
+
+	echo ""
+	echo -n "Enter y or n: [n] "
+	read ask_language
+	case "$ask_language" in
+		"" | "n")
+		ASK_LANGUAGE="0"
+		break
+		;;
+		"y" )
+		ASK_LANGUAGE="1" 
+		break
+		;;
+		"q" |"Q" )
+		echo "Exiting."
+		exit 0
+		;;
+		* )
+		echo ""
+		echo "Sorry, try again."
+		;;
+	esac
+	done
+	fi # multi-language support
+fi # language file check
+
+############ Tone set selection ############
+
+while true; do
+
+echo ""
+echo ""
+echo "Tone Set"
+echo "========"
+echo ""
+echo "Select the country tone set to use."
+echo ""
+echo "[0] US/Canada"
+echo "[1] Europe (generic tones)"
+echo "[2] UK"
+echo "[3] France"
+echo "[4] Germany"
+echo "[5] Italy"
+echo "[6] Mexico"
+echo "[7] Brazil"
+echo "[8] Australia"
+echo "[q] Quit"
+
+echo ""
+echo -n "Select Tone Set: [0] "
+read tone_set
+case "$tone_set" in
+	"" | "0")
+	TONE_SET="US"
+	break
+	;;
+	"1" )
+	TONE_SET="Europe" 
+	break
+	;;
+	"2" )
+	TONE_SET="UK" 
+	break
+	;;
+	"3" )
+	TONE_SET="France" 
+	break
+	;;
+	"4" )
+	TONE_SET="Germany" 
+	break
+	;;
+	"5" )
+	TONE_SET="Italy" 
+	break
+	;;
+	"6" )
+	TONE_SET="Mexico" 
+	break
+	;;
+	"7" )
+	TONE_SET="Brazil" 
+	break
+	;;	
+	"8" )
+	TONE_SET="Australia" 
+	break
+	;;
+	"q" |"Q" )
+	echo "Exiting."
+	exit 0
+	;;
+	* )
+	echo ""
+	echo "Sorry, try again."
+	;;
+esac
+done
+
+############ Timezone selection ############
+PAGE=1
+while true; do
+
+echo ""
+echo ""
+echo "Default phone Timezone"
+echo "======================"
+echo ""
+echo "Select the default timezone for the phones. Page $PAGE/4"
+echo ""
+case "$PAGE" in
+	"1" )
+	echo "[ 0] US-Eastern        [16] MX-Cancun         [32] AU-Lord howe      "
+	echo "[ 1] US-Central        [17] MX-Merida         [33] AU-Tasmania       "
+	echo "[ 2] US-Mountain       [18] MX-Monterrey      [34] AU-Melbourne      "
+	echo "[ 3] US-Pacific        [19] MX-Mazatlan       [35] AU-Sydney         "
+	echo "[ 4] US-Alaska         [20] MX-Chihuahua      [36] AU-Broken hill    "
+	echo "[ 5] US-Aleutian       [21] MX-Hermosillo     [37] AU-Brisbane       "
+	echo "[ 6] US-Hawaii         [22] MX-Tijuana        [38] AU-Lindeman       "
+	echo "[ 7] CA-Newfoundland   [23] AD-Andorra        [39] AU-Adelaide       "
+	echo "[ 8] CA-Atlantic       [24] AE-Dubai          [40] AU-Darwin         "
+	echo "[ 9] CA-Eastern        [25] AG-Antigua        [41] AU-Perth          "
+	echo "[10] CA-Saskatchewan   [26] AI-Anguilla       [42] AW-Aruba          "
+	echo "[11] CA-Central        [27] AL-Tirane         [43] AZ-Baku           "
+	echo "[12] CA-Mountain       [28] AN-Curacao        [44] BA-Sarajevo       "
+	echo "[13] CA-Pacific        [29] AR-Buenos aires   [45] BB-Barbados       "
+	echo "[14] CA-Yukon          [30] AS-Pago pago      [46] BE-Brussels       "
+	echo "[15] MX-Mexico city    [31] AT-Vienna         [47] BG-Sofia          "
+	echo " [q] Quit                                      [n] Next Page"
+	echo ""
+	echo -n "Select Timezone: [0] "
+	;;
+	"2" )
+	echo "[ 0] BM-Bermuda        [16] BY-Minsk          [32] EE-Tallinn        "
+	echo "[ 1] BO-La paz         [17] BZ-Belize         [33] ES-Madrid         "
+	echo "[ 2] BR-Noronha        [18] CH-Zurich         [34] ES-Canary         "
+	echo "[ 3] BR-Belem          [19] CK-Rarotonga      [35] FI-Helsinki       "
+	echo "[ 4] BR-Fortaleza      [20] CL-Santiago       [36] FJ-Fiji           "
+	echo "[ 5] BR-Recife         [21] CL-Easter         [37] FK-Stanley        "
+	echo "[ 6] BR-Araguaina      [22] CN-China          [38] FO-Faeroe         "
+	echo "[ 7] BR-Maceio         [23] CO-Bogota         [39] FR-Paris          "
+	echo "[ 8] BR-Sao paulo      [24] CR-Costa rica     [40] GB-London         "
+	echo "[ 9] BR-Cuiaba         [25] CU-Havana         [41] GB-Belfast        "
+	echo "[10] BR-Porto velho    [26] CY-Nicosia        [42] GD-Grenada        "
+	echo "[11] BR-Boa vista      [27] CZ-Prague         [43] GE-Tbilisi        "
+	echo "[12] BR-Manaus         [28] DE-Berlin         [44] GF-Cayenne        "
+	echo "[13] BR-Eirunepe       [29] DK-Copenhagen     [45] GI-Gibraltar      "
+	echo "[14] BR-Rio branco     [30] DM-Dominica       [46] GP-Guadeloupe     "
+	echo "[15] BS-Nassau         [31] DO-Santo domingo  [47] GR-Athens         "
+	echo " [q] Quit               [p] Previous Page      [n] Next Page"
+	echo ""
+	echo -n "Select Timezone: [n] "
+	;;
+	"3" )
+	echo "[ 0] GS-South georgia  [16] LI-Vaduz          [32] NZ-Chatham        "
+	echo "[ 1] GT-Guatemala      [17] LT-Vilnius        [33] OM-Muscat         "
+	echo "[ 2] GU-Guam           [18] LU-Luxembourg     [34] PA-Panama         "
+	echo "[ 3] GY-Guyana         [19] LV-Riga           [35] PE-Lima           "
+	echo "[ 4] HK-Hong kong      [20] MC-Monaco         [36] PL-Warsaw         "
+	echo "[ 5] HN-Tegucigalpa    [21] MD-Chisinau       [37] PR-Puerto rico    "
+	echo "[ 6] HR-Zagreb         [22] MK-Skopje         [38] PT-Lisbon         "
+	echo "[ 7] HT-Port-au-prince [23] MQ-Martinique     [39] PT-Madeira        "
+	echo "[ 8] HU-Budapest       [24] MS-Montserrat     [40] PT-Azores         "
+	echo "[ 9] IE-Dublin         [25] MT-Malta          [41] PY-Asuncion       "
+	echo "[10] IS-Reykjavik      [26] NI-Managua        [42] RO-Bucharest      "
+	echo "[11] IT-Rome           [27] NL-Amsterdam      [43] RU-Kaliningrad    "
+	echo "[12] JM-Jamaica        [28] NO-Oslo           [44] RU-Moscow         "
+	echo "[13] JP-Tokyo          [29] NR-Nauru          [45] RU-Samara         "
+	echo "[14] KY-Cayman         [30] NU-Niue           [46] RU-Yekaterinburg  "
+	echo "[15] LC-St lucia       [31] NZ-Auckland       [47] RU-Omsk           "
+	echo " [q] Quit               [p] Previous Page      [n] Next Page"
+	echo ""
+	echo -n "Select Timezone: [n] "
+	;;
+	"4" )
+	echo "[ 0] RU-Novosibirsk    [16] TR-Istanbul       "
+	echo "[ 1] RU-Krasnoyarsk    [17] TT-Port of spain  "
+	echo "[ 2] RU-Irkutsk        [18] TW-Taipei         "
+	echo "[ 3] RU-Yakutsk        [19] UA-Kiev           "
+	echo "[ 4] RU-Vladivostok    [20] UY-Montevideo     "
+	echo "[ 5] RU-Sakhalin       [21] VA-Vatican        "
+	echo "[ 6] RU-Magadan        [22] YU-Belgrade       "
+	echo "[ 7] RU-Kamchatka      "
+	echo "[ 8] RU-Anadyr         "
+	echo "[ 9] SE-Stockholm      "
+	echo "[10] SG-Singapore      "
+	echo "[11] SI-Ljubljana      "
+	echo "[12] SK-Bratislava     "
+	echo "[13] SM-San marino     "
+	echo "[14] SR-Paramaribo     "
+	echo "[15] SV-El salvador    "
+	echo " [q] Quit               [p] Previous Page      [n] Next Page"
+	echo ""
+	echo -n "Select Timezone: [n] "
+	;;
+esac
+read timezone
+case "$timezone" in
+	"" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="US-Eastern"
+		TZ_CODE="EST"
+		break
+		;;
+		* )
+		if [ "$PAGE" == "1" ]; then
+			PAGE="2"
+		else 
+			if [ "$PAGE" == "2" ]; then
+				PAGE="3"
+			else
+				if [ "$PAGE" == "3" ]; then
+					PAGE="4"
+				else
+					PAGE="1"
+				fi
+			fi
+		fi
+		;;
+	esac
+	;;
+	"n" | "N" )
+	if [ "$PAGE" == "1" ]; then
+		PAGE="2"
+	else 
+		if [ "$PAGE" == "2" ]; then
+			PAGE="3"
+		else
+			if [ "$PAGE" == "3" ]; then
+				PAGE="4"
+			else
+				PAGE="1"
+			fi
+		fi
+	fi
+	;;
+	"p" | "P" )
+	if [ "$PAGE" == "4" ]; then
+		PAGE="3"
+	else 
+		if [ "$PAGE" == "3" ]; then
+			PAGE="2"
+		else
+			if [ "$PAGE" == "2" ]; then
+				PAGE="1"
+			else
+				PAGE="4"
+			fi
+		fi
+	fi
+	;;
+	"0" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="US-Eastern"
+		TZ_CODE="EST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BM-Bermuda"
+		TZ_CODE="AST"
+		break
+		;;
+		"3" )
+		TZ_NAME="GS-South georgia"
+		TZ_CODE="GST"
+		break
+		;;
+		"4" )
+		TZ_NAME="RU-Novosibirsk"
+		TZ_CODE="NOV"
+		break
+		;;
+	esac
+	;;
+	"1" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="US-Central"
+		TZ_CODE="CST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BO-La paz"
+		TZ_CODE="BOT"
+		break
+		;;
+		"3" )
+		TZ_NAME="GT-Guatemala"
+		TZ_CODE="CST"
+		break
+		;;
+		"4" )
+		TZ_NAME="RU-Krasnoyarsk"
+		TZ_CODE="KRA"
+		break
+		;;
+	esac
+	;;
+	"2" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="US-Mountain"
+		TZ_CODE="MST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BR-Noronha"
+		TZ_CODE="FNT"
+		break
+		;;
+		"3" )
+		TZ_NAME="GU-Guam"
+		TZ_CODE="CST"
+		break
+		;;
+		"4" )
+		TZ_NAME="RU-Irkutsk"
+		TZ_CODE="IRK"
+		break
+		;;
+	esac
+	;;
+	"3" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="US-Pacific"
+		TZ_CODE="PST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BR-Belem"
+		TZ_CODE="BRT"
+		break
+		;;
+		"3" )
+		TZ_NAME="GY-Guyana"
+		TZ_CODE="GYT"
+		break
+		;;
+		"4" )
+		TZ_NAME="RU-Yakutsk"
+		TZ_CODE="YAK"
+		break
+		;;
+	esac
+	;;
+	"4" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="US-Alaska"
+		TZ_CODE="AKS"
+		break
+		;;
+		"2" )
+		TZ_NAME="BR-Fortaleza"
+		TZ_CODE="BRT"
+		break
+		;;
+		"3" )
+		TZ_NAME="HK-Hong kong"
+		TZ_CODE="HKS"
+		break
+		;;
+		"4" )
+		TZ_NAME="RU-Vladivostok"
+		TZ_CODE="VLA"
+		break
+		;;
+	esac
+	;;
+	"5" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="US-Aleutian"
+		TZ_CODE="HAS"
+		break
+		;;
+		"2" )
+		TZ_NAME="BR-Recife"
+		TZ_CODE="BRT"
+		break
+		;;
+		"3" )
+		TZ_NAME="HN-Tegucigalpa"
+		TZ_CODE="CST"
+		break
+		;;
+		"4" )
+		TZ_NAME="RU-Sakhalin"
+		TZ_CODE="SAK"
+		break
+		;;
+	esac
+	;;
+	"6" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="US-Hawaii"
+		TZ_CODE="HST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BR-Araguaina"
+		TZ_CODE="BRS"
+		break
+		;;
+		"3" )
+		TZ_NAME="HR-Zagreb"
+		TZ_CODE="CET"
+		break
+		;;
+		"4" )
+		TZ_NAME="RU-Magadan"
+		TZ_CODE="MAG"
+		break
+		;;
+	esac
+	;;
+	"7" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="CA-Newfoundland"
+		TZ_CODE="NST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BR-Maceio"
+		TZ_CODE="BRT"
+		break
+		;;
+		"3" )
+		TZ_NAME="HT-Port-au-prince"
+		TZ_CODE="EST"
+		break
+		;;
+		"4" )
+		TZ_NAME="RU-Kamchatka"
+		TZ_CODE="PET"
+		break
+		;;
+	esac
+	;;
+	"8" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="CA-Atlantic"
+		TZ_CODE="AST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BR-Sao paulo"
+		TZ_CODE="BRS"
+		break
+		;;
+		"3" )
+		TZ_NAME="HU-Budapest"
+		TZ_CODE="CET"
+		break
+		;;
+		"4" )
+		TZ_NAME="RU-Anadyr"
+		TZ_CODE="ANA"
+		break
+		;;
+	esac
+	;;
+	"9" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="CA-Eastern"
+		TZ_CODE="EST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BR-Cuiaba"
+		TZ_CODE="AMS"
+		break
+		;;
+		"3" )
+		TZ_NAME="IE-Dublin"
+		TZ_CODE="GMT"
+		break
+		;;
+		"4" )
+		TZ_NAME="SE-Stockholm"
+		TZ_CODE="CET"
+		break
+		;;
+	esac
+	;;
+	"10" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="CA-Saskatchewan"
+		TZ_CODE="EST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BR-Porto velho"
+		TZ_CODE="AMT"
+		break
+		;;
+		"3" )
+		TZ_NAME="IS-Reykjavik"
+		TZ_CODE="GMT"
+		break
+		;;
+		"4" )
+		TZ_NAME="SG-Singapore"
+		TZ_CODE="SGT"
+		break
+		;;
+	esac
+	;;
+	"11" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="CA-Central"
+		TZ_CODE="CST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BR-Boa vista"
+		TZ_CODE="AMT"
+		break
+		;;
+		"3" )
+		TZ_NAME="IT-Rome"
+		TZ_CODE="CET"
+		break
+		;;
+		"4" )
+		TZ_NAME="SI-Ljubljana"
+		TZ_CODE="CET"
+		break
+		;;
+	esac
+	;;
+	"12" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="CA-Mountain"
+		TZ_CODE="MST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BR-Manaus"
+		TZ_CODE="AMT"
+		break
+		;;
+		"3" )
+		TZ_NAME="JM-Jamaica"
+		TZ_CODE="EST"
+		break
+		;;
+		"4" )
+		TZ_NAME="SK-Bratislava"
+		TZ_CODE="CET"
+		break
+		;;
+	esac
+	;;
+	"13" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="CA-Pacific"
+		TZ_CODE="PST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BR-Eirunepe"
+		TZ_CODE="ACT"
+		break
+		;;
+		"3" )
+		TZ_NAME="JP-Tokyo"
+		TZ_CODE="JST"
+		break
+		;;
+		"4" )
+		TZ_NAME="SM-San marino"
+		TZ_CODE="CET"
+		break
+		;;
+	esac
+	;;
+	"14" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="CA-Yukon"
+		TZ_CODE="PST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BR-Rio branco"
+		TZ_CODE="ACT"
+		break
+		;;
+		"3" )
+		TZ_NAME="KY-Cayman"
+		TZ_CODE="EST"
+		break
+		;;
+		"4" )
+		TZ_NAME="SR-Paramaribo"
+		TZ_CODE="SRT"
+		break
+		;;
+	esac
+	;;
+	"15" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="MX-Mexico city"
+		TZ_CODE="CST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BS-Nassau"
+		TZ_CODE="EST"
+		break
+		;;
+		"3" )
+		TZ_NAME="LC-St lucia"
+		TZ_CODE="AST"
+		break
+		;;
+		"4" )
+		TZ_NAME="SV-El salvador"
+		TZ_CODE="CST"
+		break
+		;;
+	esac
+	;;
+	"16" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="MX-Cancun"
+		TZ_CODE="CST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BY-Minsk"
+		TZ_CODE="EET"
+		break
+		;;
+		"3" )
+		TZ_NAME="LI-Vaduz"
+		TZ_CODE="CET"
+		break
+		;;
+		"4" )
+		TZ_NAME="TR-Istanbul"
+		TZ_CODE="EET"
+		break
+		;;
+	esac
+	;;
+	"17" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="MX-Merida"
+		TZ_CODE="CST"
+		break
+		;;
+		"2" )
+		TZ_NAME="BZ-Belize"
+		TZ_CODE="CST"
+		break
+		;;
+		"3" )
+		TZ_NAME="LT-Vilnius"
+		TZ_CODE="EET"
+		break
+		;;
+		"4" )
+		TZ_NAME="TT-Port of spain"
+		TZ_CODE="AST"
+		break
+		;;
+	esac
+	;;
+	"18" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="MX-Monterrey"
+		TZ_CODE="CST"
+		break
+		;;
+		"2" )
+		TZ_NAME="CH-Zurich"
+		TZ_CODE="CET"
+		break
+		;;
+		"3" )
+		TZ_NAME="LU-Luxembourg"
+		TZ_CODE="CET"
+		break
+		;;
+		"4" )
+		TZ_NAME="TW-Taipei"
+		TZ_CODE="CST"
+		break
+		;;
+	esac
+	;;
+	"19" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="MX-Mazatlan"
+		TZ_CODE="MST"
+		break
+		;;
+		"2" )
+		TZ_NAME="CK-Rarotonga"
+		TZ_CODE="CKS"
+		break
+		;;
+		"3" )
+		TZ_NAME="LV-Riga"
+		TZ_CODE="EET"
+		break
+		;;
+		"4" )
+		TZ_NAME="UA-Kiev"
+		TZ_CODE="EET"
+		break
+		;;
+	esac
+	;;
+	"20" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="MX-Chihuahua"
+		TZ_CODE="MST"
+		break
+		;;
+		"2" )
+		TZ_NAME="CL-Santiago"
+		TZ_CODE="CLS"
+		break
+		;;
+		"3" )
+		TZ_NAME="MC-Monaco"
+		TZ_CODE="CET"
+		break
+		;;
+		"4" )
+		TZ_NAME="UY-Montevideo"
+		TZ_CODE="UYS"
+		break
+		;;
+	esac
+	;;
+	"21" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="MX-Hermosillo"
+		TZ_CODE="MST"
+		break
+		;;
+		"2" )
+		TZ_NAME="CL-Easter"
+		TZ_CODE="EAS"
+		break
+		;;
+		"3" )
+		TZ_NAME="MD-Chisinau"
+		TZ_CODE="EET"
+		break
+		;;
+		"4" )
+		TZ_NAME="VA-Vatican"
+		TZ_CODE="CET"
+		break
+		;;
+	esac
+	;;
+	"22" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="MX-Tijuana"
+		TZ_CODE="PST"
+		break
+		;;
+		"2" )
+		TZ_NAME="CN-China"
+		TZ_CODE="CST"
+		break
+		;;
+		"3" )
+		TZ_NAME="MK-Skopje"
+		TZ_CODE="CET"
+		break
+		;;
+		"4" )
+		TZ_NAME="YU-Belgrade"
+		TZ_CODE="CET"
+		break
+		;;
+	esac
+	;;
+	"23" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AD-Andorra"
+		TZ_CODE="CET"
+		break
+		;;
+		"2" )
+		TZ_NAME="CO-Bogota"
+		TZ_CODE="COS"
+		break
+		;;
+		"3" )
+		TZ_NAME="MQ-Martinique"
+		TZ_CODE="AST"
+		break
+		;;
+	esac
+	;;
+	"24" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AE-Dubai"
+		TZ_CODE="GST"
+		break
+		;;
+		"2" )
+		TZ_NAME="CR-Costa rica"
+		TZ_CODE="CST"
+		break
+		;;
+		"3" )
+		TZ_NAME="MS-Montserrat"
+		TZ_CODE="AST"
+		break
+		;;
+	esac
+	;;
+	"25" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AG-Antigua"
+		TZ_CODE="AST"
+		break
+		;;
+		"2" )
+		TZ_NAME="CU-Havana"
+		TZ_CODE="CST"
+		break
+		;;
+		"3" )
+		TZ_NAME="MT-Malta"
+		TZ_CODE="CET"
+		break
+		;;
+	esac
+	;;
+	"26" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AI-Anguilla"
+		TZ_CODE="AST"
+		break
+		;;
+		"2" )
+		TZ_NAME="CY-Nicosia"
+		TZ_CODE="EES"
+		break
+		;;
+		"3" )
+		TZ_NAME="NI-Managua"
+		TZ_CODE="CST"
+		break
+		;;
+	esac
+	;;
+	"27" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AL-Tirane"
+		TZ_CODE="CET"
+		break
+		;;
+		"2" )
+		TZ_NAME="CZ-Prague"
+		TZ_CODE="CET"
+		break
+		;;
+		"3" )
+		TZ_NAME="NL-Amsterdam"
+		TZ_CODE="CET"
+		break
+		;;
+	esac
+	;;
+	"28" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AN-Curacao"
+		TZ_CODE="AST"
+		break
+		;;
+		"2" )
+		TZ_NAME="DE-Berlin"
+		TZ_CODE="CET"
+		break
+		;;
+		"3" )
+		TZ_NAME="NO-Oslo"
+		TZ_CODE="CET"
+		break
+		;;
+	esac
+	;;
+	"29" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AR-Buenos aires"
+		TZ_CODE="ART"
+		break
+		;;
+		"2" )
+		TZ_NAME="DK-Copenhagen"
+		TZ_CODE="CET"
+		break
+		;;
+		"3" )
+		TZ_NAME="NR-Nauru"
+		TZ_CODE="NRT"
+		break
+		;;
+	esac
+	;;
+	"30" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AS-Pago pago"
+		TZ_CODE="BST"
+		break
+		;;
+		"2" )
+		TZ_NAME="DM-Dominica"
+		TZ_CODE="AST"
+		break
+		;;
+		"3" )
+		TZ_NAME="NU-Niue"
+		TZ_CODE="NUT"
+		break
+		;;
+	esac
+	;;
+	"31" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AT-Vienna"
+		TZ_CODE="CET"
+		break
+		;;
+		"2" )
+		TZ_NAME="DO-Santo domingo"
+		TZ_CODE="AST"
+		break
+		;;
+		"3" )
+		TZ_NAME="NZ-Auckland"
+		TZ_CODE="NZS"
+		break
+		;;
+	esac
+	;;
+	"32" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AU-Lord howe"
+		TZ_CODE="LHS"
+		break
+		;;
+		"2" )
+		TZ_NAME="EE-Tallinn"
+		TZ_CODE="EET"
+		break
+		;;
+		"3" )
+		TZ_NAME="NZ-Chatham"
+		TZ_CODE="CHA"
+		break
+		;;
+	esac
+	;;
+	"33" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AU-Tasmania"
+		TZ_CODE="EST"
+		break
+		;;
+		"2" )
+		TZ_NAME="ES-Madrid"
+		TZ_CODE="CET"
+		break
+		;;
+		"3" )
+		TZ_NAME="OM-Muscat"
+		TZ_CODE="GST"
+		break
+		;;
+	esac
+	;;
+	"34" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AU-Melbourne"
+		TZ_CODE="EST"
+		break
+		;;
+		"2" )
+		TZ_NAME="ES-Canary"
+		TZ_CODE="WET"
+		break
+		;;
+		"3" )
+		TZ_NAME="PA-Panama"
+		TZ_CODE="EST"
+		break
+		;;
+	esac
+	;;
+	"35" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AU-Sydney"
+		TZ_CODE="EST"
+		break
+		;;
+		"2" )
+		TZ_NAME="FI-Helsinki"
+		TZ_CODE="EET"
+		break
+		;;
+		"3" )
+		TZ_NAME="PE-Lima"
+		TZ_CODE="PES"
+		break
+		;;
+	esac
+	;;
+	"36" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AU-Broken hill"
+		TZ_CODE="CST"
+		break
+		;;
+		"2" )
+		TZ_NAME="FJ-Fiji"
+		TZ_CODE="NZT"
+		break
+		;;
+		"3" )
+		TZ_NAME="PL-Warsaw"
+		TZ_CODE="CET"
+		break
+		;;
+	esac
+	;;
+	"37" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AU-Brisbane"
+		TZ_CODE="EST"
+		break
+		;;
+		"2" )
+		TZ_NAME="FK-Stanley"
+		TZ_CODE="FKS"
+		break
+		;;
+		"3" )
+		TZ_NAME="PR-Puerto rico"
+		TZ_CODE="AST"
+		break
+		;;
+	esac
+	;;
+	"38" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AU-Lindeman"
+		TZ_CODE="EST"
+		break
+		;;
+		"2" )
+		TZ_NAME="FO-Faeroe"
+		TZ_CODE="WET"
+		break
+		;;
+		"3" )
+		TZ_NAME="PT-Lisbon"
+		TZ_CODE="WET"
+		break
+		;;
+	esac
+	;;
+	"39" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AU-Adelaide"
+		TZ_CODE="CST"
+		break
+		;;
+		"2" )
+		TZ_NAME="FR-Paris"
+		TZ_CODE="CET"
+		break
+		;;
+		"3" )
+		TZ_NAME="PT-Madeira"
+		TZ_CODE="WET"
+		break
+		;;
+	esac
+	;;
+	"40" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AU-Darwin"
+		TZ_CODE="CST"
+		break
+		;;
+		"2" )
+		TZ_NAME="GB-London"
+		TZ_CODE="GMT"
+		break
+		;;
+		"3" )
+		TZ_NAME="PT-Azores"
+		TZ_CODE="AZO"
+		break
+		;;
+	esac
+	;;
+	"41" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AU-Perth"
+		TZ_CODE="WST"
+		break
+		;;
+		"2" )
+		TZ_NAME="GB-Belfast"
+		TZ_CODE="GMT"
+		break
+		;;
+		"3" )
+		TZ_NAME="PY-Asuncion"
+		TZ_CODE="PYS"
+		break
+		;;
+	esac
+	;;
+	"42" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AW-Aruba"
+		TZ_CODE="AST"
+		break
+		;;
+		"2" )
+		TZ_NAME="GD-Grenada"
+		TZ_CODE="AST"
+		break
+		;;
+		"3" )
+		TZ_NAME="RO-Bucharest"
+		TZ_CODE="EET"
+		break
+		;;
+	esac
+	;;
+	"43" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="AZ-Baku"
+		TZ_CODE="AZT"
+		break
+		;;
+		"2" )
+		TZ_NAME="GE-Tbilisi"
+		TZ_CODE="GET"
+		break
+		;;
+		"3" )
+		TZ_NAME="RU-Kaliningrad"
+		TZ_CODE="EET"
+		break
+		;;
+	esac
+	;;
+	"44" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="BA-Sarajevo"
+		TZ_CODE="EET"
+		break
+		;;
+		"2" )
+		TZ_NAME="GF-Cayenne"
+		TZ_CODE="GFT"
+		break
+		;;
+		"3" )
+		TZ_NAME="RU-Moscow"
+		TZ_CODE="MSK"
+		break
+		;;
+	esac
+	;;
+	"45" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="BB-Barbados"
+		TZ_CODE="AST"
+		break
+		;;
+		"2" )
+		TZ_NAME="GI-Gibraltar"
+		TZ_CODE="CET"
+		break
+		;;
+		"3" )
+		TZ_NAME="RU-Samara"
+		TZ_CODE="SAM"
+		break
+		;;
+	esac
+	;;
+	"46" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="BE-Brussels"
+		TZ_CODE="CET"
+		break
+		;;
+		"2" )
+		TZ_NAME="GP-Guadeloupe"
+		TZ_CODE="AST"
+		break
+		;;
+		"3" )
+		TZ_NAME="RU-Yekaterinburg"
+		TZ_CODE="YEK"
+		break
+		;;
+	esac
+	;;
+	"47" )
+	case "$PAGE" in
+		"1" )
+		TZ_NAME="BG-Sofia"
+		TZ_CODE="EET"
+		break
+		;;
+		"2" )
+		TZ_NAME="GR-Athens"
+		TZ_CODE="EET"
+		break
+		;;
+		"3" )
+		TZ_NAME="RU-Omsk"
+		TZ_CODE="OMS"
+		break
+		;;
+	esac
+	;;
+	"q" |"Q" )
+	echo "Exiting."
+	exit 0
+	;;
+	* )
+	echo ""
+	echo "Sorry, try again."
+	;;
+esac
+done
+
+############ TZ User Selection ############
+
+while true; do
+	echo ""
+	echo ""
+	echo "User Timezone selection"
+	echo "======================="
+	echo ""
+	echo "Do you want the user to select the timezone during the login process?"
+	echo ""
+	echo "[y] Yes"
+	echo "[n] No"
+	echo "[q] Quit"
+
+	echo ""
+	echo -n "Enter y or n: [n] "
+	read ask_tz
+	case "$ask_tz" in
+		"" | "n")
+		ASK_TZ="0"
+		break
+		;;
+		"y" )
+		ASK_TZ="1" 
+		break
+		;;
+		"q" |"Q" )
+		echo "Exiting."
+		exit 0
+		;;
+		* )
+		echo ""
+		echo "Sorry, try again."
+		;;
+	esac
+	done
+
+############ Time Format selection ############
+
+while true; do
+echo ""
+echo ""
+echo "Time format"
+echo "==========="
+echo ""
+echo "Select the time format to be displayed on the phone."
+echo ""
+echo "[0] 12 hours (AM/PM)"
+echo "[1] 24 hours"
+echo "[q] Quit"
+echo ""
+echo -n "Select Time format: [0] "
+read time_format
+case "$time_format" in
+	"" | "0")
+	TIME_FORMAT="0"
+	break
+	;;
+	"1" )
+	TIME_FORMAT="1"
+	break
+	;;
+	"q" |"Q" )
+	echo "Exiting."
+	exit 0
+	;;
+	* )
+	echo ""
+	echo "Sorry, try again."
+	;;
+esac
+done
+
+############ Date Format selection ############
+
+while true; do
+
+echo ""
+echo ""
+echo "Date format"
+echo "==========="
+echo ""
+echo "Select the Date format to be displayed on the phone."
+echo ""
+echo "[0]  WWW MMM DD (WWW is the day of the week)"
+echo "[1]  DD-MMM-YY"
+echo "[2]  YYYY-MM-DD"
+echo "[3]  DD/MM/YYYY"
+echo "[4]  DD/MM/YY"
+echo "[5]  DD-MM-YY"
+echo "[6]  MM/DD/YY"
+echo "[7]  MMM DD"
+echo "[8]  DD MMM YYYY"
+echo "[9]  WWW DD MMM"
+echo "[10] DD MMM"
+echo "[11] DD.MM.YYYY"
+echo "[q] Quit"
+echo ""
+echo -n "Select Date format: [0] "
+read date_format
+case "$date_format" in
+	"" | "0")
+	DATE_FORMAT="0"
+	date_format_name="WWW MMM DD"
+	break
+	;;
+	"1" )
+	DATE_FORMAT="1"
+	date_format_name="DD-MMM-YY"
+	break
+	;;
+	"2" )
+	DATE_FORMAT="2"
+	date_format_name="YYYY-MM-DD"
+	break
+	;;
+	"3" )
+	DATE_FORMAT="3"
+	date_format_name="DD/MM/YYYY"
+	break
+	;;
+	"4" )
+	DATE_FORMAT="4"
+	date_format_name="DD/MM/YY"
+	break
+	;;
+	"5" )
+	DATE_FORMAT="5"
+	date_format_name="DD-MM-YY"
+	break
+	;;
+	"6" )
+	DATE_FORMAT="6"
+	date_format_name="MM/DD/YY"
+	break
+	;;
+	"7" )
+	DATE_FORMAT="7"
+	date_format_name="MMM DD"
+	break
+	;;
+	"8" )
+	DATE_FORMAT="8"
+	date_format_name="DD MMM YYYY"
+	break
+	;;
+	"9" )
+	DATE_FORMAT="9"
+	date_format_name="WWW DD MMM"
+	break
+	;;
+	"10" )
+	DATE_FORMAT="10"
+	date_format_name="DD MMM"
+	break
+	;;
+	"11" )
+	DATE_FORMAT="11"
+	date_format_name="DD.MM.YYYY"
+	break
+	;;
+	"q" |"Q" )
+	echo "Exiting."
+	exit 0
+	;;
+	* )
+	echo ""
+	echo "Sorry, try again."
+	;;
+esac
+done
+
+# PARKING extension
+PARKING=`grep parkext /etc/asterisk/features_general_additional.conf | gawk -F'=' '{print $2}'`
+if [ "$PARKING" = "" ]; then
+	PARKING="70"
+fi
+
+# Write the config file
+create_config_file
+
+# Display user message with all the parameters
+echo ""
+echo "Created $TFTP_ROOT/aastra.cfg."
+echo "   - using $IPADDR for the proxy/registrar IP address,"
+echo "   - using $PARKING for the parking lot extension,"
+if [ "$multi_language_support" = "1" ]; then
+	if [ "$classic_phones_support" = "1" ]; then
+		echo "   - adding extra languages French/Spanish/German/Italian,"
+	else
+		echo "   - adding extra language(s):"
+			if [ "${lang_name_array[1]}" != "" ]; then
+				echo "      - ${lang_name_array[1]}"
+			fi
+			if [ "${lang_name_array[2]}" != "" ]; then
+				echo "      - ${lang_name_array[2]}"
+			fi
+			if [ "${lang_name_array[3]}" != "" ]; then
+				echo "      - ${lang_name_array[3]}"
+			fi
+			if [ "${lang_name_array[4]}" != "" ]; then
+				echo "      - ${lang_name_array[4]}"
+			fi
+	fi
+	echo "   - using $INPUT_LANGUAGE as input language,"
+	if [ "$DEFAULT_LANGUAGE" = "0" ]
+	then
+		echo "   - using English as default language,"
+	else
+		echo "   - using ${lang_name_array[$DEFAULT_LANGUAGE]} as default language,"
+	fi
+
+else
+	echo "   - not adding any extra language,"
+fi
+echo "   - using $TONE_SET tone set,"
+echo "   - using $TZ_NAME ($TZ_CODE) as default phone timezone,"
+case "$TIME_FORMAT" in
+ 	"0")
+	echo "   - using 12h (AM/PM) as time format,"
+	break
+	;;
+	 "1" )
+	echo "   - using 24h as time format,"
+	break
+	;;
+esac
+echo "   - using ($date_format_name) as date format."
+echo ""
+echo "If the IP address of your Asterisk system changes, or if you want"
+echo "to change localization settings, run this script again and reboot."
+echo "Reboot your Aastra phones by disconnecting the power to the phone."
+echo ""
+
+exit 0

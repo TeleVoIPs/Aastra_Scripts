@@ -1,0 +1,76 @@
+#!/bin/bash
+#
+# aastra-daemon2:       Daemon2 for Aastra XML scripts
+#
+# chkconfig: 345 34 66
+# description: This service is the background task for \
+#              the aastra-xml-scripts. \ 
+# processname: aastra_daemon2
+# config: 
+
+# Source function library.
+. /etc/init.d/functions
+. /etc/sysconfig/network
+
+desc="Aastra XML daemon 2"
+me=`basename $0`
+lock=/var/lock/subsys/$me
+SERVICE='/var/www/html/aastra/asterisk/aastra_daemon2'
+
+# Check that networking is configured.
+[ ${NETWORKING} = "no" ] && exit 0
+
+start() {
+	echo -n $"Starting $desc: "
+	ps -ef | grep -v grep | grep "aastra_daemon2" > /dev/null
+	if [ $? -ne 0 ]; then
+		/var/www/html/aastra/asterisk/aastra_daemon2&
+		success $"$base startup"
+       	RETVAL=0
+		touch $lock 
+	else
+		echo -n "Already running"
+		failure $"$base startup"
+       	RETVAL=1
+	fi
+	echo
+	return $RETVAL
+
+}
+
+stop() {
+	echo -n $"Shutting down $desc: "
+	killproc $SERVICE
+	RETVAL=$?
+	echo
+	[ $RETVAL = 0 ] && rm -f $lock 
+	return $RETVAL
+}
+
+restart() {
+	stop
+	start
+}
+
+RETVAL=0
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  status)
+	status $SERVICE
+	;;
+  restart)
+	restart
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|status|restart}"
+	exit 1
+esac
+
+exit $?

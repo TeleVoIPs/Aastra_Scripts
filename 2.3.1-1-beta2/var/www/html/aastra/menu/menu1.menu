@@ -1,0 +1,151 @@
+#######################################################################################################################################
+# Configuration file for the mymenu.php script
+# 
+# This file is made 2 types of configuration sequences:
+#     RESERVED for the global parameters
+#     ITEM for each application
+#
+# [RESERVED] 
+#    title			Main title of the menu in English (mandatory)
+#
+# [ITEM]
+#    title			Title of the item in English (mandatory)
+#    uri			URI of the application, $$AA_XML_SERVER_AA$$ represents the local IP address of the server (mandatory)
+#    info			Help for the item in English (mandatory)
+#    PhoneModel		yes/no to indicate if the application supports the model, if absent the PhoneModel is supported
+#    param			List of parameters to be passed to the main script to be passed to the application (optional)
+#
+# EXAMPLE  
+#   [RESERVED]
+#   title=XML applications
+#
+#   [Attendance]
+#   title=Attendance
+#   info=Demo application for School Attendance.
+#   uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/school/attendance.php
+#   Aastra51i=no
+#   Aastra53i=no
+#   Aastra9112i=no
+#   Aastra9133i=no
+#   Aastra480i=no
+#   Aastra480i Cordless=no
+#   param=user
+# 
+#######################################################################################################################################
+
+[RESERVED]
+title=XML applications
+
+[Horoscope]
+title=Horoscope
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=horoscope
+info=This application provides your daily horoscope.
+[Movies]
+title=Movies
+info=RSS feed for Movies.
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=movies
+Aastra9112i=no
+Aastra9133i=no
+[Stock]
+title=Stock Quotes
+info=Get the latest trade for your favorite stock.
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/stock/stock.php
+param=user
+[Ask Google]
+title=Ask Google
+info=Ask anything to Google, see google.com/sms for more details.
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/google/google.php
+param=user
+[ESPN News]
+title=ESPN News
+info=RSS feeds from ESPN.
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=espn
+Aastra9112i=no
+Aastra9133i=no
+[CNN News]
+title=CNN News
+info=RSS feeds from CNN.
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=cnn
+Aastra9112i=no
+Aastra9133i=no
+[Fox News]
+title=Fox News
+info=RSS feeds from FoxNews.
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=fox
+Aastra9112i=no
+Aastra9133i=no
+[Today...]
+title=Today...
+info=Daily information.
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=day
+Aastra9112i=no
+Aastra9133i=no
+[World Clock]
+title=World Clock
+info=Get the current date and time in the major cities in the world.
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/clock/clock.php
+Aastra51i=no
+Aastra53i=no
+Aastra9112i=no
+Aastra9133i=no
+Aastra9143i=no
+Aastra6730i=no
+Aastra6731i=no
+param=user
+[Area Code]
+title=Area Code
+info=Get the list of the cities attached to a area code.
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/area/area.php
+[USWeather]
+title=US Weather
+info=RSS feed to access weather for a given US zip code
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/weather/weather_us.php
+Aastra9112i=no
+Aastra9133i=no
+param=user
+[Netflix]
+title=Netflix
+info=RSS feeds from Netflix.
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=netflix
+Aastra9112i=no
+Aastra9133i=no
+[Yahtzee]
+title=Yahtzee
+info=Yahtzee games on your SIP Phone.
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/games/yahtzee.php
+param=user
+Aastra51i=no
+Aastra53i=no
+Aastra9112i=no
+Aastra9133i=no
+Aastra480i=no
+Aastra480i Cordless=no
+Aastra9143i=no
+Aastra9480i=no
+Aastra9480iCT=no
+Aastra6730i=no
+Aastra6731i=no
+Aastra6739i=no
+[Biorhythm]
+title=Biorhythms
+info=Display your daily biorhythms on your SIP phone.
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/games/biorhythm.php
+param=user
+Aastra9112i=no
+Aastra9133i=no
+Aastra480i=no
+Aastra480i Cordless=no
+[Currency]
+title=Currency converter
+info=Convert any currency.
+uri=http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/stock/currency.php
+Aastra51i=no
+Aastra53i=no
+Aastra9112i=no
+Aastra9133i=no
+Aastra480i=no
+Aastra480i Cordless=no
+Aastra9143i=no
+Aastra6730i=no
+Aastra6731i=no
+param=user
