@@ -1,0 +1,65 @@
+##############################################################################################
+# Configuration file for RSS feed
+#
+# 2 types of segments in this ini file. 
+#
+# [RESERVED] Common data for the feeds
+#   title			Title of the feeds in English (mandatory)
+#   copyright			Copyright sentence in English to be added at the end of the descriptions
+#   copyright-$$LANG		Localized copyright sentence (optional)
+#   nodescription		User message if feed has no description (optional)
+#   search_before		Sequences to search before scraping, the format is "/XX/,/YY/"
+#   replace_before		Sequences to replace before scraping separated by ","
+#   search_after		Sequences to search after scraping, the format is "/XX/,/YY/"
+#   replace_after		Sequences to replace after scraping separated by ","
+#   trim_title_after		String in the title to trim after
+#   trim_title_before	String in the title to trim before
+#   encoding			Encoding (iso or utf8), iso by default (optional)
+#   file			Root name of the cache file
+#
+# [ITEM]
+#   ttl			Time to live in seconds or 'daily' (mandatory)
+#   xml			URI for the feed (mandatory)
+###############################################################################################
+[RESERVED]
+title=FOX News
+toptitle_label=FOX News
+toptitle_icon=icons/fox.png
+copyright= RSS feed provided by Foxnews.com and brought to you by Aastra.
+search_before=/<!\\[CDATA\\[/,/]]>/
+replace_before=,
+search_after=
+replace_after=
+file=fox
+    
+[Latest Headlines]  
+ttl=3600
+xml=http://feeds.foxnews.com/foxnews/latest
+
+[National]
+ttl=3600
+xml=http://feeds.foxnews.com/foxnews/national
+
+[World]
+ttl=3600
+xml=http://feeds.foxnews.com/foxnews/world
+
+[Politics]
+ttl=3600
+xml=http://feeds.foxnews.com/foxnews/politics 
+
+[Business]
+ttl=3600
+xml=http://feeds.foxnews.com/foxnews/business 
+
+[SciTech]
+ttl=daily
+xml=http://feeds.foxnews.com/foxnews/scitech 
+
+[Health]
+ttl=daily
+xml=http://feeds.foxnews.com/foxnews/health 
+
+[Entertainment]
+ttl=daily
+xml=http://feeds.foxnews.com/foxnews/entertainment

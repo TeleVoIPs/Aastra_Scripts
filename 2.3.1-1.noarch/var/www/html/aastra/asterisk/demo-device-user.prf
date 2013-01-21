@@ -1,0 +1,558 @@
+###############################################################################
+# Profiles for self-configuration
+#
+# Aastra 51i, 53i, 55, 57i and 57iCT in 2.5.3
+# Aastra 9143i, 9480i and 9480iCT in 2.5.3
+# Aastra 6730i, 6731i in 2.5.3
+# Aastra 6735i, 6737i in 3.2.2
+# Aastra 6739i in 3.0.1
+###############################################################################
+
+[Common]
+###############################################################################
+# Common configuration
+###############################################################################
+
+# SIP Lines
+sip line1 display name: $$AA_SIPCALLERID_AA$$
+sip line1 screen name: $$AA_SIPCALLERID_AA$$
+
+# Action URI
+action uri onhook: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/onhook.php?number=$$REMOTENUMBER$$&name=$$INCOMINGNAME$$&user=$$SIPUSERNAME$$
+action uri outgoing:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/outgoing.php?number=$$REMOTENUMBER$$&user=$$SIPUSERNAME$$
+
+# XML applications
+xml application URI: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/menu/mymenu.php?menu_source=menu1&menu_user=$$AA_SIPUSERNAME_AA$$&user=$$AA_SIPUSERNAME_AA$$
+xml application title: Applications
+xml get timeout: 30
+
+# Intercom and Paging
+sip allow auto answer: 1 
+sip intercom mute mic: 0
+
+# Directed Call pickup
+directed call pickup: 1
+directed call pickup prefix:**
+
+# For the visual voice mail
+auto offhook: 0
+
+[Aastra51i]
+###############################################################################
+# No key
+###############################################################################
+
+# XML applications
+xml application URI: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/menu/mymenu.php?menu_source=menu2&menu_user=$$AA_SIPUSERNAME_AA$$&user=$$AA_SIPUSERNAME_AA$$
+
+[Aastra53i]
+###############################################################################
+# Key 1:	Logout
+# Key 2:	Delete
+# Key 3:	Parking
+# Key 4:	DND
+# Key 5:	Call Forward
+# Key 6:	Voice Mail
+###############################################################################
+
+# System Softkeys
+prgkey1 type: xml
+prgkey1 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
+prgkey1 label: Logout
+prgkey1 locked: 1
+
+prgkey2 type: delete
+prgkey2 label: Delete
+
+prgkey3 type: xml
+prgkey3 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
+prgkey3 label: Parking
+
+prgkey4 type: xml
+prgkey4 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+prgkey4 label: DND
+
+prgkey5 type: xml
+prgkey5 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
+prgkey5 label: Call Fwd
+
+prgkey6 type:xml
+prgkey6 label:Voice Mail
+prgkey6 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+
+[Aastra55i]
+###############################################################################
+# Top Key 1:	Services
+# Top Key 2:	Parking
+# Top Key 3:	Speed Dial
+# Top Key 4:	Presence
+# Top Key 5:	Day/Night
+# Top Key 6:	Intercom
+# Key 1:	DND
+# Key 2:	Call Forward
+# Key 3:	Follow-me
+# Key 4:	Voice Mail
+# Key 5:	Meet-me
+# Key 6:	ACD Agent
+# Key 7:	Queues
+# Key 20:	Logout
+###############################################################################
+
+# SIP Lines
+sip line1 screen name 2: Ext. $$AA_SIPUSERNAME_AA$$
+
+# Intercom and Paging
+sip intercom type: 2 
+sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$ 
+sip intercom line: 1
+
+# Feature override
+voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+directory script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
+
+# Global Park
+sprecode:
+
+# System Softkeys
+prgkey1 type:services
+prgkey1 label:Services
+
+prgkey2 type:xml
+prgkey2 label:Parking
+prgkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
+
+prgkey3 type:xml
+prgkey3 label:Speed Dial
+prgkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/directory/speed.php?user=$$SIPUSERNAME$$
+
+prgkey4 type:xml
+prgkey4 label:Presence
+prgkey4 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/away.php?user=$$SIPUSERNAME$$
+
+prgkey5 type:xml
+prgkey5 label:Day/Night
+prgkey5 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/daynight.php?user=$$SIPUSERNAME$$
+
+prgkey6 type: icom
+prgkey6 label: Icom
+
+softkey1 type:xml
+softkey1 label:DND
+softkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+softkey1 states:idle
+
+softkey2 type:xml
+softkey2 label:Call Fwd
+softkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
+softkey2 states:idle
+
+softkey3 type:xml
+softkey3 label:Follow-me
+softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/follow.php?user=$$SIPUSERNAME$$
+softkey3 states:idle
+
+softkey4 type:xml
+softkey4 label:Voice Mail
+softkey4 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+softkey4 states:idle
+
+softkey5 type:xml
+softkey5 label:Meet-me
+softkey5 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/meetme.php?ext=$$SIPUSERNAME$$&number=$$REMOTENUMBER$$
+softkey5 states:idle connected
+
+softkey6 type: xml
+softkey6 label: ACD Agent
+softkey6 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/agent.php?agent=$$SIPUSERNAME$$
+softkey6 states: idle
+
+softkey7 type:xml
+softkey7 label:Queues
+softkey7 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/queues.php?user=$$SIPUSERNAME$$
+softkey7 states:idle connected
+
+softkey20 type:xml
+softkey20 label:Logout
+softkey20 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
+softkey20 states:idle
+
+[Aastra6735i]
+template:Aastra55i
+
+[Aastra57i]
+###############################################################################
+# Top Key 1:	Services
+# Top Key 2:	Parking
+# Top Key 3:	Speed Dial
+# Top Key 4:	Presence
+# Top Key 5:	Day/Night
+# Top Key 6:	Intercom
+# Key 1:	DND
+# Key 2:	Call Forward
+# Key 3:	Follow-me
+# Key 4:	Voice Mail
+# Key 5:	Meet-me
+# Key 6:	ACD Agent
+# Key 7:	Queues
+# Key 20:	Logout
+###############################################################################
+
+# SIP Lines
+sip line1 screen name 2: Ext. $$AA_SIPUSERNAME_AA$$
+
+# Intercom and Paging
+sip intercom type: 2 
+sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$ 
+sip intercom line: 1
+
+# Feature override
+voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+directory script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
+
+# Global Park
+sprecode: 
+
+# System Softkeys
+topsoftkey1 type:services
+topsoftkey1 label:Services
+
+topsoftkey2 type:xml
+topsoftkey2 label:Parking
+topsoftkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
+
+topsoftkey3 type:xml
+topsoftkey3 label:Speed Dial
+topsoftkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/directory/speed.php?user=$$SIPUSERNAME$$
+
+topsoftkey4 type:xml
+topsoftkey4 label:Presence
+topsoftkey4 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/away.php?user=$$SIPUSERNAME$$
+
+topsoftkey5 type:xml
+topsoftkey5 label:Day/Night
+topsoftkey5 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/daynight.php?user=$$SIPUSERNAME$$
+
+topsoftkey6 type:icom
+topsoftkey6 label:Icom
+
+softkey1 type:xml
+softkey1 label:DND
+softkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+softkey1 states:idle
+
+softkey2 type:xml
+softkey2 label:Call Fwd
+softkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
+softkey2 states:idle
+
+softkey3 type:xml
+softkey3 label:Follow-me
+softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/follow.php?user=$$SIPUSERNAME$$
+softkey3 states:idle
+
+softkey4 type:xml
+softkey4 label:Voice Mail
+softkey4 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+softkey4 states:idle
+
+softkey5 type:xml
+softkey5 label:Meet-me
+softkey5 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/meetme.php?ext=$$SIPUSERNAME$$&number=$$REMOTENUMBER$$
+softkey5 states:idle connected
+
+softkey6 type: xml
+softkey6 label: ACD Agent
+softkey6 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/agent.php?agent=$$SIPUSERNAME$$
+softkey6 states: idle
+
+softkey7 type:xml
+softkey7 label:Queues
+softkey7 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/queues.php?user=$$SIPUSERNAME$$
+softkey7 states:idle connected
+
+softkey20 type:xml
+softkey20 label:Logout
+softkey20 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
+softkey20 states:idle
+
+[Aastra57iCT]
+template:Aastra57i
+
+[Aastra6737i]
+template:Aastra57i
+
+[Aastra9143i]
+###############################################################################
+# Key 1:	Logout
+# Key 2:	Parking
+# Key 3:	DND
+# Key 4:	Call Forward
+# Key 5:   	Directory
+# Key 6:   	Presence
+# Key 7:   	Voice Mail
+###############################################################################
+
+# System Softkeys
+prgkey1 type: xml
+prgkey1 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
+prgkey1 label: Logout
+prgkey1 locked: 1
+
+prgkey2 type:xml
+prgkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
+prgkey2 label: Parking
+
+prgkey3 type: xml
+prgkey3 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+prgkey3 label: DND
+
+prgkey4 type: xml
+prgkey4 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
+prgkey4 label: Call FWD
+
+prgkey5 type: xml
+prgkey5 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
+prgkey5 label: Directory
+
+prgkey6 type:xml
+prgkey6 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/away.php?user=$$SIPUSERNAME$$
+prgkey6 label: Presence
+
+prgkey7 type:xml
+prgkey7 label:Voice Mail
+prgkey7 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+
+[Aastra9480i]
+###############################################################################
+# Key 1:	Directory
+# Key 2:	Speed Dial
+# Key 3:	DND
+# Key 4:	Call Forward
+# Key 5:	Follow-me
+# Key 6:	Presence
+# Key 7:	ACD Agent
+# Key 8:	Voice Mail
+# Key 9:	Parking
+# Key 10:	Meet-me
+# Key 20:	Logout
+###############################################################################
+
+# SIP Lines
+sip line1 screen name 2: Ext. $$AA_SIPUSERNAME_AA$$
+
+# Intercom and Paging
+sip intercom type: 2 
+sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$ 
+sip intercom line: 1
+
+# Global Park
+sprecode: asterisk;$$AA_PARKINGLOT_AA$$
+
+# Intercom and Paging
+sip intercom type: 2 
+sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$ 
+sip intercom line: 1
+
+# System Softkeys
+softkey1 type:xml
+softkey1 label:Directory
+softkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
+softkey1 states:idle connected
+
+softkey2 type:xml
+softkey2 label:Speed Dial
+softkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/directory/speed.php?user=$$SIPUSERNAME$$
+softkey2 states:idle connected
+
+softkey3 type:xml
+softkey3 label:DND
+softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+softkey3 states:idle
+
+softkey4 type:xml
+softkey4 label:Call Fwd
+softkey4 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
+softkey4 states:idle
+
+softkey5 type:xml
+softkey5 label:Follow-me
+softkey5 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/follow.php?user=$$SIPUSERNAME$$
+softkey5 states:idle
+
+softkey6 type:xml
+softkey6 label:Presence
+softkey6 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/away.php?user=$$SIPUSERNAME$$
+softkey6 states:idle connected
+
+softkey7 type: xml
+softkey7 label: ACD Agent
+softkey7 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/agent.php?agent=$$SIPUSERNAME$$
+softkey7 states: idle
+
+softkey8 type:xml
+softkey8 label:VMail
+softkey8 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+softkey8 states:idle
+
+softkey9 type:xml
+softkey9 label:Parking
+softkey9 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php
+softkey9 states:idle
+
+softkey10 type:xml
+softkey10 label:Meet-me
+softkey10 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/meetme.php?ext=$$SIPUSERNAME$$&number=$$REMOTENUMBER$$
+softkey10 states:idle connected
+
+softkey20 type:xml
+softkey20 label:Logout
+softkey20 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
+softkey20 states:idle
+
+[Aastra9480iCT]
+template:Aastra9480i
+
+[Aastra6730i]
+###############################################################################
+# Key 1:	Logout
+# Key 2:	Parking
+# Key 3:	DND
+# Key 4:	Call Forward
+# Key 5:	Presence
+# Key 6:	Delete
+# Key 7:	Directory
+# Key 8:   	Voice Mail
+###############################################################################
+
+# SIP Lines
+sip line1 screen name 2: Ext. $$AA_SIPUSERNAME_AA$$
+
+# System Softkeys
+prgkey1 type: xml
+prgkey1 label: Logout
+prgkey1 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
+
+prgkey2 type: xml
+prgkey2 label: Parking
+prgkey2 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
+
+prgkey3 type: xml
+prgkey3 label: DND
+prgkey3 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+
+prgkey4 type: xml
+prgkey4 label: Call Fwd
+prgkey4 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
+
+prgkey5 type: xml
+prgkey5 label: Presence
+prgkey5 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/away.php?user=$$SIPUSERNAME$$
+
+prgkey6 type: delete
+prgkey6 label: Delete
+
+prgkey7 type: xml
+prgkey7 label: Directory
+prgkey7 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
+
+prgkey8 type: xml
+prgkey8 label: Voice Mail
+prgkey8 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+
+[Aastra6731i]
+template:Aastra6730i
+
+[Aastra6739i]
+###############################################################################
+# Key 1:	DND
+# Key 2:	Park
+# Key 2:	Call Forward
+# Key 3:	Follow-me
+# Key 5:	Parking
+# Key 6:	Presence
+# Key 7:	Speed Dial
+# Key 8:	Intercom
+# Key 9:	Day/Night
+# Key 10:	Meet-me
+# Key 11:	ACD Agent
+# Key 12:	Queues
+# Key 55:	Logout
+###############################################################################
+
+# SIP Lines
+sip line1 screen name 2: Ext. $$AA_SIPUSERNAME_AA$$
+
+# Image Server
+image server uri: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/imageServer.php?
+
+# Intercom and Paging
+sip intercom type: 2 
+sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$ 
+sip intercom line: 1
+
+# Feature override
+voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+services script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/menu/mymenu.php?menu_source=menu1&menu_user=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+directory script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
+
+softkey1 type:xml
+softkey1 label:DND
+softkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+softkey1 states:idle
+
+softkey2 type: speeddialxfer
+softkey2 label: Call Park
+softkey2 value: $$AA_PARKINGLOT_AA$$
+softkey2 line: 1
+softkey2 states: connected
+
+softkey3 type:xml
+softkey3 label:Call Fwd
+softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
+softkey3 states:idle
+
+softkey4 type:xml
+softkey4 label:Follow-me
+softkey4 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/follow.php?user=$$SIPUSERNAME$$
+softkey4 states:idle
+
+softkey5 type:xml
+softkey5 label:Parking
+softkey5 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php
+softkey5 states:idle
+
+softkey6 type:xml
+softkey6 label:Presence
+softkey6 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/away.php?user=$$SIPUSERNAME$$
+
+softkey7 type:xml
+softkey7 label:Speed Dial
+softkey7 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/directory/speed.php?user=$$SIPUSERNAME$$
+
+softkey8 type: icom
+softkey8 label: Intercom
+
+softkey9 type:xml
+softkey9 label:Day/Night
+softkey9 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/daynight.php?user=$$SIPUSERNAME$$
+softkey9 states:idle
+
+softkey10 type:xml
+softkey10 label:Meet-me
+softkey10 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/meetme.php?ext=$$SIPUSERNAME$$&number=$$REMOTENUMBER$$
+softkey10 states:idle connected
+
+softkey11 type: xml
+softkey11 label: ACD Agent
+softkey11 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/agent.php?agent=$$SIPUSERNAME$$
+softkey11 states: idle
+
+softkey12 type:xml
+softkey12 label:Queues
+softkey12 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/queues.php?user=$$SIPUSERNAME$$
+softkey12 states:idle connected
+
+softkey55 type:xml
+softkey55 label:Logout
+softkey55 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
+softkey55 states:idle
