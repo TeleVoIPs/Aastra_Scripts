@@ -9,7 +9,7 @@ If I understand Aastra's versioning system, the noarch file is the final version
 License information taken from the file:
 /var/www/html/aastra/include/License.txt
 
---------------------------------------------------------------------------------
+{{{
 Copyright (c) 2008 Aastra Telecom US, Inc.
 All rights reserved.
 
@@ -34,3 +34,4 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
 LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+}}}
