@@ -1,0 +1,620 @@
+#!/usr/bin/php -q
+<?php 
+#############################################################################
+# Asterisk daemon 1 for Aastra SIP Phones
+#
+# Copyright 2008-2010 Aastra Telecom Ltd
+#
+# Usage
+# 	script.php
+#
+# Supported Aastra Phones
+#    Phones running 2.x firmware
+#############################################################################
+
+#############################################################################
+# PHP customization for includes and warnings
+#############################################################################
+$os = strtolower(PHP_OS);
+if(strpos($os, "win") === false) ini_set('include_path',ini_get('include_path').':'.dirname(__FILE__).'/../include');
+else ini_set('include_path',ini_get('include_path').';'.dirname(__FILE__).'\..\include');
+error_reporting(E_ERROR | E_PARSE);
+
+#############################################################################
+# Directory change
+#############################################################################
+chdir(dirname(__FILE__));
+
+#############################################################################
+# Includes
+#############################################################################
+require_once('AastraAsterisk.php');
+if($AA_ISYMPHONY) 
+	{
+	require_once('AastraiSymphony.php');
+	require_once('isymphony/iSymphonyStatusInterface.class.php');
+	}
+
+#############################################################################
+# Private functions
+#############################################################################
+
+function send_SIP_notify($event,$array_user)
+{
+Global $asm;
+
+# Max number of extensions per command
+$EXT_NUM_LIMIT=30;
+
+# Process each chunk
+while(count($array_user) > 0) 
+	{
+	# Create the chunks
+	$array_user_slice=array_slice($array_user,0,$EXT_NUM_LIMIT);
+
+  	# Prepare command
+  	$command='sip notify '.$event;
+  	foreach($array_user_slice as $value) $command.=' '.$value;
+
+  	# Send command
+  	$res=$asm->Command($command);
+
+	# Next chunk
+  	$array_user=array_slice($array_user,$EXT_NUM_LIMIT);
+
+	# Next chunk
+  	$array_user=array_slice($array_user, $EXT_NUM_LIMIT);
+	}
+}
+
+function update_parking_led()
+{
+# Retrieve current configuration
+$data=Aastra_get_user_context('parking','user');
+
+# Process each registered user
+foreach($data as $user)
+	{
+	# Send to a single user
+	$notify=Aastra_get_user_context($user,'notify');
+	$notify['parking']='1';
+	Aastra_save_user_context($user,'notify',$notify);
+	}
+
+# Notify in bulk
+send_SIP_notify('aastra-xml',$data);
+}
+
+function asm_event_status($e, $parameters, $server, $port)  
+{
+Global $AA_FREEPBX_MODE;
+Global $FEATURE_CODES;
+Global $array_config_daynight;
+
+print_r($parameters);
+
+# Process event
+if(sizeof($parameters))  
+	{
+	# Depending on context
+	switch($parameters['Context'])
+		{
+		# DND hint
+		case 'ext-dnd-hints':
+			# Prepare notification
+			if(Aastra_compare_version_Asterisk('1.6')) $user=substr($parameters['Hint'],13);
+			else $user=substr($parameters['Exten'],$FEATURE_CODES['dnd']);
+			$notify=Aastra_get_user_context($user,'notify');
+			$notify['dnd']='1';
+			Aastra_save_user_context($user,'notify',$notify);
+
+			# Notify user
+			send_SIP_notify('aastra-xml',array($user));
+			break;
+
+		# CF hint
+		case 'ext-cf-hints':
+			# Prepare notification
+			if(Aastra_compare_version_Asterisk('1.6')) $user=substr($parameters['Hint'],12);
+			else $user=substr($parameters['Exten'],$FEATURE_CODES['cf']);
+			$notify=Aastra_get_user_context($user,'notify');
+			$notify['cfwd']='1';
+			Aastra_save_user_context($user,'notify',$notify);
+
+			# Notify user
+			send_SIP_notify('aastra-xml',array($user));
+			break;
+
+		# DAY/NIGHT hint
+		case 'app-daynight-toggle':
+			# Retrieve parameters
+			if(Aastra_compare_version_Asterisk('1.6')) $index=substr($parameters['Hint'],15);
+			else $index=$FEATURE_CODES['daynight'][$parameters['Exten']];
+
+			# Update phones
+			if($index!='') 
+				{
+				$array_config_daynight=Aastra_readINIfile(AASTRA_CONFIG_DIRECTORY.'daynight.conf','#','=');
+				Aastra_propagate_daynight_Asterisk('',$index);
+				}
+			else Aastra_debug('Unexpected daynight code:'.$parameters['Exten']);
+			break;
+
+		# FMFM hint
+		case 'ext-findmefollow':
+			# Prepare notification
+			if(Aastra_compare_version_Asterisk('1.6')) $user=substr($parameters['Hint'],15);
+			else $user=substr($parameters['Exten'],$FEATURE_CODES['fmfm']);
+			$notify=Aastra_get_user_context($user,'notify');
+			$notify['follow']='1';
+			Aastra_save_user_context($user,'notify',$notify);
+
+			# Notify user
+			send_SIP_notify('aastra-xml',array($user));
+			break;
+		}
+	}
+}
+
+function asm_event_park($e, $parameters, $server, $port)  
+{
+Global $park;
+Global $last;
+
+# Process event
+if(sizeof($parameters))  
+	{
+      	if($parameters['Event']=='ParkedCall') $park++;
+      	if($parameters['Event']=='UnParkedCall') $park--;
+      	if($parameters['Event']=='ParkedCallGiveUp') $park--;
+      	if($parameters['Event']=='ParkedCallTimeOut') $park--;
+
+	# Status changed
+	if($park!=$last)
+		{
+		# Process
+		if($park==0) 
+			{
+			$status='off';
+			Aastra_save_user_context('parking','status',$status);
+			update_parking_led();
+			}
+		else 
+			{
+			if($last==0) 
+				{
+				$status='slowflash';
+				Aastra_save_user_context('parking','status',$status);
+				update_parking_led();
+				}
+			}
+
+		# Keep new state
+		$last=$park;
+		}
+	}
+}
+
+function asm_event_queue($e, $parameters, $server, $port)  
+{
+Global $AA_FREEPBX_MODE;
+
+# Process event
+if(sizeof($parameters))  
+	{
+	# Retrieve user or devices
+	sscanf($parameters['Location'],"Local/%d@from-queue/n",$user);
+	if($AA_FREEPBX_MODE=='2') 
+		{
+		$user=Aastra_get_userdevice_Asterisk($user);
+		$array_user=Aastra_get_user_info_Asterisk($user);
+		$devices=array_flip(explode('&',trim($array_user['device'])));
+		unset($devices['']);
+		$devices=array_flip($devices);
+		}
+	else $devices=array($user);
+
+	# Prepare notification
+	foreach($devices as $device)
+		{
+		$notify=Aastra_get_user_context($device,'notify');
+		$notify['agent']='1';
+		Aastra_save_user_context($device,'notify',$notify);
+		}
+
+	# Notify user
+	send_SIP_notify('aastra-xml',$devices);
+	}
+}
+
+function asm_event_system($e, $parameters, $server, $port)  
+{
+Global $socket;
+
+if(sizeof($parameters))  
+	{
+      	if($parameters['Event']=='Shutdown') $socket=False;
+    	}
+}
+
+function is_meetme_static($confno)
+{
+Global $asm;
+
+# Return 
+$return=False;
+
+# Send command
+if(Aastra_compare_version_Asterisk('1.6')) $res = $asm->Command('meetme list');
+else $res = $asm->Command('meetme');
+$line= split("\n", $res['data']);
+if(!stristr($line[1],'No active'))
+	{
+	$trace=0;
+	foreach ($line as $myline)
+		{
+		if($trace==0)
+			{
+			if (substr($myline,0,4)=='Conf') $trace=1;
+			}
+		else
+			{
+			$linevalue= preg_split("/ /", $myline,-1,PREG_SPLIT_NO_EMPTY);
+			if (substr($myline,0,1)=='*') $trace=0;
+			else 
+				{
+				if($linevalue[0]==$confno)
+					{
+					if($linevalue[4]=="Static") 
+						{
+						$return=True;
+						break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+# Return result
+return($return);
+}
+
+function meetme_user($confno,$num)
+{
+Global $asm;
+$user='';
+
+# AGI command meetme list
+$res=$asm->Command('meetme list '.$confno);
+
+# Process result
+$line=split("\n",$res['data']);
+$nbuser=0;
+foreach($line as $myline)
+	{
+	if(substr($myline,0,4)=='User')
+		{
+		$linevalue=preg_split('/ /',$myline,-1,PREG_SPLIT_NO_EMPTY);
+		if($num==intval($linevalue[2]))
+			{
+			$user=$linevalue[3];
+			break;
+			}
+		}
+	}
+
+# Return user
+return($user);
+}
+
+function get_username($user)
+{
+Global $ASTERISK_LOCATION;
+Global $asm;
+
+# Not found
+$username='';
+
+# Get all the user data
+$sip_array=Aastra_readINIfile($ASTERISK_LOCATION.'sip_additional.conf',';','=');
+
+# Collect data
+if($sip_array[$user]['username']!='') $username=$sip_array[$user]['username'];
+else
+	{
+	# Get value in the database
+	$res=$asm->database_get('DEVICE',$user.'/user');
+	if($res) $username=$res;
+	}
+
+# Return answer
+return($username);
+}
+
+function asm_event_meetme($e, $parameters, $server, $port)  
+{
+# Process event
+if(sizeof($parameters))  
+	{
+	# Depending on event
+	switch($parameters['Event'])
+		{
+		case 'MeetmeJoin':
+		case 'MeetmeLeave':
+			# Conference must be static
+			if(is_meetme_static($parameters['Meetme']))
+				{
+				# Retrieve parameters depending on Asterisk version (bug)
+				if(Aastra_compare_version_Asterisk('1.6'))
+					{
+					if($parameters['Event']=='MeetmeJoin') $user=$parameters['CallerIDnum'];
+					else $user=$parameters['CallerIDNum'];
+					}
+				else 
+					{
+					if($parameters['Event']=='MeetmeJoin') $user=meetme_user($parameters['Meetme'],$parameters['Usernum']);
+					else $user=$parameters['CallerIDnum'];
+					}
+
+				# We must recognize the user
+				if(get_username($user)!='')
+					{
+					# Prepare notification
+					$notify=Aastra_get_user_context($user,'notify');
+					if($parameters['Event']=='MeetmeJoin') $notify['meetmejoin']='1';
+					else $notify['meetmeleave']='1';
+					Aastra_save_user_context($user,'notify',$notify);
+
+					# Send notification
+					send_SIP_notify('aastra-xml',array($user));
+					}
+				}
+			break;
+		}
+	}
+}
+
+function asm_event_user($e, $parameters, $server, $port)  
+{
+Global $AA_FREEPBX_MODE;
+Global $AA_ISYMPHONY;
+if($AA_ISYMPHONY) 
+	{
+	Global $AA_ARRAY_REVERSE;
+	Global $AA_ISYMP_LOCATION;
+	Global $AA_ISYMP_TENANT;
+	}
+
+# Depending on event type
+switch($parameters['UserEvent'])
+	{
+	# Userdevice
+	case 'UserDeviceAdded':
+	case 'UserDeviceRemoved':
+		# Only in device/user mode
+		if($AA_FREEPBX_MODE=='2')
+			{
+			# Retrieve device
+			$temp=explode(',',$parameters['Data']);
+			$device=$temp[1];
+
+			# Prepare notification
+			$notify=Aastra_get_user_context($device,'notify');
+			$notify['userdevice']='1';
+			Aastra_save_user_context($device,'notify',$notify);
+
+			# Notify device
+			send_SIP_notify('aastra-xml',array($device));
+			}
+		break;
+
+	# Presencestatus change
+	case 'PresenceStatusChanged':
+		# Retrieve user
+		$temp=explode(',',$parameters['Data']);
+		$user=$temp[0];
+
+		# Retrieve all devices in device/user mode
+		if($AA_FREEPBX_MODE=='2') 
+			{
+			$user=Aastra_get_userdevice_Asterisk($user);
+			$array_user=Aastra_get_user_info_Asterisk($user);
+			$devices=array_flip(explode('&',trim($array_user['device'])));
+			unset($devices['']);
+			$devices=array_flip($devices);
+			}
+		else $devices=array($user);
+
+		# Prepare notification
+		foreach($devices as $device)
+			{
+			$notify=Aastra_get_user_context($device,'notify');
+			$notify['away']='1';
+			Aastra_save_user_context($device,'notify',$notify);
+			}
+
+		# Notify device
+		send_SIP_notify('aastra-xml',$devices);
+
+		# Update iSymphony
+		if($AA_ISYMPHONY) 
+			{
+			$state=$temp[1];
+			$isym=new iSymphonyStatusInterface();
+			if($isym->connect())
+				{
+				$isym->set_extension_status($user,$AA_ARRAY_REVERSE[$state],$AA_ISYMP_LOCATION,$AA_ISYMP_TENANT);
+				$isym->disconnect();
+				}
+			else Aastra_debug('Failed to connect to iSymphony Status Interface');
+			}
+		break;
+
+	# Presencereturn change
+	case 'PresenceReturnChanged':
+		# Update iSymphony
+		if($AA_ISYMPHONY) 
+			{
+			# Retrieve user and value
+			$temp=explode(',',$parameters['Data']);
+			$user=$temp[0];
+			$value=$temp[1]*1000;
+			$isym=new iSymphonyStatusInterface();
+			if($isym->connect())
+				{
+				$isym->set_extension_return_time($user,$value,$AA_ISYMP_LOCATION,$AA_ISYMP_TENANT);
+				$isym->disconnect();
+				}
+			else Aastra_debug('Failed to connect to iSymphony Status Interface');
+			}
+		break;
+	}
+}
+
+#############################################################################
+# Body
+#############################################################################
+
+# Init park
+$park=0;
+$last=0;
+$socket=False;
+$init=True;
+
+# Global parameters
+if(Aastra_compare_version_Asterisk('1.6')) $command='parkedcalls show';
+else 
+	{
+	$command='show parkedcalls';
+	while(!$db)
+		{
+		$db=Aastra_connect_freePBX_db_Asterisk();
+		if(!$db) sleep(10);
+		}
+	$db->setFetchMode(DB_FETCHMODE_ASSOC);
+	$query=$db->getAll('SELECT * FROM featurecodes');
+	foreach($query as $value)
+		{
+		if(($value['modulename']=='donotdisturb') and ($value['featurename']=='dnd_toggle')) 
+			{
+			if($value['customcode']!='') $FEATURE_CODES['dnd']=strlen($value['customcode']);
+			else $FEATURE_CODES['dnd']=strlen($value['defaultcode']);
+			}
+		if(($value['modulename']=='findmefollow') and ($value['featurename']=='fmf_toggle')) 
+			{
+			if($value['customcode']!='') $FEATURE_CODES['fmfm']=strlen($value['customcode']);
+			else $FEATURE_CODES['fmfm']=strlen($value['defaultcode']);
+			}
+		if(($value['modulename']=='callforward') and ($value['featurename']=='cf_toggle')) 
+			{
+			if($value['customcode']!='') $FEATURE_CODES['cf']=strlen($value['customcode']);
+			else $FEATURE_CODES['cf']=strlen($value['defaultcode']);
+			}
+		if(($value['modulename']=='daynight') and (strstr($value['featurename'],'toggle-mode-')))
+			{
+			$index=substr($value['featurename'],12);
+			if($value['customcode']!='') $code=$value['customcode'];
+			else $code=$value['defaultcode'];
+			$FEATURE_CODES['daynight'][$code]=$index;
+			}
+		}
+	}
+
+# Reset init
+$init=True;
+
+# Get all the queues
+while(1)
+	{
+	# Not connected
+	if(!$socket)
+		{
+		# Connect to AGI
+		$asm=new AGI_AsteriskManager();
+		while(!$socket)
+			{
+			$socket=$asm->connect(NULL,NULL,NULL,False);
+			if(!$socket) sleep(10);
+			}
+
+		# Parking enabled
+		if($AA_PARKING_EXCLUDE[0]!='ALL')
+			{
+			# Init mode
+			if($init)
+				{
+				# Check current Parking list
+				$park=0;
+				$res=$asm->Command($command);
+				$line=split("\n", $res['data']);
+				foreach ($line as $myline)
+					{
+					if((!strstr($myline,'Privilege')) && (!strstr($myline,'Extension')) && (!strstr($myline,'parked')) && (!strstr($myline,'Parking')) && ($myline!=''))
+						{
+				 		$linevalue= preg_split('/ /', $myline,-1,PREG_SPLIT_NO_EMPTY);
+						if(($linevalue[0]!='') and (is_numeric($linevalue[0]))) $park++;
+						}
+					}
+
+				# Update status
+				if($park!=0) $status='slowflash';
+				else $status='off';
+	
+				# End init
+				$init=False;
+				}
+			else 
+				{
+				# Asterisk just restarting
+				$park=0;
+				$status='off';
+				}
+
+			# Update Parking LED
+			Aastra_save_user_context('parking','status',$status);
+			update_parking_led();
+			$last=$park;
+
+			# Add event handlers Parking
+			$asm->add_event_handler('parkedcall','asm_event_park');
+			$asm->add_event_handler('unparkedcall','asm_event_park');
+			$asm->add_event_handler('parkedcallgiveup','asm_event_park');
+			$asm->add_event_handler('parkedcalltimeout','asm_event_park');
+			}
+
+		# Add event handlers synchronization mechanism
+		if($AA_FREEPBX_USEDEVSTATE) 
+			{
+echo "USE DEVSTATE\n";
+			$asm->add_event_handler('extensionstatus','asm_event_status');
+			}
+else echo "DON'T USE DEVSTATE\n";
+
+		# Handler for queues events
+		$asm->add_event_handler('queuememberadded','asm_event_queue');
+		$asm->add_event_handler('queuememberremoved','asm_event_queue');
+
+		# Handler for meetme events
+		if(($AA_FREEPBX_MODE=='1') and $AA_MEETME_STATE)
+			{
+			$asm->add_event_handler('meetmejoin','asm_event_meetme');
+			$asm->add_event_handler('meetmeleave','asm_event_meetme');
+			}
+
+		# Handler for login/logout and presence
+		$asm->add_event_handler('userevent','asm_event_user');
+
+		# Add event handlers System
+		$asm->add_event_handler('shutdown','asm_event_system');
+		}
+
+	# Wait for events
+	$asm->listen(True);
+	$socket=$asm->get_socket();
+	}
+
+# Disconnect properly
+$asm->disconnect();
+exit;
+?>

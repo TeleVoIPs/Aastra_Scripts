@@ -1,0 +1,93 @@
+##############################################################################################
+# Configuration file for RSS feed
+#
+# 2 types of segments in this ini file. 
+#
+# [RESERVED] Common data for the feeds
+#   title			Title of the feeds in English (mandatory)
+#   copyright			Copyright sentence in English to be added at the end of the descriptions
+#   copyright-$$LANG		Localized copyright sentence (optional)
+#   nodescription		User message if feed has no description (optional)
+#   search_before		Sequences to search before scraping, the format is "/XX/,/YY/"
+#   replace_before		Sequences to replace before scraping separated by ","
+#   search_after		Sequences to search after scraping, the format is "/XX/,/YY/"
+#   replace_after		Sequences to replace after scraping separated by ","
+#   trim_title_after		String in the title to trim after
+#   trim_title_before	String in the title to trim before
+#   encoding			Encoding (iso or utf8), iso by default (optional)
+#   file			Root name of the cache file
+#
+# [ITEM]
+#   ttl			Time to live in seconds or 'daily' (mandatory)
+#   xml			URI for the feed (mandatory)
+###############################################################################################
+[RESERVED]
+title=CNN
+toptitle_label=CNN News
+toptitle_icon=icons/cnn.png
+copyright= RSS feed provided by CNN.com and brought to you by Aastra.
+search_before=
+replace_before=
+search_after=
+replace_after=
+file=cnn
+    
+[Top Stories]  
+ttl=3600
+xml=http://rss.cnn.com/rss/cnn_topstories.rss
+ 
+[World]  
+ttl=3600
+xml=http://rss.cnn.com/rss/cnn_world.rss
+
+[U.S.]
+ttl=3600
+xml=http://rss.cnn.com/rss/cnn_us.rss
+
+[Politics]  
+ttl=daily
+xml=http://rss.cnn.com/rss/cnn_allpolitics.rss
+
+[Law]
+ttl=daily
+xml=http://rss.cnn.com/rss/cnn_law.rss   
+ 
+[Technology]
+ttl=daily
+xml=http://rss.cnn.com/rss/cnn_tech.rss   
+ 
+[Science and Space]
+ttl=daily
+xml=http://rss.cnn.com/rss/cnn_space.rss   
+ 
+[Health]
+ttl=daily
+xml=http://rss.cnn.com/rss/cnn_health.rss   
+ 
+[Entertainment]
+ttl=daily
+xml=http://rss.cnn.com/rss/cnn_showbiz.rss     
+ 
+[Travel]
+ttl=daily
+xml=http://rss.cnn.com/rss/cnn_travel.rss 
+ 
+[Education]
+ttl=daily
+xml=http://rss.cnn.com/rss/cnn_education.rss
+ 
+[Video]
+ttl=daily
+xml=http://rss.cnn.com/rss/cnn_freevideo.rss
+
+[Offbeat]
+ttl=daily
+xml=http://rss.cnn.com/rss/cnn_offbeat.rss
+ 
+[Most Popular]
+ttl=daily
+xml=http://rss.cnn.com/rss/cnn_mostpopular.rss     
+ 
+[Most Recent]
+ttl=daily
+xml=http://rss.cnn.com/rss/cnn_latest.rss

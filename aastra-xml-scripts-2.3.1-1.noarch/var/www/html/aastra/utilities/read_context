@@ -1,0 +1,81 @@
+#!/usr/bin/php -q
+<?php 
+#############################################################################
+# Debug tool for aastra-xml-scripts
+#
+# This script dumps the content of any context file, all of it or just 
+# limited to an application.
+#
+# Copyright 2009 Aastra Telecom Ltd
+#
+# Usage
+# 	read_context.php contextID [appli]
+#
+#############################################################################
+
+#############################################################################
+# PHP customization for includes and warnings
+#############################################################################
+chdir(dirname(__FILE__));
+$os = strtolower(PHP_OS);
+if(strpos($os, "win") === false) ini_set('include_path',ini_get('include_path').':include:../include');
+else ini_set('include_path',ini_get('include_path').';include;..\include');
+error_reporting(E_ERROR | E_PARSE);
+
+#############################################################################
+# Includes
+#############################################################################
+require_once('AastraCommon.php');
+require_once('AastraAsterisk.php');
+
+#############################################################################
+# Main code
+#############################################################################
+# Test parameters
+if($argc<2) 
+	{
+	echo "Usage: ./".basename(__FILE__)." contextID [appli]\n";
+	exit;
+	}
+
+# File name
+$file=AASTRA_PATH_CACHE.$argv[1].'.context';
+
+# If file exists
+if(is_file($file)) $array=Aastra_readINIfile($file,'#','=');
+else 
+	{
+	echo 'Context file '.$file.' does not exist'."\n";
+	exit;
+	}
+
+# Display content
+if($argv[2]=='')
+	{
+	foreach($array as $appli=>$value)
+		{
+		$display=unserialize(base64_decode($array[$appli]['data']));
+		if(is_array($display))
+			{
+			echo 'Application '.$appli."\n";
+			print_r($display);
+			}
+		else echo 'Application '.$appli."=".$display."\n";
+		}
+	}
+else
+	{
+	if(array_key_exists($argv[2],$array))
+		{
+		$display=unserialize(base64_decode($array[$argv[2]]['data']));
+		if(is_array($display))
+			{
+			echo 'Application '.$argv[2]."\n";
+			print_r($display);
+			}
+		else echo 'Application '.$argv[2]."=".$display."\n";
+		}
+	else echo "No data for $argv[2] application\n";
+	}
+
+?>

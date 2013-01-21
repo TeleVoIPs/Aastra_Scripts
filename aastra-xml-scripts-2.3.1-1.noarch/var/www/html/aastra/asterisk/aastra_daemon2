@@ -1,0 +1,270 @@
+#!/usr/bin/php -q
+<?php 
+#############################################################################
+# Asterisk daemon 2 for Aastra SIP Phones
+#
+# Copyright 2009 Aastra Telecom Ltd
+#
+# Usage
+# 	script.php
+#
+# Supported Aastra Phones
+#    Phones running 2.x firmware
+#############################################################################
+
+#############################################################################
+# PHP customization for includes and warnings
+#############################################################################
+$os = strtolower(PHP_OS);
+if(strpos($os, "win") === false) ini_set('include_path',ini_get('include_path').':'.dirname(__FILE__).'/../include');
+else ini_set('include_path',ini_get('include_path').';'.dirname(__FILE__).'\..\include');
+error_reporting(E_ERROR | E_PARSE);
+
+#############################################################################
+# Directory change
+#############################################################################
+chdir(dirname(__FILE__));
+
+#############################################################################
+# Includes
+#############################################################################
+require_once('AastraCommon.php');
+require_once('AastraAsterisk.php');
+
+#############################################################################
+# Private functions
+#############################################################################
+
+function send_SIP_notify($event,$array_user)
+{
+Global $asm;
+
+# Max number of extensions per command
+$EXT_NUM_LIMIT=50;
+
+# Process each chunk
+while(count($array_user) > 0) 
+	{
+	# Create the chunks
+	$array_user_slice=array_slice($array_user,0,$EXT_NUM_LIMIT);
+
+  	# Prepare command
+  	$command='sip notify '.$event;
+  	foreach($array_user_slice as $value) $command.=' '.$value;
+
+  	# Send command
+  	$res=$asm->Command($command);
+
+	# Next chunk
+  	$array_user=array_slice($array_user,$EXT_NUM_LIMIT);
+	}
+}
+
+function update_vm_status($init)
+{
+Global $asm;
+
+# Retrieve VM status
+if(Aastra_compare_version_Asterisk('1.6')) $res=$asm->Command('voicemail show users');
+else $res=$asm->Command('show voicemail users');
+$line=split("\n", $res['data']);
+$nbuser=0;
+foreach ($line as $myline)
+	{
+	if((!strstr($myline,'Privilege')) && (!strstr($myline,'Context')) && ($myline!='')) $status_mbox[trim(substr($myline,11,6))]=trim(substr($myline,54,6));
+	}
+
+# Initial Status
+$array_mbox=Aastra_get_user_context('vmail','user');
+
+# Depending on the mode
+if($init)
+	{
+	foreach($array_mbox as $key=>$value)
+		{
+		if($status_mbox[$key]==0) $array_mbox[$key]['status']='off';
+		else $array_mbox[$key]['status']='on';
+		if($array_mbox[$key]['count']>0) $array_mbox[$key]['msg']=$status_mbox[$key];
+		foreach($array_mbox[$key]['user'] as $key2=>$value2) 
+			{
+			if(!in_array($value2,$array_update)) $array_update[]=$value2;
+			}
+		}
+	}
+else
+	{
+	foreach($array_mbox as $key=>$value)
+		{
+		$update=False;
+		if($status_mbox[$key]==0) 
+			{
+			if($array_mbox[$key]['status']=='on') 
+				{
+				$array_mbox[$key]['status']='off';
+				$update=True;
+				}
+			}
+		else 
+			{
+			if($array_mbox[$key]['status']=='off') 
+				{
+				$array_mbox[$key]['status']='on';
+				$update=True;
+				}
+			}
+		if($array_mbox[$key]['count']>0) 
+			{
+			if($array_mbox[$key]['msg']!=$status_mbox[$key])
+				{
+				$array_mbox[$key]['msg']=$status_mbox[$key];
+				$update=True;
+				}
+			}
+		if($update)
+			{
+			foreach($array_mbox[$key]['user'] as $key2=>$value2) 
+				{
+				if(!in_array($value2,$array_update)) $array_update[]=$value2;
+				}
+			}
+		}
+	}
+
+# If update needed
+if(count($array_update)!=0)
+	{
+	# Save new context
+	Aastra_save_user_context('vmail','user',$array_mbox);
+
+	# Process each registered user
+	foreach($array_update as $user)
+		{
+		# Send to a single user
+		$notify=Aastra_get_user_context($user,'notify');
+		$notify['vmail']='1';
+		Aastra_save_user_context($user,'notify',$notify);
+		}
+
+	# Notify in bulk
+	send_SIP_notify('aastra-xml',$array_update);
+	}
+}
+
+function logout()
+{
+Global $asm;
+
+# Retrieve current logout times
+$raw=$asm->database_show('AMPUSER');
+foreach($raw as $key=>$value) 
+	{
+	if(strstr($key,'presence/logout')) $data[preg_replace(array('/\/AMPUSER\//','/\/presence\/logout/'),array('',''),$key)]=$value; 
+	}
+
+# Remove the ones that are not in the range
+$current_time=time();
+foreach($data as $key=>$value)
+	{
+	$split=explode('-',$value);
+	$test_time=mktime($split[0],$split[1],0,date('n'),date('j'),date('Y'));
+	if($current_time<$test_time) unset($data[$key]);
+	else 
+		{
+		if(($current_time-$test_time)>60) unset($data[$key]);
+		}
+	}
+
+# Some users to logout
+if(count($data)!=0)
+	{
+	# Nobody to logout
+	$logout=array();
+
+	# Process each phone
+	foreach($data as $key=>$value)
+		{
+		# Check phone state
+		$current_state='';
+		$res=$asm->Command('core show hint '.$key);
+		$line=split("\n", $res['data']);
+		foreach($line as $parameter)
+			{
+			if(strstr($parameter,'ext-local')) 
+				{
+				$status=explode(' ', $parameter);
+				$state=explode(':',$status[34]);
+				$current_state=$state[1];
+				break;
+				}
+			}
+
+		# Prepare logout
+		if(($current_state!='InUse') and ($current_state!='Unavailable'))
+			{
+			$split=explode('-',$value);
+			$test_time=mktime($split[0],$split[1],0,date('n'),date('j'),date('Y'));
+			Aastra_debug('Sending logout to extension '.$key.' Test time='.$test_time.' Current='.$current_time);
+			$notify=Aastra_get_user_context($key,'notify');
+			$notify['logout']='1';
+			Aastra_save_user_context($key,'notify',$notify);
+			$asm->Command('sip notify aastra-xml '.$key);
+			}
+		}
+	}
+}
+
+#############################################################################
+# Main code
+#############################################################################
+
+# Init variables
+$socket=False;
+$init=True;
+$count=0;
+
+# Get all the queues
+while(1)
+	{
+	# Not connected
+	if(!$socket)
+		{
+		# Connect to AGI
+		$asm=new AGI_AsteriskManager();
+		while(!$socket)
+			{
+			$socket=$asm->connect(NULL,NULL,NULL,False);
+			if(!$socket) sleep(10);
+			}
+
+		# Init mode
+		if($init)
+			{
+			# Init VM
+			update_vm_status($init);
+
+			# End init
+			$init=False;
+			}
+		}
+
+	# Timeout
+	sleep(30);
+
+	# Update VM + LOGOUT
+	$socket=$asm->get_socket();
+	if($socket) 
+		{
+		update_vm_status($init);
+		if($AA_AUTOLOGOUT and ($AA_FREEPBX_MODE=='1'))
+			{
+			if($count==0) logout();
+			$count++;
+			if($count==2) $count=0;
+			}
+		}
+	}
+
+# Disconnect properly
+$asm->disconnect();
+exit;
+?>
