@@ -21,7 +21,7 @@
 #     addEntry(index,message,type,timeout,uri,icon,color) to add a message to be displayed on the idle screen.
 #          @index		integer
 #          @message		string
-#	       @type		enum ("alert","icon") optional
+#	         @type		enum ("alert","icon") optional
 #          @timeout		integer (seconds) optional
 #          @uri		    uri to call when message/alert pressed optional, only for 6739i
 #          @icon		icon index 6739i only, optional
