@@ -1,16 +1,13 @@
 <?php
 ########################################################################################################
-# Aastra XML API Classes - AastraIPPhoneTextScreen
-# Copyright Aastra Telecom 2005-2010
+# Aastra XML API Classes - AastraIPPhoneCallLog
+# Copyright Aastra Telecom 2005-2012
 #
-# AastraIPPhoneTextScreen object.
+# AastraIPPhoneCallLog object.
 #
 # Public methods
 #
 # Inherited from AastraIPPhone
-#     setTitle(Title) to setup the title of an object (optional)
-#          @title		string
-#     setTitleWrap() to set the title to be wrapped on 2 lines (optional)
 #     setTopTitle(title,color,icon_index) to set the Top Title of the XML screen (6739i only)
 #          @title		string
 #          @color		string, "red", "blue", ... (optional)
@@ -21,18 +18,12 @@
 #     setBeep() to enable a notification beep with the object (optional)
 #     setLockIn(uri) to set the Lock-in tag to 'yes' and the GoodbyeLockInURI(optional)
 #          @uri		string, GoodByeLockInURI
-#     setLockInCall() to set the Lock-in tag to 'call' (optional)
 #     setAllowAnswer() to set the allowAnswer tag to 'yes' (optional only for non softkey phones)
 #     setAllowDrop() to set the allowDrop tag to 'yes' (optional only for non softkey phones)
 #     setAllowXfer() to set the allowXfer tag to 'yes' (optional only for non softkey phones)
 #     setAllowConf() to set the allowConf tag to 'yes' (optional only for non softkey phones)
 #     setTimeout(timeout) to define a specific timeout for the XML object (optional)
 #          @timeout		integer (seconds)
-#     addSoftkey(index,label,uri,icon_index) to add custom soktkeys to the object (optional)
-#          @index		integer, softkey number
-#          @label		string
-#          @uri		string
-#          @icon_index	integer, icon number
 #     setRefresh(timeout,URL) to add Refresh parameters to the object (optional)
 #          @timeout		integer (seconds)
 #          @URL		string
@@ -45,48 +36,56 @@
 #          @flush		boolean optional, output buffer to be flushed out or not.
 #
 # Specific to the object
-#     setText(text,color) to set the text to be displayed.
-#          @text		string
-#          @color		string, "red", "blue"... (optional)
-#     setDoneAction(uri) to set the URI to be called when the user selects the default "Done" key (optional)
-#          @uri		string
-#     setAllowDTMF() to allow DTMF passthrough on the object
+#     addEntry(name,number,date,time,selection,duration,type,terminal,count,line)
+#          @name		string (optional) 
+#          @number		string 
+#          @date		string MM-DD-YYYY
+#          @time		string HH:MM (military time)
+#          @selection	string (optional)
+#          @duration	integer call duration in seconds (optional)
+#          @type		string call type (incoming/outgoung/missed) (optional)
+#          @terminal	string terminal type (office/mobile/home) (optional)
+#          @count	    integer number of calls (optional)
+#          @line	    integer line used (1-9) (optional)
+#     setScrollConstrain() to avoid the list to wrap
 #     setScrollUp(uri) to set the URI to be called when the user presses the Up arrow (optional)
 #          @uri		string
 #     setScrollDown(uri) to set the URI to be called when the user presses the Down arrow (optional)
 #          @uri		string
-#     setScrollLeft(uri) to set the URI to be called when the user presses the Left arrow (optional)
+#     setDeleteUri(uri) to configure the uri called by the "Delete" button (optional)
 #          @uri		string
-#     setScrollRight(uri) to set the URI to be called when the user presses the Right arrow (optional)
+#     setDeleteAllUri(uri) to configure the uri called by the "Delete ALL" button (optional)
+#          @uri		string
+#     setDialUri(uri) to configure the uri called by the "Dial" button (optional)
+#          @uri		string
+#     setAddUri(uri) to configure the uri called by the "Add to directory" button(optional)
 #          @uri		string
 #
-# Example
-#     require_once('AastraIPPhoneTextScreen.class.php');
-#     $text = new AastraIPPhoneTextScreen();
-#     $text->setTitle('Title');
-#     $text->setText('Text to be displayed.');
-#     $text->setDestroyOnExit();
-#     $text->addSoftkey('1', 'Mail', 'http://myserver.com/script.php?action=1','1');
-#     $text->addSoftkey('6', 'Exit', 'SoftKey:Exit');
-#     $text->addIcon('1', 'Icon:Envelope');
-#     $text->output();
+# Example 
 #
 ########################################################################################################
-
 require_once('AastraIPPhone.class.php');
-require_once('AastraIPPhoneTextScreenEntry.class.php');
+require_once('AastraIPPhoneCallLogEntry.class.php');
 
-class AastraIPPhoneTextScreen extends AastraIPPhone {
-   	var $_doneAction='';
-	var $_allowDTMF='';
+class AastraIPPhoneCallLog extends AastraIPPhone {
+	var $_maxitems='50';
+	var $_scrollConstrain='';
 	var $_scrollUp='';
 	var $_scrollDown='';
-	var $_scrollLeft='';
-	var $_scrollRight='';
-
-	function setDoneAction($uri)
+	var $_delete='';
+	var $_deleteAll='';
+	var $_dial='';
+	var $_add='';
+    
+	function addEntry($name, $number, $date, $time, $selection, $duration, $type, $terminal, $count='', $line='')
 	{
-		$this->_doneAction = $uri;
+		$this->_entries[] = new AastraIPPhoneCallLogEntry($name, $number, $date, $time, $selection, $duration, $type, $terminal, $count, $line);
+	}
+
+
+	function setScrollConstrain()
+	{
+		$this->_scrollConstrain = 'yes';
 	}
 
 	function setScrollUp($uri)
@@ -99,62 +98,42 @@ class AastraIPPhoneTextScreen extends AastraIPPhone {
 		$this->_scrollDown = $uri;
 	}
 
-	function setScrollLeft($uri)
+	function setDeleteUri($uri)
 	{
-		$this->_scrollLeft = $uri;
+		$this->_delete = $uri;
 	}
 
-	function setScrollRight($uri)
+	function setDeleteAllUri($uri)
 	{
-		$this->_scrollRight = $uri;
+		$this->_deleteAll = $uri;
 	}
 
-	function setAllowDTMF()
+	function setDialUri($uri)
 	{
-		$this->_allowDTMF = 'yes';
+		$this->_dial = $uri;
 	}
 
-	function addEntry($text, $color='')
+	function setAddUri($uri)
 	{
-		$this->_entries[] = new AastraIPPhoneTextScreenEntry($text, $color);
-	}
-
-	function setText($text,$color='')
-	{
-		$pieces=explode("\n",$text);
-		foreach($pieces as $key=>$value)
-			{
-			$this->_entries[] = new AastraIPPhoneTextScreenEntry($value, $color);
-			}
+		$this->_add = $uri;
 	}
 
 	function render()
 	{
-		# Beginning of root tag
-		$out = "<AastraIPPhoneTextScreen";
+		# Beginning of root tag		
+		$out = "<AastraIPPhoneCallLog";
 
-		# DestroyOnExut
-		if($this->_destroyOnExit == 'yes') $out .= " destroyOnExit=\"yes\"";
+		# DestroyOnExit
+		if ($this->_destroyOnExit=='yes') $out .= " destroyOnExit=\"yes\"";
 
 		# CancelAction
-		if($this->_cancelAction != "")
-			{ 
+		if($this->_cancelAction != "") { 
 			$cancelAction = $this->escape($this->_cancelAction);
 			$out .= " cancelAction=\"{$cancelAction}\"";
-			}
-
-		# DoneAction
-		if($this->_doneAction != "")
-			{ 
-			$doneAction = $this->escape($this->_doneAction);
-			$out .= " doneAction=\"{$doneAction}\"";
-			}
+		}
 
 		# Beep
 		if ($this->_beep=='yes') $out .= " Beep=\"yes\"";
-
-		# TimeOut
-		if ($this->_timeout!=0) $out .= " Timeout=\"{$this->_timeout}\"";
 
 		# Lockin
 		if($this->_lockin!='') {
@@ -174,71 +153,61 @@ class AastraIPPhoneTextScreen extends AastraIPPhone {
 		# AllowConf
 		if ($this->_allowConf == 'yes') $out .= " allowConf=\"yes\"";
 
-		# AllowDTMF
-		if ($this->_allowDTMF=='yes') $out .= " allowDTMF=\"yes\"";
+		# Timeout
+		if ($this->_timeout!=0) $out .= " Timeout=\"{$this->_timeout}\"";
 
-		# Scrolls up/down/left/right
+		# Prevent list wrap
+		if ($this->_scrollConstrain == 'yes') $out .= " scrollConstrain=\"yes\"";
+
+		# Scrolls up/down
 		if($this->_scrollUp!='') $out .= " scrollUp=\"".$this->escape($this->_scrollUp)."\"";
 		if($this->_scrollDown!='') $out .= " scrollDown=\"".$this->escape($this->_scrollDown)."\"";
-		if($this->_scrollLeft!='') $out .= " scrollLeft=\"".$this->escape($this->_scrollLeft)."\"";
-		if($this->_scrollRight!='') $out .= " scrollRight=\"".$this->escape($this->_scrollRight)."\"";
+
+		# Misc uris
+		if($this->_delete!='') $out .= " deleteUri=\"".$this->escape($this->_delete)."\"";
+		if($this->_deleteAll!='') $out .= " deleteAllUri=\"".$this->escape($this->_deleteAll)."\"";
+		if($this->_dial!='') $out .= " dialUri=\"".$this->escape($this->_dial)."\"";
+		if($this->_add!='') $out .= " addUri=\"".$this->escape($this->_add)."\"";
 
 		# End of root tag
 		$out .= ">\n";
 
-		# Title
-		if ($this->_title!='')
-			{
-			$title = $this->escape($this->_title);
-		 	$out .= "<Title";
-		 	if ($this->_title_wrap=='yes') $out .= " wrap=\"yes\"";
-		 	if ($this->_title_color!='') $out .= " Color=\"{$this->_title_color}\"";
-			$out .= ">".$title."</Title>\n";
-			}
-
 		# Top Title
-		if ($this->_toptitle!='')
-			{
+		if ($this->_toptitle!='') {
 			$toptitle = $this->escape($this->_toptitle);
 		 	$out .= "<TopTitle";
 		 	if ($this->_toptitle_icon!='') $out .= " icon=\"{$this->_toptitle_icon}\"";
 		 	if ($this->_toptitle_color!='') $out .= " Color=\"{$this->_toptitle_color}\"";
 			$out .= ">".$toptitle."</TopTitle>\n";
-			}
+		}
 
-		# Text Items		
-		if (isset($this->_entries) && is_array($this->_entries)) 
-			{
-			foreach ($this->_entries as $entry) $out .= $entry->render();
+		# Menu items
+		if (isset($this->_entries) && is_array($this->_entries)) {
+			$index=0;
+			foreach ($this->_entries as $entry) {
+				if($index<$this->_maxitems) $out .= $entry->render($this->_style,$length,$is_softkeys);
+				$index++;
 			}
-
-		# Softkeys
-		if (isset($this->_softkeys) && is_array($this->_softkeys)) 
-			{
-		  	foreach ($this->_softkeys as $softkey) $out .= $softkey->render();
-			}
+		}
 
 		# Icons
-		if (isset($this->_icons) && is_array($this->_icons)) 
-			{
+		if (isset($this->_icons) && is_array($this->_icons)) {
   			$IconList=False;
-  			foreach ($this->_icons as $icon) 
-  				{
-	  			if(!$IconList) 
-  					{
+  			foreach ($this->_icons as $icon)  {
+	  			if(!$IconList) {
 	  				$out .= "<IconList>\n";
 	  				$IconList=True;
-	  				}
+	  			}
 	  			$out .= $icon->render();
-  				}
+  			}
   			if($IconList) $out .= "</IconList>\n";
-			}
+		}
 
-		# End tag
-		$out .= "</AastraIPPhoneTextScreen>\n";
+		# End Tag
+		$out .= "</AastraIPPhoneCallLog>\n";
 
 		# Return XML object
-		return $out;
+		return($out);
 	}
 }
 ?>
