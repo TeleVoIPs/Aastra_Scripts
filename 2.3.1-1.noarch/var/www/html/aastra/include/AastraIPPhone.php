@@ -266,8 +266,8 @@ return($return);
 # Phone types
 #	1=9112i,9133i
 #	2=480i,480i Cordless
-#	3=6730i,6731i,6751i,6753i,9143i,6863i,6865i
-#	4=6755i,6757i,6757iCT,9480i,9480iCT,6735i,6737i,6867i,6869i
+#	3=6730i,6731i,6751i,6753i,9143i
+#	4=6755i,6757i,6757iCT,9480i,9480iCT,6735i,6737i
 #	5=6739i, Aastra8000i
 #
 # Returns
@@ -299,10 +299,10 @@ else
 			$models=array('Aastra480i','Aastra480i Cordless');
 			break;
 		case '3':
-			$models=array('Aastra6730i','Aastra6731i','Aastra51i','Aastra53i','Aastra6863i','Aastra6865i');
+			$models=array('Aastra6730i','Aastra6731i','Aastra51i','Aastra53i');
 			break;
 		case '4':
-			$models=array('Aastra55i','Aastra57iCTi','Aastra9480i','Aastra9480iCT','Aastra6735i','Aastra6737i','Aastra6867i','Aastra6869i');
+			$models=array('Aastra55i','Aastra57iCTi','Aastra9480i','Aastra9480iCT','Aastra6735i','Aastra6737i');
 			break;
 		case '5':
 			$models=array('Aastra6739i','Aastra8000i');
@@ -430,26 +430,22 @@ return($return);
 ###################################################################################################
 function Aastra_is_top_title_supported($header=NULL)
 {
-	# True by default
-	$return=False;
+# True by default
+$return=False;
 
-	# Get header info if needed
-	if(!$header) $header=Aastra_decode_HTTP_header();
+# Get header info if needed
+if(!$header) $header=Aastra_decode_HTTP_header();
 
-	# Test the model
-	switch($header['model']) {
-		case 'Aastra8000i':
-		case 'Aastra6867i':
-		case 'Aastra6869i':
-			$return=True;
-			break;
- 		case 'Aastra6739i':
-   		if(Aastra_test_phone_version('3.3.1.',1,$header)==0) $return=True;
-    	break;
+# Test the model
+switch($header['model'])
+	{
+	case 'Aastra8000i':
+		$return=True;
+		break;
 	}
 
-	# Return Result
-	return($return);
+# Return Result
+return($return);
 }
 
 
@@ -480,8 +476,6 @@ switch($header['model'])
 		if(Aastra_test_phone_version('1.4.2.',1,$header)!=0) $return=False;
 		else $return=True;
 		break;
-	case 'Aastra6867i':
-	case 'Aastra6869i':
 	case 'Aastra6739i':
 	case 'Aastra8000i':
 		$return=False;
@@ -556,8 +550,6 @@ switch($header['model'])
 		break;
 	case 'Aastra6735i':
 	case 'Aastra6737i':
-	case 'Aastra6867i':
-	case 'Aastra6869i':
 		$return=True;
 		break;
 	case 'Aastra6739i':
@@ -601,8 +593,6 @@ switch($header['model'])
 		break;
 	case 'Aastra6735i':
 	case 'Aastra6737i':
-	case 'Aastra6867i':
-	case 'Aastra6869i':
 		$return=True;
 		break;
 	case 'Aastra6739i':
@@ -678,8 +668,6 @@ switch($header['model'])
 	case 'Aastra6739i':
 		if(Aastra_test_phone_version('3.2.0.',1,$header)==0) $return=True;
 		break;
-	case 'Aastra6867i':
-	case 'Aastra6869i':
 	case 'Aastra8000i':
 		$return=True;
 		break;
@@ -925,89 +913,8 @@ switch($header['model'])
 	case 'Aastra6735i':
 	case 'Aastra6737i':
 	case 'Aastra6739i':
-	case 'Aastra6867i':
-	case 'Aastra6869i':
 	case 'Aastra8000i':
 		$return=True;
-		break;
-	}
-
-# Return result
-return($return);
-}
-
-###################################################################################################
-# Aastra_is_graphical_display(header)
-#
-# Parameters
-#    header		phone HTTP header (optional)
-#
-# Returns
-#    Boolean
-###################################################################################################
-function Aastra_is_graphical_display($header=NULL)
-{
-# False by default
-$return=False;
-
-# Get header info if needed
-if(!$header) $header=Aastra_decode_HTTP_header();
-
-# Check Model/Version
-switch($header['model'])
-	{
-	case 'Aastra6739i':
-	case 'Aastra6867i':
-	case 'Aastra6869i':
-	case 'Aastra8000i':
-		$return=True;
-		break;
-	}
-
-# Return result
-return($return);
-}
-
-###################################################################################################
-# Aastra_number_physical_softkeys_supported(header)
-#
-# Parameters
-#    header		phone HTTP header (optional)
-#
-# Returns
-#    Number of physical softkeys 4, 6 or 10
-###################################################################################################
-function Aastra_number_physical_softkeys_supported($header=NULL)
-{
-# No by default
-$return=0;
-
-# Get header info if needed
-if(!$header) $header=Aastra_decode_HTTP_header();
-
-# Check Model/Version
-switch($header['model'])
-	{
-	case 'Aastra6867i':
-		$return=4;
-		break;
-	case 'Aastra6869i':
-		$return=5;
-		break;
-	case 'Aastra480i':
-	case 'Aastra480i Cordless':
-	case 'Aastra55i':
-	case 'Aastra57i':
-	case 'Aastra57iCT':
-	case 'Aastra9480i':
-	case 'Aastra9480iCT':
-	case 'Aastra6735i':
-	case 'Aastra6737i':
-		$return=6;
-		break;
-	case 'Aastra6739i':
-	case 'Aastra8000i':
-		$return=10;
 		break;
 	}
 
@@ -1044,10 +951,6 @@ switch($header['model'])
 	case 'Aastra9480iCT':
 	case 'Aastra6735i':
 	case 'Aastra6737i':
-	case 'Aastra6867i':
-		$return=6;
-		break;
-	case 'Aastra6869i':
 		$return=6;
 		break;
 	case 'Aastra6739i':
@@ -1059,7 +962,6 @@ switch($header['model'])
 # Return result
 return($return);
 }
-
 
 ###################################################################################################
 # Aastra_is_doneaction_supported(header)
@@ -1293,8 +1195,6 @@ switch($header['model'])
 	case 'Aastra9480iCT':
 	case 'Aastra6735i':
 	case 'Aastra6737i':
-	case 'Aastra6867i':
-	case 'Aastra6869i':
 	case 'Aastra6739i':
 		$return=True;
 		break;
@@ -1331,8 +1231,6 @@ switch($header['model'])
 	case 'Aastra9480iCT':
 	case 'Aastra6735i':
 	case 'Aastra6737i':
-	case 'Aastra6867i':
-	case 'Aastra6869i':
 	case 'Aastra6739i':
 		$return=True;
 		break;
@@ -1503,14 +1401,12 @@ $return=False;
 # Get info header if needed
 if(!$header) $header=Aastra_decode_HTTP_header();
 
-# Only the 6867i/6869i/6739i/8000i
+# Only the 6739i/8000i
 if($header['model']=='Aastra6739i')
 	{
 	if(Aastra_test_phone_version('3.0.1.',1,$header)==0) $return=True;
 	}
 if($header['model']=='Aastra8000i') $return=True;
-if($header['model']=='Aastra6867i') $return=True;
-if($header['model']=='Aastra6869i') $return=True;
 
 # Return result
 return($return);
@@ -1544,8 +1440,6 @@ switch($header['model'])
 	case 'Aastra6730i':
 	case 'Aastra6731i':
 	case 'Aastra9143i':
-	case 'Aastra6863i':
-	case 'Aastra6865i':
 		$return=2;
 		break;
 	case 'Aastra55i':
@@ -1557,8 +1451,6 @@ switch($header['model'])
 	case 'Aastra6737i':
 		$return=5;
 		break;
-	case 'Aastra6867i':
-	case 'Aastra6869i':
 	case 'Aastra6739i':
 	case 'Aastra8000i':
 		$return=14;
@@ -1595,8 +1487,6 @@ switch($header['model'])
 	case 'Aastra9143i':
 	case 'Aastra6730i':
 	case 'Aastra6731i':
-	case 'Aastra6863i':
-	case 'Aastra6865i':
 		$return='16';
 		break;
 	case 'Aastra480i':
@@ -1612,8 +1502,6 @@ switch($header['model'])
 	case 'Aastra6737i':
 		$return='24';
 		break;
-	case 'Aastra6867i':
-	case 'Aastra6869i':
 	case 'Aastra6739i':
 	case 'Aastra8000i':
 		$return='32';
@@ -1800,8 +1688,6 @@ switch($header['model'])
 	case 'Aastra51i':
 	case 'Aastra53i':
 	case 'Aastra9143i':
-	case 'Aastra6863i':
-	case 'Aastra6865i':
 		$return='3';
 		break;
 	case 'Aastra55i':
@@ -1811,8 +1697,6 @@ switch($header['model'])
 	case 'Aastra9480iCT':
 	case 'Aastra6735i':
 	case 'Aastra6737i':
-	case 'Aastra6867i':
-	case 'Aastra6869i':
 		$return='4';
 		break;
 	case 'Aastra6739i':

@@ -228,7 +228,7 @@ class AastraIPPhoneScrollableTextMenu extends AastraIPPhoneTextMenu {
 			# Make sure we don't add menu items the phone firmware cannot handle
 			if (!Aastra_is_icons_supported()) $tmpEntry['icon'] = NULL; 
 			if (Aastra_test_phone_version('2.0.1.',1)) $tmpEntry['dial'] = NULL; 
-			$this->_entries[] = new AastraIPPhoneTextMenuEntry($tmpEntry['name'], $tmpEntry['url'], $tmpEntry['selection'], $tmpEntry['icon'], $tmpEntry['dial'], NULL, NULL, NULL, NULL);
+			$this->_entries[] = new AastraIPPhoneTextMenuEntry($tmpEntry['name'], $tmpEntry['url'], $tmpEntry['selection'], $tmpEntry['icon'], $tmpEntry['dial'], NULL, NULL);
 			}
 		
 		# On phones without softkeys: Add dummy entry that allows to jump to next page
