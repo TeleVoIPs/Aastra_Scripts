@@ -1,17 +1,13 @@
 <?php
 ########################################################################################################
 # Aastra XML API Classes - AastraIPPhoneImageMenu
-# Copyright Aastra Telecom 2007-2012
+# Copyright Aastra Telecom 2007-2010
 #
 # AastraIPPhoneImageMenu object.
 #
 # Public methods
 #
 # Inherited from AastraIPPhone
-#     setTopTitle(title,color,icon_index) to set the Top Title of the XML screen (6739i only)
-#          @title		string
-#          @color		string, "red", "blue", ... (optional)
-#          @icon_index	integer, icon number
 #     setCancelAction(uri) to set the cancel parameter with the URI to be called on Cancel (optional)
 #          @uri		string
 #     setDestroyOnExit() to set DestroyonExit parameter to 'yes', 'no' by default (optional)
@@ -19,10 +15,6 @@
 #     setLockIn(uri) to set the Lock-in tag to 'yes' and the GoodbyeLockInURI(optional)
 #          @uri		string, GoodByeLockInURI
 #     setLockInCall() to set the Lock-in tag to 'call' (optional)
-#     setAllowAnswer() to set the allowAnswer tag to 'yes' (optional, only for non softkey phones)
-#     setAllowDrop() to set the allowDrop tag to 'yes' (optional, only for non softkey phones)
-#     setAllowXfer() to set the allowXfer tag to 'yes' (optional, only for non softkey phones)
-#     setAllowConf() to set the allowConf tag to 'yes' (optional, only for non softkey phones)
 #     setTimeout(timeout) to define a specific timeout for the XML object (optional)
 #          @timeout		integer (seconds)
 #     addSoftkey(index,label,uri,icon_index) to add custom soktkeys to the object (optional)
@@ -193,18 +185,6 @@ class AastraIPPhoneImageMenu extends AastraIPPhone {
    			if($this->_lockin_uri!='') $out .= " GoodbyeLockInURI=\"".$this->escape($this->_lockin_uri)."\"";
 		}
 
-		# AllowAnswer
-		if ($this->_allowAnswer == 'yes') $out .= " allowAnswer=\"yes\"";
-
-		# AllowDrop
-		if ($this->_allowDrop == 'yes') $out .= " allowDrop=\"yes\"";
-
-		# AllowXfer
-		if ($this->_allowXfer == 'yes') $out .= " allowXfer=\"yes\"";
-
-		# AllowConf
-		if ($this->_allowConf == 'yes') $out .= " allowConf=\"yes\"";
-
 		# Timeout
 		if($this->_timeout!=0) $out .= " Timeout=\"{$this->_timeout}\"";
 
@@ -224,16 +204,6 @@ class AastraIPPhoneImageMenu extends AastraIPPhone {
 
 		# End of root tag
 		$out .= ">\n";
-
-		# Top Title
-		if ($this->_toptitle!='')
-			{
-			$toptitle = $this->escape($this->_toptitle);
-		 	$out .= "<TopTitle";
-		 	if ($this->_toptitle_icon!='') $out .= " icon=\"{$this->_toptitle_icon}\"";
-		 	if ($this->_toptitle_color!='') $out .= " Color=\"{$this->_toptitle_color}\"";
-			$out .= ">".$toptitle."</TopTitle>\n";
-			}
 
 		# Image tag
 		$out .= "<Image";
