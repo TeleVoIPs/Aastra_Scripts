@@ -51,6 +51,9 @@ Aastra_test_phone_versions(array('1'=>'','2'=>'1.4.2.','3'=>'2.5.3','4'=>'2.5.3.
 # Get Language
 $language=Aastra_get_language();
 
+# Get HTML header for phone
+$header=Aastra_decode_HTTP_header();
+
 # Keep URL
 $XML_SERVER.='?ext='.$ext;
 
@@ -210,7 +213,13 @@ switch($action)
 		# Softkeys
 		if($nb_softkeys)
 			{
-			if($nb_softkeys==6)
+			if($header['model']=='Aastra6867i') {
+				$object->addSoftkey('1',Aastra_get_label('Backspace',$language),'SoftKey:BackSpace');
+				$object->addSoftkey('3',Aastra_get_label('Chg. User',$language),$XML_SERVER);
+				$object->addSoftkey('2',Aastra_get_label('Submit',$language),'SoftKey:Submit');
+				$object->addSoftkey('4',Aastra_get_label('Exit',$language),'SoftKey:Exit');
+			}
+			elseif($nb_softkeys==6)
 				{
 				$object->addSoftkey('1',Aastra_get_label('Backspace',$language),'SoftKey:BackSpace');
 				$object->addSoftkey('4',Aastra_get_label('Chg. User',$language),$XML_SERVER);
