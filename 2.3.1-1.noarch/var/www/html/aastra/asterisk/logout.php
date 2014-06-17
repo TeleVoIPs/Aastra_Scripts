@@ -212,7 +212,13 @@ switch($action)
 		# Softkeys
 		if($nb_softkeys)
 			{
-			if($nb_softkeys==6)
+			if($header['model']=='Aastra6867i') {
+				$object->addSoftKey('1',Aastra_get_label('No Time',$language),$XML_SERVER.'&action=set_logout&value=&origin='.$origin.'&password='.$password);
+				$object->addSoftKey('4',Aastra_get_label('Cancel',$language),$XML_SERVER.'&action='.$origin.'&password='.$password);
+				$object->addSoftKey('2',Aastra_get_label('Submit',$language),'SoftKey:Submit');
+				$object->addSoftKey('6',Aastra_get_label('Exit',$language),'SoftKey:Exit');
+                        }
+			elseif($nb_softkeys==6)
 				{
 				$object->addSoftKey('1',Aastra_get_label('No Time',$language),$XML_SERVER.'&action=set_logout&value=&origin='.$origin.'&password='.$password);
 				$object->addSoftKey('4',Aastra_get_label('Cancel',$language),$XML_SERVER.'&action='.$origin.'&password='.$password);
@@ -303,7 +309,12 @@ switch($action)
 				# Softkeys
 				if($nb_softkeys)
 					{
-					if($nb_softkeys==6)
+					if($header['model']=='Aastra6867i') {
+						$object->addSoftkey('1',Aastra_get_label('Backspace',$language),'SoftKey:BackSpace');
+						$object->addSoftkey('4',Aastra_get_label('Cancel',$language),'SoftKey:Exit');
+						$object->addSoftkey('2',Aastra_get_label('Submit',$language),'SoftKey:Submit');
+					}
+					elseif($nb_softkeys==6)
 						{
 						$object->addSoftkey('1',Aastra_get_label('Backspace',$language),'SoftKey:BackSpace');
 						$object->addSoftkey('5',Aastra_get_label('Cancel',$language),'SoftKey:Exit');
