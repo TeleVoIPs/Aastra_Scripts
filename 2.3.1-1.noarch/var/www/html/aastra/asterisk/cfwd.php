@@ -47,6 +47,9 @@ Aastra_trace_call('cfwd_asterisk','user='.$user.', action='.$action.', value='.$
 # Test User Agent
 Aastra_test_phone_versions(array('1'=>'1.4.2.','2'=>'1.4.2.','3'=>'2.5.3.','4'=>'2.5.3.','5'=>'3.0.1.'),'0');
 
+# Retrieve phone information
+$header=Aastra_decode_HTTP_header();
+
 # Get Language
 $language=Aastra_get_language();
 
@@ -471,7 +474,13 @@ switch($action)
 				$object->addSoftkey('1',Aastra_get_label('Change',$language), $XML_SERVER.'&action='.$change);
 				$object->addSoftkey('2',Aastra_get_label('Deactivate',$language), $XML_SERVER.'&action=cancel');
 				}
-			if($nb_softkeys==6) 
+			if($header['model']=='Aastra6867i')
+				{
+				$object->addSoftkey('2',Aastra_get_label('My Numbers',$language), $XML_SERVER.'&action=info');
+				$object->addSoftkey('4',Aastra_get_label('Exit',$language), 'SoftKey:Exit');
+
+				}
+			elseif($nb_softkeys==6) 
 				{
 				$object->addSoftkey('3',Aastra_get_label('My Numbers',$language), $XML_SERVER.'&action=info');
 				$object->addSoftkey('6',Aastra_get_label('Exit',$language), 'SoftKey:Exit');
