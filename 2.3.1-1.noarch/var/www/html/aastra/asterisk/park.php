@@ -161,7 +161,12 @@ switch($action)
 			# Softkeys
 			if($nb_softkeys)
 				{
-				if($nb_softkeys==6) 
+				if($header['model']=='Aastra6867i') 
+					{
+					$object->addSoftkey(1,Aastra_get_label('Refresh',$language),$XML_SERVER.'&action=list');
+					$object->addSoftkey(4,Aastra_get_label('Exit',$language),'SoftKey:Exit');
+					}				
+				elseif($nb_softkeys==6) 
 					{
 					$object->addSoftkey(4,Aastra_get_label('Refresh',$language),$XML_SERVER.'&action=list');
 					$object->addSoftkey(6,Aastra_get_label('Exit',$language),'SoftKey:Exit');
@@ -214,6 +219,11 @@ switch($action)
 						}
 					if($nb_softkeys)
 						{
+						if($header['model']=='Aastra6867i') 
+							{
+							$object->addSoftkey(1,Aastra_get_label('Refresh',$language),$XML_SERVER.'&action=list');
+							$object->addSoftkey(4,Aastra_get_label('Exit',$language),'SoftKey:Exit');
+							}
 						if($nb_softkeys==6)
 							{
 							$object->addSoftkey(4,Aastra_get_label('Refresh',$language),$XML_SERVER.'&action=list');
