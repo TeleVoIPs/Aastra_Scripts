@@ -120,7 +120,7 @@ if($user!='')
 				$array_out[$key]=$line;
 				}
 			}
-
+	
 		# Use the add-ons
 		if($template!=$model)
 			{
@@ -264,7 +264,7 @@ else
 	}
 
 # Process day/night keys
-foreach($array_out as $key=>$value)
+foreach($array_out as $key=>$value) 
 	{
 	if(strstr($value,'daynight.php'))
 		{
@@ -288,7 +288,7 @@ foreach($array_out as $key=>$value)
 # Process presence
 if(!$AA_PRESENCE_STATE)
 	{
-	foreach($array_out as $key=>$value)
+	foreach($array_out as $key=>$value) 
 		{
 		if(strstr($value,'away.php'))
 			{
@@ -310,7 +310,7 @@ if(!$AA_PRESENCE_STATE)
 # Process speed dial
 if(!$AA_SPEEDDIAL_STATE)
 	{
-	foreach($array_out as $key=>$value)
+	foreach($array_out as $key=>$value) 
 		{
 		if(strstr($value,'speed.php'))
 			{
@@ -332,7 +332,7 @@ if(!$AA_SPEEDDIAL_STATE)
 # Remove 'logout' if device is fixed
 if(($user!='') and ($device_info['type']=='fixed'))
 	{
-	foreach($array_out as $key=>$value)
+	foreach($array_out as $key=>$value) 
 		{
 		if(strstr($value,'logout.php'))
 			{
@@ -397,17 +397,13 @@ if(($away['key']!='') or ($header['mac']=='Aastra51i')) $object->addEntry($XML_S
 if(($agent['key']!='') or ($header['mac']=='Aastra51i')) $object->addEntry($XML_SERVER_PATH.'agent.php?action='.$action.'&agent='.$user);
 if(($follow['key']!='') or ($header['mac']=='Aastra51i')) $object->addEntry($XML_SERVER_PATH.'follow.php?action='.$action.'&user='.$user);
 if(($AA_FREEPBX_MODE=='1') and Aastra_is_sip_notify_supported() and $AA_AUTOLOGOUT and $AA_AUTOLOGOUT_MSG) $object->addEntry($XML_SERVER_PATH.'logout.php?action='.$action.'&user='.$user);
-if(($action=='register') and Aastra_is_ledcontrol_supported())
+if(($action=='register') and Aastra_is_ledcontrol_supported()) 
 	{
-	if($parking['key']!='')
+	if($parking['key']!='') 
 		{
 		$status=Aastra_get_user_context('parking','status');
 		if($status=='') $status='off';
-		if($model=='Aastra6867i') {
-            $object->addEntry('Led: top'.$parking['key'].'='.$status);
-        } else {
-            $object->addEntry('Led: '.$parking['key'].'='.$status);
-        }
+		$object->addEntry('Led: '.$parking['key'].'='.$status);
 		}
 	$status=Aastra_get_user_context('vmail','user');
 	foreach($vmail as $box=>$key) $object->addEntry('Led: '.$key['key'].'='.$status[$box]['status']);
@@ -450,21 +446,21 @@ Aastra_remove_vmail_Asterisk('',$user,$count);
 # Some data
 if($array_config!=NULL)
 	{
-	foreach($array_config as $key=>$value)
+	foreach($array_config as $key=>$value) 
 		{
-		if(strstr($value,'dnd.php'))
+		if(strstr($value,'dnd.php')) 
 			{
 			$pieces=explode(' ',$key);
 			if(stristr($pieces[0],'expmod')) $dnd['key']=$pieces[0].' '.$pieces[1];
 			else $dnd['key']=$pieces[0];
 			}
-		if(strstr($value,'cfwd.php'))
+		if(strstr($value,'cfwd.php')) 
 			{
 			$pieces=explode(' ',$key);
 			if(stristr($pieces[0],'expmod')) $cfwd['key']=$pieces[0].' '.$pieces[1];
 			else $cfwd['key']=$pieces[0];
 			}
-		if(strstr($value,'daynight.php'))
+		if(strstr($value,'daynight.php')) 
 			{
 			$pieces=explode(' ',$key);
 			if(stristr($pieces[0],'expmod')) $key=$pieces[0].' '.$pieces[1];
@@ -472,42 +468,42 @@ if($array_config!=NULL)
 			$url=parse_url($value);
 			parse_str($url['query'],$parse);
 			if(isset($parse['index']))
-				{
+				{			
 				if($parse['index']!='') $daynight['key'][$parse['index']]=$key;
 				else $daynight['key']['ALL']=$key;
 				}
 			else $daynight['key']['ALL']=$key;
 			}
-		if(strstr($value,'away.php'))
+		if(strstr($value,'away.php')) 
 			{
 			$pieces=explode(' ',$key);
 			if(stristr($pieces[0],'expmod')) $away['key']=$pieces[0].' '.$pieces[1];
 			else $away['key']=$pieces[0];
 			}
-		if(strstr($value,'agent.php'))
+		if(strstr($value,'agent.php')) 
 			{
 			$pieces=explode(' ',$key);
 			if(stristr($pieces[0],'expmod')) $agent['key']=$pieces[0].' '.$pieces[1];
 			else $agent['key']=$pieces[0];
 			}
-		if(strstr($value,'follow.php'))
+		if(strstr($value,'follow.php')) 
 			{
 			$pieces=explode(' ',$key);
 			if(stristr($pieces[0],'expmod')) $follow['key']=$pieces[0].' '.$pieces[1];
 			else $follow['key']=$pieces[0];
 			}
-		if(strstr($value,'park.php') and $is_sip_notify_supported)
+		if(strstr($value,'park.php') and $is_sip_notify_supported) 
 			{
 			$pieces=explode(' ',$key);
 			if(stristr($pieces[0],'expmod')) $parking['key']=$pieces[0].' '.$pieces[1];
 			else $parking['key']=$pieces[0];
 			Aastra_add_parking_Asterisk($user);
 			}
-		if(strstr($value,'vmail.php') and $is_sip_notify_supported)
+		if(strstr($value,'vmail.php') and $is_sip_notify_supported) 
 			{
 			$url=parse_url($value);
 			parse_str($url['query'],$parse);
-			if($parse['user']!='')
+			if($parse['user']!='') 
 				{
 				Aastra_add_vmail_Asterisk($parse['user'],$user,$count);
 				$pieces=explode(' ',$key);
@@ -553,7 +549,7 @@ $array_config=$array_temp[''];
 
 # Update user keys
 $keys=Aastra_get_user_context($user,'keys');
-foreach($array_config as $key=>$value)
+foreach($array_config as $key=>$value) 
 	{
 	if(stristr($key,'key')) $array_key[$key]=$value;
 	}
@@ -674,13 +670,7 @@ switch($action)
 						$follow=Aastra_get_user_context($device,'follow');
 						if($follow['key']!='') $object->AddEntry('Led: '.$follow['key'].'=off');
 						$parking=Aastra_get_user_context($device,'parking');
-						if($parking['key']!='') {
-                            if($model=='Aastra6867i') {
-                                $object->AddEntry('Led: top'.$parking['key'].'=off');
-                            } else {
-                                $object->AddEntry('Led: '.$parking['key'].'=off');
-                            }
-                        }
+						if($parking['key']!='') $object->AddEntry('Led: '.$parking['key'].'=off');
 						$vmail=Aastra_get_user_context($device,'vmail');
 						foreach($vmail as $box=>$value) if($value['key']!='') $object->AddEntry('Led: '.$value['key'].'=off');
 						}
@@ -731,7 +721,7 @@ switch($action)
 			$last_user=$data['user'];
 
 			# New user?
-			if($user!=$last_user)
+			if($user!=$last_user) 
 				{
 				require_once('AastraIPPhoneExecute.class.php');
 				$object=new AastraIPPhoneExecute();
@@ -740,12 +730,12 @@ switch($action)
 			else
 				{
 				# Sync the applications
-				if($user!='')
+				if($user!='')	
 					{
 					if($action=='check') $object=sync_apps($device,'check');
 					else $object=sync_apps($device,'register');
 					}
-				else
+				else 
 					{
 					# Do nothing
 					require_once('AastraIPPhoneExecute.class.php');
@@ -764,7 +754,7 @@ switch($action)
 		$object=new AastraIPPhoneExecute();
 		if(isset($data['keys']))
 			{
-			if($data['keys']=='1')
+			if($data['keys']=='1') 
 				{
 				$object->addEntry($XML_SERVER_PATH.'key.php?action=msg&user='.$user);
 				if(Aastra_is_ledcontrol_supported()) $object->addEntry($XML_SERVER_PATH.'key.php?action=led&user='.$user);
@@ -828,7 +818,7 @@ switch($action)
 			}
 		if(isset($data['message']))
 			{
-			if($data['message']=='1')
+			if($data['message']=='1') 
 				{
 				$object->addEntry($XML_SERVER.'?action=send&user='.$user);
 				$data['message']='0';
@@ -836,29 +826,23 @@ switch($action)
 			}
 		if(isset($data['parking']))
 			{
-			if($data['parking']=='1')
+			if($data['parking']=='1') 
 				{
 				$parking=Aastra_get_user_context($user,'parking');
-				if(($parking['key']!='') and Aastra_is_ledcontrol_supported()) {
-                    if($model=='Aastra6867i') {
-                        $object->addEntry('Led: top'.$parking['key'].'='.Aastra_get_user_context('parking','status'));
-                    } else {
-                        $object->addEntry('Led: '.$parking['key'].'='.Aastra_get_user_context('parking','status'));
-                    }
-                }
+				if(($parking['key']!='') and Aastra_is_ledcontrol_supported()) $object->addEntry('Led: '.$parking['key'].'='.Aastra_get_user_context('parking','status'));
 				$data['parking']='0';
 				}
 			}
 		if(isset($data['vmail']))
 			{
-			if($data['vmail']=='1')
+			if($data['vmail']=='1') 
 				{
 				$vmail=Aastra_get_user_context($user,'vmail');
 				$status=Aastra_get_user_context('vmail','user');
-				foreach($vmail as $box=>$value)
+				foreach($vmail as $box=>$value) 
 					{
 					if(Aastra_is_ledcontrol_supported()) $object->addEntry('Led: '.$value['key'].'='.$status[$box]['status']);
-					else
+					else 
 						{
 						if($status[$box]['msg']==0) $label=$value['label'];
 						else $label=sprintf('%s(%s)',$value['label'],$status[$box]['msg']);
@@ -878,7 +862,7 @@ switch($action)
 			}
 		if(isset($data['logout']))
 			{
-			if($data['logout']=='1')
+			if($data['logout']=='1') 
 				{
 				$object->addEntry($XML_SERVER_PATH.'logout.php?action=logout&user='.$user);
 				$data['logout']='0';
@@ -886,7 +870,7 @@ switch($action)
 			}
 		if(isset($data['forced_logout']))
 			{
-			if($data['forced_logout']=='1')
+			if($data['forced_logout']=='1') 
 				{
 				$object->addEntry($XML_SERVER_PATH.'logout.php?action=forced_logout&user='.$user);
 				$data['forced_logout']='0';
@@ -894,7 +878,7 @@ switch($action)
 			}
 		if(isset($data['auto_logout']))
 			{
-			if($data['auto_logout']=='1')
+			if($data['auto_logout']=='1') 
 				{
 				$object->addEntry($XML_SERVER_PATH.'logout.php?action=check&user='.$user);
 				$data['auto_logout']='0';
@@ -902,7 +886,7 @@ switch($action)
 			}
 		if(isset($data['userdevice']))
 			{
-			if($data['userdevice']=='1')
+			if($data['userdevice']=='1') 
 				{
 				if($AA_FREEPBX_MODE=='2') $object->addEntry($XML_SERVER.'?user='.$user.'&action=register');
 				$data['userdevice']='0';
@@ -918,7 +902,7 @@ switch($action)
 			}
 		if(isset($data['meetmeleave']))
 			{
-			if(($data['meetmeleave']=='1') and ($AA_FREEPBX_MODE=='1') and (Aastra_is_softkeys_supported()))
+			if(($data['meetmeleave']=='1') and ($AA_FREEPBX_MODE=='1') and (Aastra_is_softkeys_supported())) 
 				{
 				$object->addEntry('');
 				$object->setTriggerDestroyOnExit('');
@@ -940,7 +924,7 @@ switch($action)
 			$object=new AastraIPPhoneStatus();
 			$object->setBeep();
 			$object->setSession('message');
-			if(Aastra_size_display_line()>20)
+			if(Aastra_size_display_line()>20) 
 				{
 				if(Aastra_is_status_uri_supported() and ($data['uri']!='')) $object->addEntry('0',$data['long'],'alert','10',$data['uri']);
 				else $object->addEntry('0',$data['long'],'alert','10');
