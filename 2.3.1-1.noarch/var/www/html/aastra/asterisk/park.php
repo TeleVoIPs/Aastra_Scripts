@@ -40,21 +40,22 @@ $value=Aastra_getvar_safe('value');
 $linestate=Aastra_getvar_safe('linestate');
 $autopick=Aastra_getvar_safe('autopick');
 
-# Initial action
-if($action=='')
-	{
-	if($linestate=='CONNECTED') $action='park';
-	else $action='list';
-	}
+# Retrieve phone information
+$header=Aastra_decode_HTTP_header();
 
+# Initial action
+if($action=='') {
+    if($linestate=='CONNECTED') {
+        $action='park';
+    } else { 
+	$action='list';
+    }
+}
 # Trace
 Aastra_trace_call('park_asterisk','user='.$user.', linestate='.$linestate);
 
 # Test User Agent
 Aastra_test_phone_versions(array('1'=>'1.4.2.','2'=>'1.4.2.','3'=>'2.5.3.','4'=>'2.5.3.','5'=>'3.0.1.'),'0');
-
-# Retrieve phone information
-$header=Aastra_decode_HTTP_header();
 
 # Get phone language
 $language=Aastra_get_language();
@@ -70,6 +71,7 @@ switch($action)
 	{
 	# Park (does not work on 6739i 3.0.1)
 	case 'park':
+		
 		# Retrieve parking lot
 		$parking=Aastra_get_park_config_Asterisk();
 	
@@ -159,7 +161,12 @@ switch($action)
 			# Softkeys
 			if($nb_softkeys)
 				{
-				if($nb_softkeys==6) 
+				if($header['model']=='Aastra6867i') 
+					{
+					$object->addSoftkey(1,Aastra_get_label('Refresh',$language),$XML_SERVER.'&action=list');
+					$object->addSoftkey(4,Aastra_get_label('Exit',$language),'SoftKey:Exit');
+					}				
+				elseif($nb_softkeys==6) 
 					{
 					$object->addSoftkey(4,Aastra_get_label('Refresh',$language),$XML_SERVER.'&action=list');
 					$object->addSoftkey(6,Aastra_get_label('Exit',$language),'SoftKey:Exit');
@@ -195,23 +202,28 @@ switch($action)
 					if(Aastra_is_dialuri_supported())
 						{
 						for ($index=0;$index<$count;$index++) $object->addEntry(sprintf('%s-%s',$park[$index][0],$park[$index][1]),'Dial:'.$park[$index][0],$park[$index][0],'',$park[$index][0]);
-						$object->addSoftkey(1,Aastra_get_label('Pickup',$language),'SoftKey:Select');
+						if($header['model']!='Aastra6867i') { $object->addSoftkey(1,Aastra_get_label('Pickup',$language),'SoftKey:Select'); }
 						}
 					else
 						{
 						if(Aastra_is_dialkey_supported())
 							{
 							for ($index=0;$index<$count;$index++) $object->addEntry(sprintf('%s-%s',$park[$index][0],$park[$index][1]),$park[$index][0],$park[$index][0]);
-							$object->addSoftkey(1,Aastra_get_label('Pickup',$language),'SoftKey:Dial');
+							if($header['model']!='Aastra6867i') { $object->addSoftkey(1,Aastra_get_label('Pickup',$language),'SoftKey:Dial'); }
 							}
 						else
 							{
 							for ($index=0;$index<$count;$index++) $object->addEntry(sprintf('%s-%s',$park[$index][0],$park[$index][1]),$XML_SERVER.'&action=dial&value='.$park[$index][0],$park[$index][0]);
-							$object->addSoftkey(1,Aastra_get_label('Pickup',$language),'SoftKey:Select');
+							if($header['model']!='Aastra6867i') { $object->addSoftkey(1,Aastra_get_label('Pickup',$language),'SoftKey:Select'); }
 							}
 						}
 					if($nb_softkeys)
 						{
+						if($header['model']=='Aastra6867i') 
+							{
+							$object->addSoftkey(1,Aastra_get_label('Refresh',$language),$XML_SERVER.'&action=list');
+							$object->addSoftkey(4,Aastra_get_label('Exit',$language),'SoftKey:Exit');
+							}
 						if($nb_softkeys==6)
 							{
 							$object->addSoftkey(4,Aastra_get_label('Refresh',$language),$XML_SERVER.'&action=list');
