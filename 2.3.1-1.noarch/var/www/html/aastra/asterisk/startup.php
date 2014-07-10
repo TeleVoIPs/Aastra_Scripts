@@ -507,6 +507,10 @@ switch($action)
 					if($nb_softkeys==6) $object->addSoftkey('3',Aastra_get_label('Reboot',$language),$XML_SERVER.'&action=reboot');
 					else $object->addSoftkey('6',Aastra_get_label('Reboot',$language),$XML_SERVER.'&action=reboot');
 					}
+				if($header['model']=='Aastra6867i') {
+					$object->addSoftkey('1',Aastra_get_label('Backspace',$language),'SoftKey:BackSpace');
+					$object->addSoftkey('2',Aastra_get_label('Submit',$language),'SoftKey:Submit');
+				}
 				if($nb_softkeys==6) 
 					{
 					$object->addSoftkey('1',Aastra_get_label('Backspace',$language),'SoftKey:BackSpace');
