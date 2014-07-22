@@ -4,7 +4,7 @@
 #
 # Copyright 2005-2010 Aastra Telecom Ltd
 #
-# Presence management adapted from
+# Presence management adapted from 
 # 	Copyright (C) 2008 Ethan Schroeder
 # 	ethan.schroeder@schmoozecom.com
 #
@@ -64,7 +64,7 @@ if($action=='init')
 	{
 	# Retrieve current configuration
 	$mode=Aastra_get_user_context(Aastra_get_userdevice_Asterisk($user),'pbx_directory');
-	if($mode=='')
+	if($mode=='') 
 		{
 		$mode='1';
 		Aastra_save_user_context(Aastra_get_userdevice_Asterisk($user),'pbx_directory',$mode);
@@ -107,12 +107,12 @@ switch($action)
 		# Softkeys
 		$object->addSoftkey('1',Aastra_get_label('Backspace',$language),'SoftKey:BackSpace');
 		$object->addSoftkey('2','ABC','SoftKey:ChangeMode');
-		$object->addSoftkey('3',Aastra_get_label('Submit',$language),'SoftKey:Submit');
-		$object->addSoftkey('5',Aastra_get_label('Exit',$language),'SoftKey:Exit');
+		$object->addSoftkey('5',Aastra_get_label('Submit',$language),'SoftKey:Submit');
+		$object->addSoftkey('6',Aastra_get_label('Exit',$language),'SoftKey:Exit');
 		if($origin!='presence') $object->addSoftkey('4',Aastra_get_label('Cancel',$language),$XML_SERVER.'&action=list');
 		else
 			{
-			$object->addSoftkey('6',Aastra_get_label('List Mode',$language),$XML_SERVER.'&action=list');
+			$object->addSoftkey('3',Aastra_get_label('List Mode',$language),$XML_SERVER.'&action=list');
 			$object->addSoftkey('4',Aastra_get_label('Back',$language),$XML_SERVER_PATH.'/away.php?user='.$user);
 			}
 		break;
@@ -187,13 +187,13 @@ switch($action)
 		$conf_speed[$speed]['name']=Aastra_get_callerid_Asterisk($selection);
 		$conf_speed[$speed]['work']=$selection;
 		Aastra_save_user_context(Aastra_get_userdevice_Asterisk($user),'speed',$conf_speed);
-
+		
 		# Display position
 		require_once('AastraIPPhoneTextScreen.class.php');
 		$object=new AastraIPPhoneTextScreen();
 		$object->setDestroyOnExit();
 		$object->setTitle(Aastra_get_label('List Updated',$language));
-		$position=$speed+1;
+		$position=$speed+1;		
 		$object->setText(sprintf(Aastra_get_label('%s stored in speed dial list at position %d.',$language),$conf_speed[$speed]['name'],$position));
 
 		# Softkey
@@ -241,7 +241,7 @@ switch($action)
 			foreach($line as $data) $object->addLine($data);
 			if($notify) $object->addLine(Aastra_get_label('Notification on return',$language));
 			}
-		else
+		else 
 			{
 			if($hint=='Idle') $object->addLine(Aastra_get_label('Phone is idle',$language));
 			else
@@ -253,17 +253,17 @@ switch($action)
 		$object->setScrollEnd();
 
 		# Softkeys
-		/* $object->addSoftKey('1',Aastra_get_label('Dial',$language),'Dial:'.$selection); */
-		/* if(($away['status']!=AA_PRESENCE_AVAILABLE) and ($away['status']!=AA_PRESENCE_DISCONNECTED)) */
-		/* 	{ */
-		/* 	if(!$notify) $object->addSoftKey('2',Aastra_get_label('Notify me',$language),$XML_SERVER.'&action=notify&page='.$page.'&selection='.$selection.'&lookup='.$lookup); */
-		/* 	else $object->addSoftKey('2',Aastra_get_label('Unnotify',$language),$XML_SERVER.'&action=unnotify&page='.$page.'&selection='.$selection.'&lookup='.$lookup); */
-		/* 	} */
-		/* if($AA_SPEEDDIAL_STATE) $object->addSoftkey('3',Aastra_get_label('+Speed',$language),$XML_SERVER.'&action=select&page='.$page.'&selection='.$selection.'&orig_s=zoom'.'&lookup='.$lookup); */
-		/* $intercom=Aastra_get_intercom_config_Asterisk(); */
-		/* if($intercom!='') $object->addSoftKey('4',Aastra_get_label('Icom',$language),'Dial:'.$intercom.$selection); */
-		$object->addSoftKey('1',Aastra_get_label('Back',$language),$XML_SERVER.'&action=list&page='.$page.'&selection='.$selection.'&lookup='.$lookup);
-		/* $object->addSoftKey('6',Aastra_get_label('Exit',$language),'SoftKey:Exit'); */
+		$object->addSoftKey('1',Aastra_get_label('Dial',$language),'Dial:'.$selection);
+		if(($away['status']!=AA_PRESENCE_AVAILABLE) and ($away['status']!=AA_PRESENCE_DISCONNECTED))
+			{
+			if(!$notify) $object->addSoftKey('2',Aastra_get_label('Notify me',$language),$XML_SERVER.'&action=notify&page='.$page.'&selection='.$selection.'&lookup='.$lookup);
+			else $object->addSoftKey('2',Aastra_get_label('Unnotify',$language),$XML_SERVER.'&action=unnotify&page='.$page.'&selection='.$selection.'&lookup='.$lookup);
+			}
+		if($AA_SPEEDDIAL_STATE) $object->addSoftkey('3',Aastra_get_label('+Speed',$language),$XML_SERVER.'&action=select&page='.$page.'&selection='.$selection.'&orig_s=zoom'.'&lookup='.$lookup);
+		$intercom=Aastra_get_intercom_config_Asterisk();
+		if($intercom!='') $object->addSoftKey('4',Aastra_get_label('Icom',$language),'Dial:'.$intercom.$selection);
+		$object->addSoftKey('5',Aastra_get_label('Back',$language),$XML_SERVER.'&action=list&page='.$page.'&selection='.$selection.'&lookup='.$lookup);
+		$object->addSoftKey('6',Aastra_get_label('Exit',$language),'SoftKey:Exit');
 		break;
 
 	# Notify
@@ -316,7 +316,7 @@ switch($action)
 		# Softkey
 		$object->addSoftkey('6',Aastra_get_label('Close',$language),$XML_SERVER.'&action=zoom&page='.$page.'&selection='.$selection.'&lookup='.$lookup);
 		break;
-
+	
 	# Display directory
 	case 'list':
 		# Get list of users
@@ -363,7 +363,7 @@ switch($action)
 			$rank=1;
 			$min='';
 			$max='';
-			foreach ($directory as $v)
+			foreach ($directory as $v) 
 				{
 				if(($index>=(($page-1)*$MaxLines+1)) and ($index<=$page*$MaxLines))
 					{
@@ -373,7 +373,7 @@ switch($action)
 					$icon='';
 					if($AA_PRESENCE_STATE)
 						{
-						if($v['status']==AA_PRESENCE_AVAILABLE)
+						if($v['status']==AA_PRESENCE_AVAILABLE) 
 							{
 							if($v['hint']=='Idle') $icon='1';
 							else
@@ -413,7 +413,7 @@ switch($action)
 				if($menu_set=='1')
 					{
 					# Single page list
-					if($intercom!='') $object->addSoftkey('6',Aastra_get_label('Icom',$language),$XML_SERVER.'&action=intercom');
+					if($intercom!='') $object->addSoftkey('2',Aastra_get_label('Icom',$language),$XML_SERVER.'&action=intercom');
 					if(!$AA_PRESENCE_STATE)
 						{
 						$object->addSoftkey('1',Aastra_get_label('Dial',$language),'SoftKey:Dial2');
@@ -421,17 +421,16 @@ switch($action)
 						}
 					else
 						{
-						$object->addSoftkey('1',Aastra_get_label('Status',$language),$XML_SERVER.'&action=zoom'.'&lookup='.$lookup);
-						$object->addSoftkey('2',Aastra_get_label('Dial',$language),'SoftKey:Dial2');
-       					$object->addSoftkey('3',Aastra_get_label('Exit',$language),'SoftKey:Exit');
-						if($origin!='presence')
+						$object->addSoftkey('1',Aastra_get_label('Select',$language),$XML_SERVER.'&action=zoom'.'&lookup='.$lookup);
+						$object->addSoftkey('3',Aastra_get_label('Dial',$language),'SoftKey:Dial2');
+						if($origin!='presence') 
 							{
 							if($AA_SPEEDDIAL_STATE) $object->addSoftkey('4',Aastra_get_label('+Speed',$language),$XML_SERVER.'&action=select&orig_s=list'.'&lookup='.$lookup);
 							}
 						else $object->addSoftkey('4',Aastra_get_label('Back',$language),$XML_SERVER_PATH.'/away.php?user='.$user);
 						}
 					$object->addSoftkey('5',Aastra_get_label('Lookup',$language),$XML_SERVER.'&action=search');
-					/* $object->addSoftkey('6',Aastra_get_label('More',$language),$XML_SERVER.'&action=list&menu_set=2&lookup='.$lookup); */
+					$object->addSoftkey('6',Aastra_get_label('More',$language),$XML_SERVER.'&action=list&menu_set=2&lookup='.$lookup);
 					}
 				else
 					{
@@ -442,9 +441,8 @@ switch($action)
 						}
 					else
 						{
-						$object->addSoftkey('1',Aastra_get_label('Status',$language),$XML_SERVER.'&action=zoom'.'&lookup='.$lookup);
-						$object->addSoftkey('2',Aastra_get_label('Dial',$language),'SoftKey:Dial2');
-                        $object->addSoftkey('3',Aastra_get_label('Exit',$language),'SoftKey:Exit');
+						$object->addSoftkey('1',Aastra_get_label('Select',$language),$XML_SERVER.'&action=zoom'.'&lookup='.$lookup);
+						$object->addSoftkey('3',Aastra_get_label('Dial',$language),'SoftKey:Dial2');
 						}
 					if($lookup!='') $object->addSoftkey('2',Aastra_get_label('List',$language),$XML_SERVER.'&action=list');
 					$object->addSoftkey('4',Aastra_get_label('Exit',$language),'SoftKey:Exit');
@@ -466,7 +464,7 @@ switch($action)
 					else
 						{
 						$object->addSoftkey('1',Aastra_get_label('Select',$language),$XML_SERVER.'&action=zoom&page='.$page);
-						$object->addSoftkey('2',Aastra_get_label('Dial',$language),'SoftKey:Dial2');
+						$object->addSoftkey('3',Aastra_get_label('Dial',$language),'SoftKey:Dial2');
 						if($origin!='presence') $object->addSoftkey('4',Aastra_get_label('Lookup',$language),$XML_SERVER.'&action=search');
 						else $object->addSoftkey('4',Aastra_get_label('Back',$language),$XML_SERVER_PATH.'/away.php?user='.$user);
 						}
@@ -482,7 +480,7 @@ switch($action)
 						}
 					else
 						{
-						if($origin!='presence')
+						if($origin!='presence') 
 							{
 							if($AA_SPEEDDIAL_STATE) $object->addSoftkey('1',Aastra_get_label('+Speed',$language),$XML_SERVER.'&action=select&page='.$page.'&orig_s=list');
 							}
@@ -496,7 +494,7 @@ switch($action)
 					$object->addSoftkey('6',Aastra_get_label('More',$language),$XML_SERVER.'&action=list&menu_set=1&lookup='.$lookup);
 					}
 				}
-
+			
 			# Icons
 			$object->addIcon('1',Aastra_get_custom_icon('Available'));
 			$object->addIcon('2',Aastra_get_custom_icon('DND'));

@@ -28,7 +28,7 @@ sip line1 vmail: *98
 sip line1 mode: 0
 
 # Action URI
-action uri startup: 
+action uri startup:
 
 # XML applications
 xml application URI: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/menu/mymenu.php?menu_source=menu1&menu_user=$$AA_SIPUSERNAME_AA$$&user=$$AA_SIPUSERNAME_AA$$
@@ -36,7 +36,7 @@ xml application title: Applications
 xml get timeout: 30
 
 # Intercom and Paging
-sip allow auto answer: 1 
+sip allow auto answer: 1
 sip intercom mute mic: 0
 
 # Time Zone
@@ -123,7 +123,7 @@ action uri incoming: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk
 action uri onhook: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/onhook.php?number=$$REMOTENUMBER$$&name=$$INCOMINGNAME$$&user=$$SIPUSERNAME$$
 
 # Intercom and Paging
-sip intercom type: 2 
+sip intercom type: 2
 sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$
 sip intercom line: 1
 
@@ -282,8 +282,8 @@ action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/as
 sip customized codec: payload=9;ptime=20;silsupp=on,payload=0;ptime=20;silsupp=on,payload=8;ptime=20;silsupp=on
 
 # Intercom and Paging
-sip intercom type: 2 
-sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$ 
+sip intercom type: 2
+sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$
 sip intercom line: 1
 
 # Feature override
@@ -291,7 +291,7 @@ voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vm
 directory script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
 
 # Global Park
-sprecode: 
+sprecode:
 
 # System Softkeys
 prgkey1 type:services
@@ -401,8 +401,8 @@ action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/as
 sip customized codec: payload=9;ptime=20;silsupp=on,payload=0;ptime=20;silsupp=on,payload=8;ptime=20;silsupp=on
 
 # Intercom and Paging
-sip intercom type: 2 
-sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$ 
+sip intercom type: 2
+sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$
 sip intercom line: 1
 
 # Feature override
@@ -410,7 +410,7 @@ voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vm
 directory script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/directory/directory.php?user=$$SIPUSERNAME$$
 
 # Global Park reset as park key is not dynamic
-sprecode: 
+sprecode:
 
 # System Softkeys
 topsoftkey1 type:services
@@ -572,8 +572,8 @@ action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/as
 sip customized codec: payload=9;ptime=20;silsupp=on,payload=0;ptime=20;silsupp=on,payload=8;ptime=20;silsupp=on
 
 # Intercom and Paging
-sip intercom type: 2 
-sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$ 
+sip intercom type: 2
+sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$
 sip intercom line: 1
 
 # Global Park
@@ -744,8 +744,8 @@ image server uri: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/im
 sip customized codec: payload=9;ptime=20;silsupp=on,payload=0;ptime=20;silsupp=on,payload=8;ptime=20;silsupp=on
 
 # Intercom and Paging
-sip intercom type: 2 
-sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$ 
+sip intercom type: 2
+sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$
 sip intercom line: 1
 
 # Feature override
@@ -896,7 +896,7 @@ extrakey15 exclude=Aastra51i,Aastra53i,Aastra9143i,Aastra6730i,Aastra6731i
 # Top Key 5:	Call FWD
 # Top Key 6:	Intercom
 # Key 1:	BLF Exts
-# Key 2:	
+# Key 2:
 # Key 3:	Follow-me
 # Key 4:	Voice Mail
 # Key 5:	Meet-me
@@ -924,8 +924,8 @@ action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/as
 sip customized codec:
 
 # Intercom and Paging
-sip intercom type: 2 
-sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$ 
+sip intercom type: 2
+sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$
 sip intercom line: 1
 
 # Feature override
@@ -933,32 +933,28 @@ voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vm
 directory script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
 
 # Global Park
-sprecode: 
+sprecode:
 
 softkey1 type:callers
 softkey1 label:Callers
 
 softkey2 type:xml
-softkey2 label:Park
-softkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
+softkey2 label:Voice Mail
+softkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+softkey2 states:idle
 
 softkey3 type:xml
-softkey3 label:Voice Mail
-softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+softkey3 label:DND
+softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
 softkey3 states:idle
 
 softkey4 type:xml
-softkey4 label:DND
-softkey4 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+softkey4 label:Call Fwd
+softkey4 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
 softkey4 states:idle
 
-softkey5 type:xml
-softkey5 label:Call Fwd
-softkey5 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
-softkey5 states:idle
-
-softkey6 type: icom
-softkey6 label: Icom
+softkey5 type: icom
+softkey5 label: Icom
 
 softkey16 type:xml
 softkey16 label:Keys
@@ -975,9 +971,14 @@ softkey18 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logo
 softkey18 states:idle
 softkey18 locked: 1
 
-topsoftkey1 type: blfxfer
-topsoftkey1 label: User
-topsoftkey1 value: 201
+topsoftkey1 type: xml
+topsoftkey1 label: Park
+topsoftkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
+
+topsoftkey2 type:xml
+topsoftkey2 label:Directory
+topsoftkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php
+topsoftkey2 states:idle
 
 sip line3 auth name: $$AA_SIPAUTHNAME_AA$$
 sip line3 password: "$$AA_SIPSECRET_AA$$"
@@ -1065,4 +1066,3 @@ prgkey8 type: xml
 prgkey8 label: Logout
 prgkey8 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
 prgkey8 locked: 1
-
