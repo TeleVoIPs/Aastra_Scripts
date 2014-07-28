@@ -44,7 +44,7 @@ function send_SIP_notify($event,$array_user)
 Global $asm;
 
 # Max number of extensions per command
-$EXT_NUM_LIMIT=30;
+$EXT_NUM_LIMIT=50;
 
 # Process each chunk
 while(count($array_user) > 0) 
