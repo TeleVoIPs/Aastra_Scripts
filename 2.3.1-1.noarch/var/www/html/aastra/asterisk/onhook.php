@@ -90,17 +90,17 @@ if(($found==0) and ($number!='Paging') and ($number!=''))
 		{
 		# Display current status
 		require_once('AastraIPPhoneStatus.class.php');
-		$object=new AastraIPPhoneStatus();
-		$object->setSession('Park');
-	     	$object->setBeep();
-     		if(Aastra_size_display_line()>16) $object->addEntry('1',sprintf(Aastra_get_label('Call Parked at %s',$language),$park),'alert',5);
-		else $object->addEntry('1',sprintf(Aastra_get_label('Parked at %s',$language),$park),'alert',5);
+		#$object=new AastraIPPhoneStatus();
+		#$object->setSession('Park');
+	     	#$object->setBeep();
+     		#if(Aastra_size_display_line()>16) $object->addEntry('1',sprintf(Aastra_get_label('Call Parked at %s',$language),$park),'alert',5);
+		#else $object->addEntry('1',sprintf(Aastra_get_label('Parked at %s',$language),$park),'alert',5);
 
 		# Bug 3.2.1
-		if(Aastra_test_phone_version('3.2.1.','1')==0) sleep(4);
+		#if(Aastra_test_phone_version('3.2.1.','1')==0) sleep(4);
 
 		# End of search 
-		$found=1;
+		#$found=1;
 		}
 	}
 
