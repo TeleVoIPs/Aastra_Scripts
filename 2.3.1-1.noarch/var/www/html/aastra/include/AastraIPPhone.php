@@ -302,10 +302,13 @@ else
 			$models=array('Aastra6730i','Aastra6731i','Aastra51i','Aastra53i','Aastra6863i','Aastra6865i');
 			break;
 		case '4':
-			$models=array('Aastra55i','Aastra57iCTi','Aastra9480i','Aastra9480iCT','Aastra6735i','Aastra6737i','Aastra6867i','Aastra6869i');
+			$models=array('Aastra55i','Aastra57iCTi','Aastra9480i','Aastra9480iCT','Aastra6735i','Aastra6737i','Aastra6869i');
 			break;
 		case '5':
 			$models=array('Aastra6739i','Aastra8000i');
+			break;
+		case '6':
+			$models=array('Aastra6867i');
 			break;
 		}
 	return(Aastra_test_phone_model($models,False,$type));
