@@ -45,7 +45,7 @@ $menu_set=Aastra_getvar_safe('menu_set','1');
 $lookup=Aastra_getvar_safe('lookup','');
 
 # Trace
-Aastra_trace_call('directory_4_asterisk','user='.$user.', action='.$action.', speed='.$speed.', selection='.$selection);
+Aastra_trace_call('directory_6_asterisk','user='.$user.', action='.$action.', speed='.$speed.', selection='.$selection);
 
 # Test User Agent
 Aastra_test_phone_versions(array('1'=>'','2'=>'','3'=>'','4'=>'2.5.3.','5'=>''),'0');

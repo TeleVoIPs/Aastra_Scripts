@@ -32,6 +32,8 @@ require_once('AastraAsterisk.php');
 # Retrieve parameters
 $user=Aastra_getvar_safe('user');
 $origin=Aastra_getvar_safe('origin');
+$header = Aastra_decode_HTTP_header();
+$model=$header['model'];
 
 # Trace
 Aastra_trace_call('directory_asterisk','user='.$user);
@@ -42,8 +44,11 @@ Aastra_test_phone_versions(array('1'=>'1.4.2.','2'=>'1.4.2.','3'=>'2.5.3.','4'=>
 # Launch application
 require_once('AastraIPPhoneExecute.class.php');
 $object=new AastraIPPhoneExecute();
+if($model=='Aastra6867i') {
+$object->addEntry($XML_SERVER_PATH.'directory_6'.'.php?user='.$user.'&origin='.$origin);
+} else {
 $object->addEntry($XML_SERVER_PATH.'directory_'.Aastra_phone_type().'.php?user='.$user.'&origin='.$origin);
-
+}
 # Output XML object
 $object->output();
 exit();

@@ -976,7 +976,7 @@ topsoftkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/pa
 
 topsoftkey2 type:xml
 topsoftkey2 label:Directory
-topsoftkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php
+topsoftkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
 topsoftkey2 states:idle
 
 sip line3 auth name: $$AA_SIPAUTHNAME_AA$$
