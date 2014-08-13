@@ -27,6 +27,9 @@ sip line1 registrar port: 5060
 sip line1 vmail: *98
 sip line1 mode: 0
 
+# Codecs
+sip customized codec: payload=0;ptime=30;silsupp=off,payload=110;ptime=30;silsupp=off
+
 # Action URI
 action uri startup:
 
@@ -219,9 +222,6 @@ action uri poll interval:$$AA_POLLING_INT_AA$$
 sip xml notify event: 1
 action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=notify&user=$$SIPUSERNAME$$
 
-# Codecs
-sip customized codec: payload=9;ptime=20;silsupp=on,payload=0;ptime=20;silsupp=on,payload=8;ptime=20;silsupp=on
-
 # System Softkeys
 prgkey1 type: xml
 prgkey1 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
@@ -277,9 +277,6 @@ action uri poll:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync
 action uri poll interval:$$AA_POLLING_INT_AA$$
 sip xml notify event: 1
 action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=notify&user=$$SIPUSERNAME$$
-
-# Codecs
-sip customized codec: payload=9;ptime=20;silsupp=on,payload=0;ptime=20;silsupp=on,payload=8;ptime=20;silsupp=on
 
 # Intercom and Paging
 sip intercom type: 2
@@ -397,9 +394,6 @@ action uri poll interval:$$AA_POLLING_INT_AA$$
 sip xml notify event: 1
 action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=notify&user=$$SIPUSERNAME$$
 
-# Codecs
-sip customized codec: payload=9;ptime=20;silsupp=on,payload=0;ptime=20;silsupp=on,payload=8;ptime=20;silsupp=on
-
 # Intercom and Paging
 sip intercom type: 2
 sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$
@@ -507,9 +501,6 @@ action uri poll interval:$$AA_POLLING_INT_AA$$
 sip xml notify event: 1
 action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=notify&user=$$SIPUSERNAME$$
 
-# Codecs
-sip customized codec: payload=9;ptime=20;silsupp=on,payload=0;ptime=20;silsupp=on,payload=8;ptime=20;silsupp=on
-
 # System Softkeys
 prgkey1 type: xml
 prgkey1 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
@@ -567,9 +558,6 @@ action uri poll:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync
 action uri poll interval:$$AA_POLLING_INT_AA$$
 sip xml notify event: 1
 action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=notify&user=$$SIPUSERNAME$$
-
-# Codecs
-sip customized codec: payload=9;ptime=20;silsupp=on,payload=0;ptime=20;silsupp=on,payload=8;ptime=20;silsupp=on
 
 # Intercom and Paging
 sip intercom type: 2
@@ -668,9 +656,6 @@ action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/as
 # SIP Lines
 sip line1 screen name 2: Ext. $$AA_SIPUSERNAME_AA$$
 
-# Codecs
-sip customized codec: payload=9;ptime=20;silsupp=on,payload=0;ptime=20;silsupp=on,payload=8;ptime=20;silsupp=on
-
 # System Softkeys
 prgkey1 type: xml
 prgkey1 label: Logout
@@ -739,9 +724,6 @@ action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/as
 
 # Image Server
 image server uri: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/imageServer.php?
-
-# Codecs
-sip customized codec: payload=9;ptime=20;silsupp=on,payload=0;ptime=20;silsupp=on,payload=8;ptime=20;silsupp=on
 
 # Intercom and Paging
 sip intercom type: 2
@@ -919,9 +901,6 @@ action uri poll interval:$$AA_POLLING_INT_AA$$
 sip xml notify event: 1
 action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=notify&user=$$SIPUSERNAME$$
 
-# Codecs
-sip customized codec: payload=0;ptime=30;silsupp=off,payload=110;ptime=30;silsupp=off
-
 # Intercom and Paging
 sip intercom type: 2
 sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$
@@ -1028,9 +1007,6 @@ action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/as
 sip line1 screen name 2: Ext. $$AA_SIPUSERNAME_AA$$
 sip intercom type: 2
 sip intercom prefix code: *80
-
-# Codecs
-sip customized codec: payload=9;ptime=20;silsupp=on,payload=0;ptime=20;silsupp=on,payload=8;ptime=20;silsupp=on
 
 # System Softkeys
 prgkey1 type: xml
