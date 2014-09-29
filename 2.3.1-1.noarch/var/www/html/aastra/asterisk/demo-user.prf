@@ -908,7 +908,6 @@ sip intercom line: 1
 
 # Feature override
 voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
-directory script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
 
 # Global Park
 sprecode:
@@ -953,10 +952,8 @@ topsoftkey1 type: xml
 topsoftkey1 label: Park
 topsoftkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
 
-topsoftkey2 type:xml
+topsoftkey2 type:Directory
 topsoftkey2 label:Directory
-topsoftkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
-topsoftkey2 states:idle
 
 sip line3 auth name: $$AA_SIPAUTHNAME_AA$$
 sip line3 password: "$$AA_SIPSECRET_AA$$"
