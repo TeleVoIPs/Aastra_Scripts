@@ -28,7 +28,7 @@ sip line1 vmail: *98
 sip line1 mode: 0
 
 # Codecs
-sip customized codec: payload=0;ptime=30;silsupp=off,payload=110;ptime=30;silsupp=off
+sip customized codec: payload=110;ptime=30;silsupp=off,payload=0;ptime=30;silsupp=off
 
 # Action URI
 action uri startup:
