@@ -952,7 +952,7 @@ topsoftkey1 type: xml
 topsoftkey1 label: Park
 topsoftkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
 
-topsoftkey2 type:Directory
+topsoftkey2 type:directory
 topsoftkey2 label:Directory
 
 sip line3 auth name: $$AA_SIPAUTHNAME_AA$$
