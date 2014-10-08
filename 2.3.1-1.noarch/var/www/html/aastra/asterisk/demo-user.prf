@@ -909,6 +909,9 @@ sip intercom line: 1
 # Feature override
 voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
 
+# Display Name + Extension on Idle screen
+idle screen mode: 1
+
 # Global Park
 sprecode:
 
