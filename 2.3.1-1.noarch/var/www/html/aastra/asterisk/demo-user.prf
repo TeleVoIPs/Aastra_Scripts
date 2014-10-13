@@ -912,6 +912,9 @@ voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vm
 # Display Name + Extension on Idle screen
 idle screen mode: 1
 
+# background Image 6867i
+background image: "http://www.televoips.com/images/aastra6867i.jpg"
+
 # Global Park
 sprecode:
 
