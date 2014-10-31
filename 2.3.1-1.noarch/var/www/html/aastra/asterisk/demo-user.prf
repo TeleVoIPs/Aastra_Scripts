@@ -146,7 +146,7 @@ softkey2 states:idle connected
 
 softkey3 type:xml
 softkey3 label:DND
-softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+softkey3 value:*76$$AA_SIPUSERNAME_AA$$
 softkey3 states:idle
 
 softkey4 type:xml
@@ -236,7 +236,7 @@ prgkey3 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.
 prgkey3 label: Parking
 
 prgkey4 type: xml
-prgkey4 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+prgkey4 value: *76$$AA_SIPUSERNAME_AA$$
 prgkey4 label: DND
 
 prgkey5 type: xml
@@ -315,7 +315,7 @@ prgkey6 label: Icom
 
 softkey1 type:xml
 softkey1 label:DND
-softkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+softkey1 value:*76$$AA_SIPUSERNAME_AA$$
 softkey1 states:idle
 
 softkey2 type:xml
@@ -431,7 +431,7 @@ topsoftkey6 label:Icom
 
 softkey1 type:xml
 softkey1 label:DND
-softkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+softkey1 value:*76$$AA_SIPUSERNAME_AA$$
 softkey1 states:idle
 
 softkey2 type:xml
@@ -512,7 +512,7 @@ prgkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.p
 prgkey2 label: Parking
 
 prgkey3 type: xml
-prgkey3 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+prgkey3 value: *76$$AA_SIPUSERNAME_AA$$
 prgkey3 label: DND
 
 prgkey4 type: xml
@@ -580,7 +580,7 @@ softkey2 states:idle connected
 
 softkey3 type:xml
 softkey3 label:DND
-softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+softkey3 value:*76$$AA_SIPUSERNAME_AA$$
 softkey3 states:idle
 
 softkey4 type:xml
@@ -668,7 +668,7 @@ prgkey2 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.
 
 prgkey3 type: xml
 prgkey3 label: DND
-prgkey3 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+prgkey3 value: *76$$AA_SIPUSERNAME_AA$$
 
 prgkey4 type: xml
 prgkey4 label: Call Fwd
@@ -749,7 +749,7 @@ softkey2 locked: 1
 
 softkey3 type:xml
 softkey3 label:DND
-softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+softkey3 value:*76$$AA_SIPUSERNAME_AA$$
 softkey3 states:idle
 
 softkey4 type:xml
@@ -928,7 +928,7 @@ softkey2 states:idle
 
 softkey3 type:xml
 softkey3 label:DND
-softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+softkey3 value:*76$$AA_SIPUSERNAME_AA$$
 softkey3 states:idle
 
 softkey4 type:xml
@@ -1089,7 +1089,7 @@ prgkey3 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail
 
 prgkey4 type: xml
 prgkey4 label: DND
-prgkey4 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+prgkey4 value: *76$$AA_SIPUSERNAME_AA$$
 
 prgkey5 type: xml
 prgkey5 label: Call FWD
@@ -1166,7 +1166,7 @@ softkey2 states:idle
 
 softkey3 type:xml
 softkey3 label:DND
-softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
+softkey3 value:*76$$AA_SIPUSERNAME_AA$$
 softkey3 states:idle
 
 softkey4 type:xml
