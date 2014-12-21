@@ -926,7 +926,7 @@ softkey2 label:Voice Mail
 softkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
 softkey2 states:idle
 
-softkey3 type:xml
+softkey3 type:blfxfer
 softkey3 label:DND
 softkey3 value:*76$$AA_SIPUSERNAME_AA$$
 softkey3 states:idle
