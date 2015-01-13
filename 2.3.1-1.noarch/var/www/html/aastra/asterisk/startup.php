@@ -487,7 +487,7 @@ switch($action)
 				elseif($nb_softkeys==6) 
 				{
 					$object->addSoftkey('1',Aastra_get_label('Backspace',$language),'SoftKey:BackSpace');
-					$object->addSoftkey('6',Aastra_get_label('Submit',$language),'SoftKey:Submit');
+					$object->addSoftkey('4',Aastra_get_label('Submit',$language),'SoftKey:Submit');
 				}
 				break;
 
@@ -515,7 +515,7 @@ switch($action)
 					{
 					$object->addSoftkey('1',Aastra_get_label('Backspace',$language),'SoftKey:BackSpace');
 				       if($AA_FREEPBX_MODE=='2') $object->addSoftkey('2',Aastra_get_label('ABC',$language),'SoftKey:ChangeMode');
-					$object->addSoftkey('6',Aastra_get_label('Submit',$language),'SoftKey:Submit');
+					$object->addSoftkey('4',Aastra_get_label('Submit',$language),'SoftKey:Submit');
 					}
 				break;
 
