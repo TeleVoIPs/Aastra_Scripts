@@ -53,139 +53,190 @@ directed call pickup prefix:**
 # For the visual voice mail
 auto offhook: 0
 
-[Aastra9112i]
+# Firmware
+firmware server: ftp://tvadmin:Televoips11!@$$AA_XML_SERVER_AA$$:21/tftpboot/FTP
+
+[Aastra6867i]
 ###############################################################################
-# Key 1:	Logout
-# Key 2:	Park
-###############################################################################
-
-# Action URI
-action uri registered: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=register&user=$$SIPUSERNAME$$
-action uri incoming: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/incoming.php?number=$$REMOTENUMBER$$&name=$$INCOMINGNAME$$&user=$$SIPUSERNAME$$
-
-# System Softkeys
-prgkey1 type: xml
-prgkey1 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
-prgkey2 type: park
-prgkey2 value: asterisk;$$AA_PARKINGLOT_AA$$
-
-[Aastra9133i]
-###############################################################################
-# Key 1:	Logout
-# Key 2:	Park
-# Key 3:	DND
-# Key 4:	Call Forward
-# Key 5:	Directory
-# Key 6:	Presence
-# Key 7:	Parking Lot
-###############################################################################
-
-# Action URI
-action uri registered: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=register&user=$$SIPUSERNAME$$
-action uri incoming: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/incoming.php?number=$$REMOTENUMBER$$&name=$$INCOMINGNAME$$&user=$$SIPUSERNAME$$
-
-# System Softkeys
-prgkey1 type: xml
-prgkey1 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
-
-prgkey2 type: park
-prgkey2 value: asterisk;$$AA_PARKINGLOT_AA$$
-
-prgkey3 type: xml
-prgkey3 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$SIPUSERNAME$$
-
-prgkey4 type: xml
-prgkey4 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
-
-prgkey5 type:xml
-prgkey5 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
-
-prgkey6 type:xml
-prgkey6 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/away.php?user=$$SIPUSERNAME$$
-
-prgkey7 type:xml
-prgkey7 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$
-
-[Aastra480i]
-###############################################################################
-# Key 1:	Directory
-# Key 2:	Speed Dial
-# Key 3:	DND
-# Key 4:	Call Forward
-# Key 5:	Presence
+# Top Key 1:	Callers
+# Top Key 2:	Parking
+# Top Key 3:	Voice Mail
+# Top Key 4:	DND
+# Top Key 5:	Call FWD
+# Top Key 6:	Intercom
+# Key 1:	BLF Exts
+# Key 2:
+# Key 3:	Follow-me
+# Key 4:	Voice Mail
+# Key 5:	Meet-me
 # Key 6:	ACD Agent
-# Key 7:	Voice Mail
-# Key 8:	Parking
-# Key 9:	Meet-me
+# Key 7:	Queues
+# Key 18:  Directory
+# Key 19:	Keys
 # Key 20:	Logout
 ###############################################################################
 
+# SIP Lines
+sip line1 screen name 2: Ext. $$AA_SIPUSERNAME_AA$$
+
 # Action URI
 action uri registered: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=register&user=$$SIPUSERNAME$$
-action uri incoming: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/incoming.php?number=$$REMOTENUMBER$$&name=$$INCOMINGNAME$$&user=$$SIPUSERNAME$$
 action uri onhook: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/onhook.php?number=$$REMOTENUMBER$$&name=$$INCOMINGNAME$$&user=$$SIPUSERNAME$$
+action uri outgoing:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/outgoing.php?number=$$REMOTENUMBER$$
+action uri poll:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=check&user=$$SIPUSERNAME$$
+action uri poll interval:$$AA_POLLING_INT_AA$$
+sip xml notify event: 1
+action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=notify&user=$$SIPUSERNAME$$
 
 # Intercom and Paging
 sip intercom type: 2
 sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$
 sip intercom line: 1
 
-# Global Park
-sprecode: asterisk;$$AA_PARKINGLOT_AA$$
+# Feature override
+voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
 
-# System Softkeys
+# Display Name + Extension on Idle screen
+idle screen mode: 1
+
+#disable Switch UI for Call Parking
+switch focus to ringing line: 0
+
+#firmware server
+upgrade uri: ftp://tvadmin:Televoips11!@$$AA_REGISTRAR_SERVER_AA$$:21
+
+# background Image 6867i
+background image: "http://www.televoips.com/images/aastra6867i.jpg"
+
+# Change Default Admin password
+admin password: 505050
+
+# Global Park
+sprecode:
+
 softkey1 type:xml
-softkey1 label:Directory
-softkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
-softkey1 states:idle connected
+softkey1 label:Voice Mail
+softkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+softkey1 states:idle
 
 softkey2 type:xml
-softkey2 label:Speed Dial
-softkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/directory/speed.php?user=$$SIPUSERNAME$$
-softkey2 states:idle connected
+softkey2 label:DND
+softkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$AA_SIPUSERNAME_AA$$
+softkey2 states:idle
 
 softkey3 type:xml
-softkey3 label:DND
-softkey3 value:*76$$AA_SIPUSERNAME_AA$$
+softkey3 label:FollowMe
+softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/follow.php?user=$$SIPUSERNAME$$
 softkey3 states:idle
 
-softkey4 type:xml
-softkey4 label:Call Fwd
-softkey4 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
+softkey4 type: icom
+softkey4 label: Icom
 softkey4 states:idle
 
-softkey5 type:xml
-softkey5 label:Presence
-softkey5 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/away.php?user=$$SIPUSERNAME$$
-softkey5 states:idle connected
 
-softkey6 type: xml
-softkey6 label: ACD Agent
-softkey6 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/agent.php?agent=$$SIPUSERNAME$$
-softkey6 states: idle
+softkey17 type:xml
+softkey17 label:Keys
+softkey17 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/key.php?user=$$SIPUSERNAME$$
+softkey17 states:idle
+softkey17 locked: 1
 
-softkey7 type:xml
-softkey7 label:Voice Mail
-softkey7 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
-softkey7 states:idle
+softkey18 type:xml
+softkey18 label:Logout
+softkey18 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
+softkey18 states:idle
+softkey18 locked: 1
 
-softkey8 type:xml
-softkey8 label:Parking
-softkey8 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php
-softkey8 states:idle
+topsoftkey1 type: xml
+topsoftkey1 label: Park
+topsoftkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
 
-softkey9 type:xml
-softkey9 label:Meet-me
-softkey9 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/meetme.php?ext=$$SIPUSERNAME$$&number=$$REMOTENUMBER$$
-softkey9 states:idle connected
+topsoftkey20 type:directory
+topsoftkey20 label:Directory
 
-softkey20 type:xml
-softkey20 label:Logout
-softkey20 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
-softkey20 states:idle
+sip line3 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line3 password: "$$AA_SIPSECRET_AA$$"
+sip line3 user name: $$AA_SIPUSERNAME_AA$$
+sip line3 display name: $$AA_SIPCALLERID_AA$$
+sip line3 screen name: $$AA_SIPCALLERID_AA$$
+sip line3 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line3 proxy port: 5060
+sip line3 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line3 registrar port: 5060
+sip line3 vmail: *98
+sip line3 mode: 0
 
-[Aastra480i Cordless]
-template:Aastra480i
+sip line4 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line4 password: "$$AA_SIPSECRET_AA$$"
+sip line4 user name: $$AA_SIPUSERNAME_AA$$
+sip line4 display name: $$AA_SIPCALLERID_AA$$
+sip line4 screen name: $$AA_SIPCALLERID_AA$$
+sip line4 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line4 proxy port: 5060
+sip line4 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line4 registrar port: 5060
+sip line4 vmail: *98
+sip line4 mode: 0
+
+sip line5 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line5 password: "$$AA_SIPSECRET_AA$$"
+sip line5 user name: $$AA_SIPUSERNAME_AA$$
+sip line5 display name: $$AA_SIPCALLERID_AA$$
+sip line5 screen name: $$AA_SIPCALLERID_AA$$
+sip line5 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line5 proxy port: 5060
+sip line5 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line5 registrar port: 5060
+sip line5 vmail: *98
+sip line5 mode: 0
+
+sip line6 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line6 password: "$$AA_SIPSECRET_AA$$"
+sip line6 user name: $$AA_SIPUSERNAME_AA$$
+sip line6 display name: $$AA_SIPCALLERID_AA$$
+sip line6 screen name: $$AA_SIPCALLERID_AA$$
+sip line6 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line6 proxy port: 5060
+sip line6 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line6 registrar port: 5060
+sip line6 vmail: *98
+sip line6 mode: 0
+
+sip line7 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line7 password: "$$AA_SIPSECRET_AA$$"
+sip line7 user name: $$AA_SIPUSERNAME_AA$$
+sip line7 display name: $$AA_SIPCALLERID_AA$$
+sip line7 screen name: $$AA_SIPCALLERID_AA$$
+sip line7 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line7 proxy port: 5060
+sip line7 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line7 registrar port: 5060
+sip line7 vmail: *98
+sip line7 mode: 0
+
+sip line8 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line8 password: "$$AA_SIPSECRET_AA$$"
+sip line8 user name: $$AA_SIPUSERNAME_AA$$
+sip line8 display name: $$AA_SIPCALLERID_AA$$
+sip line8 screen name: $$AA_SIPCALLERID_AA$$
+sip line8 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line8 proxy port: 5060
+sip line8 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line8 registrar port: 5060
+sip line8 vmail: *98
+sip line8 mode: 0
+
+sip line9 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line9 password: "$$AA_SIPSECRET_AA$$"
+sip line9 user name: $$AA_SIPUSERNAME_AA$$
+sip line9 display name: $$AA_SIPCALLERID_AA$$
+sip line9 screen name: $$AA_SIPCALLERID_AA$$
+sip line9 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line9 proxy port: 5060
+sip line9 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line9 registrar port: 5060
+sip line9 vmail: *98
+sip line9 mode: 0
+
 
 [Aastra51i]
 ###############################################################################
@@ -478,572 +529,8 @@ softkey20 locked:1
 [Aastra57iCT]
 template:Aastra57i
 
-[Aastra6737i]
-template:Aastra57i
 
-[Aastra9143i]
-###############################################################################
-# Key 1:	Logout
-# Key 2:	Parking
-# Key 3:	DND
-# Key 4:	Call Forward
-# Key 5:   	Directory
-# Key 6:   	Presence
-# Key 7:   	Voice Mail
-###############################################################################
 
-# Action URI
-action uri registered: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=register&user=$$SIPUSERNAME$$
-action uri onhook: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/onhook.php?number=$$REMOTENUMBER$$&name=$$INCOMINGNAME$$&user=$$SIPUSERNAME$$
-action uri outgoing:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/outgoing.php?number=$$REMOTENUMBER$$&user=$$SIPUSERNAME$$
-action uri poll:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=check&user=$$SIPUSERNAME$$
-action uri poll interval:$$AA_POLLING_INT_AA$$
-sip xml notify event: 1
-action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=notify&user=$$SIPUSERNAME$$
-
-# System Softkeys
-prgkey1 type: xml
-prgkey1 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
-prgkey1 label: Logout
-prgkey1 locked: 1
-
-prgkey2 type:xml
-prgkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
-prgkey2 label: Parking
-
-prgkey3 type: xml
-prgkey3 value: *76$$AA_SIPUSERNAME_AA$$
-prgkey3 label: DND
-
-prgkey4 type: xml
-prgkey4 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
-prgkey4 label: Call FWD
-
-prgkey5 type: xml
-prgkey5 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
-prgkey5 label: Directory
-
-prgkey6 type:xml
-prgkey6 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/away.php?user=$$SIPUSERNAME$$
-prgkey6 label: Presence
-
-prgkey7 type:xml
-prgkey7 label:Voice Mail
-prgkey7 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
-
-[Aastra9480i]
-###############################################################################
-# Key 1:	Directory
-# Key 2:	Speed Dial
-# Key 3:	DND
-# Key 4:	Call Forward
-# Key 5:	Follow-me
-# Key 6:	Presence
-# Key 7:	ACD Agent
-# Key 8:	Voice Mail
-# Key 9:	Parking
-# Key 10:	Meet-me
-# Key 19:	Keys
-# Key 20:	Logout
-###############################################################################
-
-# SIP Lines
-sip line1 screen name 2: Ext. $$AA_SIPUSERNAME_AA$$
-
-# Action URI
-action uri registered: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=register&user=$$SIPUSERNAME$$
-action uri onhook: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/onhook.php?number=$$REMOTENUMBER$$&name=$$INCOMINGNAME$$&user=$$SIPUSERNAME$$
-action uri outgoing:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/outgoing.php?number=$$REMOTENUMBER$$&user=$$SIPUSERNAME$$
-action uri poll:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=check&user=$$SIPUSERNAME$$
-action uri poll interval:$$AA_POLLING_INT_AA$$
-sip xml notify event: 1
-action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=notify&user=$$SIPUSERNAME$$
-
-# Intercom and Paging
-sip intercom type: 2
-sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$
-sip intercom line: 1
-
-# Global Park
-sprecode: asterisk;$$AA_PARKINGLOT_AA$$
-
-# System Softkeys
-softkey1 type:xml
-softkey1 label:Directory
-softkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
-softkey1 states:idle connected
-
-softkey2 type:xml
-softkey2 label:Speed Dial
-softkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/directory/speed.php?user=$$SIPUSERNAME$$
-softkey2 states:idle connected
-
-softkey3 type:xml
-softkey3 label:DND
-softkey3 value:*76$$AA_SIPUSERNAME_AA$$
-softkey3 states:idle
-
-softkey4 type:xml
-softkey4 label:Call Fwd
-softkey4 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
-softkey4 states:idle
-
-softkey5 type:xml
-softkey5 label:Follow-me
-softkey5 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/follow.php?user=$$SIPUSERNAME$$
-softkey5 states:idle
-
-softkey6 type:xml
-softkey6 label:Presence
-softkey6 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/away.php?user=$$SIPUSERNAME$$
-softkey6 states:idle connected
-
-softkey7 type: xml
-softkey7 label: ACD Agent
-softkey7 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/agent.php?agent=$$SIPUSERNAME$$
-softkey7 states: idle
-
-softkey8 type:xml
-softkey8 label:VMail
-softkey8 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
-softkey8 states:idle
-
-softkey9 type:xml
-softkey9 label:Parking
-softkey9 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php
-softkey9 states:idle
-
-softkey10 type:xml
-softkey10 label:Meet-me
-softkey10 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/meetme.php?ext=$$SIPUSERNAME$$&number=$$REMOTENUMBER$$
-softkey10 states:idle connected
-
-softkey19 type:xml
-softkey19 label:Keys
-softkey19 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/key.php?user=$$SIPUSERNAME$$
-softkey19 states:idle
-
-softkey20 type:xml
-softkey20 label:Logout
-softkey20 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
-softkey20 states:idle
-softkey20 locked:1
-
-[Aastra9480iCT]
-template:Aastra9480i
-
-[Aastra6730i]
-###############################################################################
-# Key 1:	Logout
-# Key 2:	Parking
-# Key 3:	DND
-# Key 4:	Call Forward
-# Key 5:	Presence
-# Key 6:	Delete
-# Key 7:	Directory
-# Key 8:   	Voice Mail
-###############################################################################
-
-# Action URI
-action uri registered: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=register&user=$$SIPUSERNAME$$
-action uri onhook: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/onhook.php?number=$$REMOTENUMBER$$&name=$$INCOMINGNAME$$&user=$$SIPUSERNAME$$
-action uri outgoing:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/outgoing.php?number=$$REMOTENUMBER$$&user=$$SIPUSERNAME$$
-action uri poll:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=check&user=$$SIPUSERNAME$$
-action uri poll interval:$$AA_POLLING_INT_AA$$
-sip xml notify event: 1
-action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=notify&user=$$SIPUSERNAME$$
-
-# SIP Lines
-sip line1 screen name 2: Ext. $$AA_SIPUSERNAME_AA$$
-
-# System Softkeys
-prgkey1 type: xml
-prgkey1 label: Logout
-prgkey1 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
-prgkey1 locked: 1
-
-prgkey2 type: xml
-prgkey2 label: Parking
-prgkey2 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
-
-prgkey3 type: xml
-prgkey3 label: DND
-prgkey3 value: *76$$AA_SIPUSERNAME_AA$$
-
-prgkey4 type: xml
-prgkey4 label: Call Fwd
-prgkey4 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
-
-prgkey5 type: xml
-prgkey5 label: Presence
-prgkey5 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/away.php?user=$$SIPUSERNAME$$
-
-prgkey6 type: delete
-prgkey6 label: Delete
-prgkey6 locked: 0
-
-prgkey7 type: xml
-prgkey7 label: Directory
-prgkey7 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
-
-prgkey8 type: xml
-prgkey8 label: Voice Mail
-prgkey8 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
-
-[Aastra6731i]
-template:Aastra6730i
-
-[Aastra6739i]
-###############################################################################
-# Key 1:	Parking
-# Key 2:	DND
-# Key 3:	Call Forward
-# Key 4:	Follow-me
-# Key 5:	Presence
-# Key 6:	Speed Dial
-# Key 7:	Intercom
-# Key 8:	Day/Night
-# Key 9:	Meet-me
-# Key 10:	ACD Agent
-# Key 11:	Queues
-# Key 54:	Keys
-# Key 55:	Logout
-###############################################################################
-
-# SIP Lines
-sip line1 screen name 2: Ext. $$AA_SIPUSERNAME_AA$$
-
-# Action URI
-action uri registered: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=register&user=$$SIPUSERNAME$$
-action uri onhook: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/onhook.php?number=$$REMOTENUMBER$$&name=$$INCOMINGNAME$$&user=$$SIPUSERNAME$$
-action uri outgoing:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/outgoing.php?number=$$REMOTENUMBER$$&user=$$SIPUSERNAME$$
-action uri poll:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=check&user=$$SIPUSERNAME$$
-action uri poll interval:$$AA_POLLING_INT_AA$$
-sip xml notify event: 1
-action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=notify&user=$$SIPUSERNAME$$
-
-# Image Server
-image server uri: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/imageServer.php?
-
-# Intercom and Paging
-sip intercom type: 2
-sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$
-sip intercom line: 1
-
-# Feature override
-voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
-services script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/menu/mymenu.php?menu_source=menu1&menu_user=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
-directory script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php?user=$$SIPUSERNAME$$
-
-softkey1 type:xml
-softkey1 label:Parking
-softkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$
-softkey1 states:idle
-
-softkey2 type: speeddialxfer
-softkey2 label: Call Park
-softkey2 value: $$AA_PARKINGLOT_AA$$
-softkey2 line: 1
-softkey2 states: connected
-softkey2 locked: 1
-
-softkey3 type:xml
-softkey3 label:DND
-softkey3 value:*76$$AA_SIPUSERNAME_AA$$
-softkey3 states:idle
-
-softkey4 type:xml
-softkey4 label:Call Fwd
-softkey4 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
-softkey4 states:idle
-
-softkey5 type:xml
-softkey5 label:Follow-me
-softkey5 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/follow.php?user=$$SIPUSERNAME$$
-softkey5 states:idle
-
-softkey6 type:xml
-softkey6 label:Presence
-softkey6 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/away.php?user=$$SIPUSERNAME$$
-
-softkey7 type:xml
-softkey7 label:Speed Dial
-softkey7 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/directory/speed.php?user=$$SIPUSERNAME$$
-
-softkey8 type:xml
-softkey8 label:Day/Night
-softkey8 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/daynight.php?user=$$SIPUSERNAME$$
-softkey8 states:idle
-
-softkey9 type:xml
-softkey9 label:Meet-me
-softkey9 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/meetme.php?ext=$$SIPUSERNAME$$&number=$$REMOTENUMBER$$
-softkey9 states:idle connected
-
-softkey10 type: xml
-softkey10 label: ACD Agent
-softkey10 value: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/agent.php?agent=$$SIPUSERNAME$$
-softkey10 states: idle
-
-softkey11 type:xml
-softkey11 label:Queues
-softkey11 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/queues.php?user=$$SIPUSERNAME$$
-softkey11 states:idle connected
-
-softkey12 type:xml
-softkey12 label:Keys
-softkey12 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/key.php?user=$$SIPUSERNAME$$
-softkey12 states:idle
-softkey12 locked:1
-
-softkey13 type: icom
-softkey13 label: Intercom
-
-softkey55 type:xml
-softkey55 label:Logout
-softkey55 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
-softkey55 states:idle
-softkey55 locked:1
-
-[Extra]
-extrakey01 type:xml
-extrakey01 label:Horoscope
-extrakey01 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=horoscope
-
-extrakey02 type:xml
-extrakey02 label: Movies
-extrakey02 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=movies
-
-extrakey03 type:xml
-extrakey03 label:Stocks
-extrakey03 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/stock/stock.php?user=$$SIPUSERNAME$$
-
-extrakey04 type:xml
-extrakey04 label:Google
-extrakey04 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/google/google.php?user=$$SIPUSERNAME$$
-
-extrakey05 type:xml
-extrakey05 label:ESPN
-extrakey05 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=espn
-
-extrakey06 type:xml
-extrakey06 label:CNN
-extrakey06 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=cnn
-
-extrakey07 type:xml
-extrakey07 label:Fox News
-extrakey07 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=fox
-
-extrakey08 type:xml
-extrakey08 label:Today
-extrakey08 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=day
-
-extrakey09 type:xml
-extrakey09 label:Clock
-extrakey09 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/clock/clock.php?user=$$SIPUSERNAME$$
-extrakey09 exclude=Aastra51i,Aastra53i,Aastra9143i,Aastra6730i,Aastra6731i
-
-extrakey10 type:xml
-extrakey10 label:A-Code
-extrakey10 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/area/area.php
-
-extrakey11 type:xml
-extrakey11 label:Weather
-extrakey11 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/weather/weather_us.php?user=$$SIPUSERNAME$$
-
-extrakey12 type:xml
-extrakey12 label:Netflix
-extrakey12 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/rss/rss.php?feed=netflix
-
-extrakey13 type:xml
-extrakey13 label:Yahtzee
-extrakey13 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/games/yahtzee.php?user=$$SIPUSERNAME$$
-extrakey13 exclude=Aastra51i,Aastra53i,Aastra9143i,Aastra6730i,Aastra6731i,Aastra6739i,Aastra9480i,Aastra9480iCT
-
-extrakey14 type:xml
-extrakey14 label:Biorhythms
-extrakey14 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/games/biorhythm.php?user=$$SIPUSERNAME$$
-
-extrakey15 type:xml
-extrakey15 label:Currency
-extrakey15 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/stock/currency.php?user=$$SIPUSERNAME$$
-extrakey15 exclude=Aastra51i,Aastra53i,Aastra9143i,Aastra6730i,Aastra6731i
-
-[Aastra6867i]
-###############################################################################
-# Top Key 1:	Callers
-# Top Key 2:	Parking
-# Top Key 3:	Voice Mail
-# Top Key 4:	DND
-# Top Key 5:	Call FWD
-# Top Key 6:	Intercom
-# Key 1:	BLF Exts
-# Key 2:
-# Key 3:	Follow-me
-# Key 4:	Voice Mail
-# Key 5:	Meet-me
-# Key 6:	ACD Agent
-# Key 7:	Queues
-# Key 18:  Directory
-# Key 19:	Keys
-# Key 20:	Logout
-###############################################################################
-
-# SIP Lines
-sip line1 screen name 2: Ext. $$AA_SIPUSERNAME_AA$$
-
-# Action URI
-action uri registered: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=register&user=$$SIPUSERNAME$$
-action uri onhook: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/onhook.php?number=$$REMOTENUMBER$$&name=$$INCOMINGNAME$$&user=$$SIPUSERNAME$$
-action uri outgoing:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/outgoing.php?number=$$REMOTENUMBER$$
-action uri poll:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=check&user=$$SIPUSERNAME$$
-action uri poll interval:$$AA_POLLING_INT_AA$$
-sip xml notify event: 1
-action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=notify&user=$$SIPUSERNAME$$
-
-# Intercom and Paging
-sip intercom type: 2
-sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$
-sip intercom line: 1
-
-# Feature override
-voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
-
-# Display Name + Extension on Idle screen
-idle screen mode: 1
-
-# background Image 6867i
-background image: "http://www.televoips.com/images/aastra6867i.jpg"
-
-# Global Park
-sprecode:
-
-softkey1 type:callers
-softkey1 label:Callers
-
-softkey2 type:xml
-softkey2 label:Voice Mail
-softkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
-softkey2 states:idle
-
-softkey3 type:blfxfer
-softkey3 label:DND
-softkey3 value:*76$$AA_SIPUSERNAME_AA$$
-softkey3 states:idle
-
-softkey4 type:xml
-softkey4 label:Call Fwd
-softkey4 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
-softkey4 states:idle
-
-softkey5 type: icom
-softkey5 label: Icom
-
-softkey16 type:xml
-softkey16 label:Keys
-softkey16 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/key.php?user=$$SIPUSERNAME$$
-softkey16 states:idle
-softkey16 locked: 1
-
-softkey17 type:redial
-softkey17 label:Redial
-
-softkey18 type:xml
-softkey18 label:Logout
-softkey18 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
-softkey18 states:idle
-softkey18 locked: 1
-
-topsoftkey1 type: xml
-topsoftkey1 label: Park
-topsoftkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
-
-topsoftkey2 type:directory
-topsoftkey2 label:Directory
-
-sip line3 auth name: $$AA_SIPAUTHNAME_AA$$
-sip line3 password: "$$AA_SIPSECRET_AA$$"
-sip line3 user name: $$AA_SIPUSERNAME_AA$$
-sip line3 display name: $$AA_SIPCALLERID_AA$$
-sip line3 screen name: $$AA_SIPCALLERID_AA$$
-sip line3 proxy ip: $$AA_PROXY_SERVER_AA$$
-sip line3 proxy port: 5060
-sip line3 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
-sip line3 registrar port: 5060
-sip line3 vmail: *98
-sip line3 mode: 0
-
-sip line4 auth name: $$AA_SIPAUTHNAME_AA$$
-sip line4 password: "$$AA_SIPSECRET_AA$$"
-sip line4 user name: $$AA_SIPUSERNAME_AA$$
-sip line4 display name: $$AA_SIPCALLERID_AA$$
-sip line4 screen name: $$AA_SIPCALLERID_AA$$
-sip line4 proxy ip: $$AA_PROXY_SERVER_AA$$
-sip line4 proxy port: 5060
-sip line4 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
-sip line4 registrar port: 5060
-sip line4 vmail: *98
-sip line4 mode: 0
-
-sip line5 auth name: $$AA_SIPAUTHNAME_AA$$
-sip line5 password: "$$AA_SIPSECRET_AA$$"
-sip line5 user name: $$AA_SIPUSERNAME_AA$$
-sip line5 display name: $$AA_SIPCALLERID_AA$$
-sip line5 screen name: $$AA_SIPCALLERID_AA$$
-sip line5 proxy ip: $$AA_PROXY_SERVER_AA$$
-sip line5 proxy port: 5060
-sip line5 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
-sip line5 registrar port: 5060
-sip line5 vmail: *98
-sip line5 mode: 0
-
-sip line6 auth name: $$AA_SIPAUTHNAME_AA$$
-sip line6 password: "$$AA_SIPSECRET_AA$$"
-sip line6 user name: $$AA_SIPUSERNAME_AA$$
-sip line6 display name: $$AA_SIPCALLERID_AA$$
-sip line6 screen name: $$AA_SIPCALLERID_AA$$
-sip line6 proxy ip: $$AA_PROXY_SERVER_AA$$
-sip line6 proxy port: 5060
-sip line6 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
-sip line6 registrar port: 5060
-sip line6 vmail: *98
-sip line6 mode: 0
-
-sip line7 auth name: $$AA_SIPAUTHNAME_AA$$
-sip line7 password: "$$AA_SIPSECRET_AA$$"
-sip line7 user name: $$AA_SIPUSERNAME_AA$$
-sip line7 display name: $$AA_SIPCALLERID_AA$$
-sip line7 screen name: $$AA_SIPCALLERID_AA$$
-sip line7 proxy ip: $$AA_PROXY_SERVER_AA$$
-sip line7 proxy port: 5060
-sip line7 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
-sip line7 registrar port: 5060
-sip line7 vmail: *98
-sip line7 mode: 0
-
-sip line8 auth name: $$AA_SIPAUTHNAME_AA$$
-sip line8 password: "$$AA_SIPSECRET_AA$$"
-sip line8 user name: $$AA_SIPUSERNAME_AA$$
-sip line8 display name: $$AA_SIPCALLERID_AA$$
-sip line8 screen name: $$AA_SIPCALLERID_AA$$
-sip line8 proxy ip: $$AA_PROXY_SERVER_AA$$
-sip line8 proxy port: 5060
-sip line8 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
-sip line8 registrar port: 5060
-sip line8 vmail: *98
-sip line8 mode: 0
-
-sip line9 auth name: $$AA_SIPAUTHNAME_AA$$
-sip line9 password: "$$AA_SIPSECRET_AA$$"
-sip line9 user name: $$AA_SIPUSERNAME_AA$$
-sip line9 display name: $$AA_SIPCALLERID_AA$$
-sip line9 screen name: $$AA_SIPCALLERID_AA$$
-sip line9 proxy ip: $$AA_PROXY_SERVER_AA$$
-sip line9 proxy port: 5060
-sip line9 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
-sip line9 registrar port: 5060
-sip line9 vmail: *98
-sip line9 mode: 0
 
 
 
@@ -1150,54 +637,58 @@ voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vm
 # Display Name + Extension on Idle screen
 idle screen mode: 1
 
+#disable Switch UI for Call Parking
+switch focus to ringing line: 0
+
+#firmware server
+upgrade uri: ftp://tvadmin:Televoips11!@$$AA_REGISTRAR_SERVER_AA$$:21
+
 # background Image 6869i
 background image: "http://www.televoips.com/images/aastra6867i.jpg"
+
+# Change Default Admin password
+admin password: 505050
 
 # Global Park
 sprecode:
 
-softkey1 type:callers
-softkey1 label:Callers
+softkey1 type:xml
+softkey1 label:Voice Mail
+softkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+softkey1 states:idle
 
 softkey2 type:xml
-softkey2 label:Voice Mail
-softkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+softkey2 label:DND
+softkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$AA_SIPUSERNAME_AA$$
 softkey2 states:idle
 
 softkey3 type:xml
-softkey3 label:DND
-softkey3 value:*76$$AA_SIPUSERNAME_AA$$
+softkey3 label:FollowMe
+softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/follow.php?user=$$SIPUSERNAME$$
 softkey3 states:idle
 
-softkey4 type:xml
-softkey4 label:Call Fwd
-softkey4 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/cfwd.php?user=$$SIPUSERNAME$$
+softkey4 type: icom
+softkey4 label: Icom
 softkey4 states:idle
 
-softkey5 type: icom
-softkey5 label: Icom
+softkey23 type:xml
+softkey23 label:Keys
+softkey23 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/key.php?user=$$SIPUSERNAME$$
+softkey23 states:idle
+softkey23 locked: 1
 
-softkey16 type:xml
-softkey16 label:Keys
-softkey16 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/key.php?user=$$SIPUSERNAME$$
-softkey16 states:idle
-softkey16 locked: 1
-
-softkey17 type:redial
-softkey17 label:Redial
-
-softkey18 type:xml
-softkey18 label:Logout
-softkey18 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
-softkey18 states:idle
-softkey18 locked: 1
+softkey24 type:xml
+softkey24 label:Logout
+softkey24 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
+softkey24 states:idle
+softkey24 locked: 1
 
 topsoftkey1 type: xml
 topsoftkey1 label: Park
 topsoftkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
 
-topsoftkey2 type:directory
-topsoftkey2 label:Directory
+topsoftkey40 type:directory
+topsoftkey40 label:Directory
 
 sip line3 auth name: $$AA_SIPAUTHNAME_AA$$
 sip line3 password: "$$AA_SIPSECRET_AA$$"
@@ -1318,3 +809,229 @@ sip line12 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
 sip line12 registrar port: 5060
 sip line12 vmail: *98
 sip line12 mode: 0
+
+[Aastra6873i]
+###############################################################################
+# Top Key 1:	Callers
+# Top Key 2:	Parking
+# Top Key 3:	Voice Mail
+# Top Key 4:	DND
+# Top Key 5:	Call FWD
+# Top Key 6:	Intercom
+# Key 1:	BLF Exts
+# Key 2:
+# Key 3:	Follow-me
+# Key 4:	Voice Mail
+# Key 5:	Meet-me
+# Key 6:	ACD Agent
+# Key 7:	Queues
+# Key 18:  Directory
+# Key 19:	Keys
+# Key 20:	Logout
+###############################################################################
+
+# SIP Lines
+sip line1 screen name 2: Ext. $$AA_SIPUSERNAME_AA$$
+
+# Action URI
+action uri registered: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=register&user=$$SIPUSERNAME$$
+action uri onhook: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/onhook.php?number=$$REMOTENUMBER$$&name=$$INCOMINGNAME$$&user=$$SIPUSERNAME$$
+action uri outgoing:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/outgoing.php?number=$$REMOTENUMBER$$
+action uri poll:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=check&user=$$SIPUSERNAME$$
+action uri poll interval:$$AA_POLLING_INT_AA$$
+sip xml notify event: 1
+action uri xml sip notify: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/sync.php?action=notify&user=$$SIPUSERNAME$$
+
+# Intercom and Paging
+sip intercom type: 2
+sip intercom prefix code: $$AA_INTERCOM_CODE_AA$$
+sip intercom line: 1
+
+# Feature override
+voicemail script: http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+
+# Display Name + Extension on Idle screen
+idle screen mode: 1
+
+#disable Switch UI for Call Parking
+switch focus to ringing line: 0
+
+#firmware server
+upgrade uri: ftp://tvadmin:Televoips11!@$$AA_REGISTRAR_SERVER_AA$$:21
+
+# background Image 6873i
+background image: "http://$$AA_REGISTRAR_SERVER_AA$$/aastra/6873ibackground.jpg"
+
+#Screen Saver Background image
+screen saver background image: "http://$$AA_REGISTRAR_SERVER_AA$$/aastra/6873iscreensaver.jpg"
+
+# Font Color
+idle screen font color: White
+
+# Change Default Admin password
+admin password: 505050
+
+# Global Park
+sprecode:
+
+softkey1 type:xml
+softkey1 label:Voice Mail
+softkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/vmail.php?ext=$$SIPUSERNAME$$&user=$$AA_SIPUSERNAME_AA$$
+softkey1 states:idle
+
+softkey2 type:xml
+softkey2 label:DND
+softkey2 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/dnd.php?user=$$AA_SIPUSERNAME_AA$$
+softkey2 states:idle
+
+softkey3 type:xml
+softkey3 label:FollowMe
+softkey3 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/follow.php?user=$$SIPUSERNAME$$
+softkey3 states:idle
+
+softkey4 type: icom
+softkey4 label: Icom
+softkey4 states:idle
+
+softkey23 type:xml
+softkey23 label:Keys
+softkey23 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/key.php?user=$$SIPUSERNAME$$
+softkey23 states:idle
+softkey23 locked: 1
+
+softkey24 type:xml
+softkey24 label:Logout
+softkey24 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/logout.php?user=$$SIPUSERNAME$$
+softkey24 states:idle
+softkey24 locked: 1
+
+topsoftkey1 type: xml
+topsoftkey1 label: Park
+topsoftkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
+
+topsoftkey20 type:xml
+topsoftkey20 label:Directory
+topsoftkey20 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php
+
+
+
+sip line3 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line3 password: "$$AA_SIPSECRET_AA$$"
+sip line3 user name: $$AA_SIPUSERNAME_AA$$
+sip line3 display name: $$AA_SIPCALLERID_AA$$
+sip line3 screen name: $$AA_SIPCALLERID_AA$$
+sip line3 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line3 proxy port: 5060
+sip line3 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line3 registrar port: 5060
+sip line3 vmail: *98
+sip line3 mode: 0
+
+sip line4 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line4 password: "$$AA_SIPSECRET_AA$$"
+sip line4 user name: $$AA_SIPUSERNAME_AA$$
+sip line4 display name: $$AA_SIPCALLERID_AA$$
+sip line4 screen name: $$AA_SIPCALLERID_AA$$
+sip line4 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line4 proxy port: 5060
+sip line4 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line4 registrar port: 5060
+sip line4 vmail: *98
+sip line4 mode: 0
+
+sip line5 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line5 password: "$$AA_SIPSECRET_AA$$"
+sip line5 user name: $$AA_SIPUSERNAME_AA$$
+sip line5 display name: $$AA_SIPCALLERID_AA$$
+sip line5 screen name: $$AA_SIPCALLERID_AA$$
+sip line5 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line5 proxy port: 5060
+sip line5 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line5 registrar port: 5060
+sip line5 vmail: *98
+sip line5 mode: 0
+
+sip line6 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line6 password: "$$AA_SIPSECRET_AA$$"
+sip line6 user name: $$AA_SIPUSERNAME_AA$$
+sip line6 display name: $$AA_SIPCALLERID_AA$$
+sip line6 screen name: $$AA_SIPCALLERID_AA$$
+sip line6 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line6 proxy port: 5060
+sip line6 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line6 registrar port: 5060
+sip line6 vmail: *98
+sip line6 mode: 0
+
+sip line7 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line7 password: "$$AA_SIPSECRET_AA$$"
+sip line7 user name: $$AA_SIPUSERNAME_AA$$
+sip line7 display name: $$AA_SIPCALLERID_AA$$
+sip line7 screen name: $$AA_SIPCALLERID_AA$$
+sip line7 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line7 proxy port: 5060
+sip line7 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line7 registrar port: 5060
+sip line7 vmail: *98
+sip line7 mode: 0
+
+sip line8 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line8 password: "$$AA_SIPSECRET_AA$$"
+sip line8 user name: $$AA_SIPUSERNAME_AA$$
+sip line8 display name: $$AA_SIPCALLERID_AA$$
+sip line8 screen name: $$AA_SIPCALLERID_AA$$
+sip line8 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line8 proxy port: 5060
+sip line8 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line8 registrar port: 5060
+sip line8 vmail: *98
+sip line8 mode: 0
+
+sip line9 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line9 password: "$$AA_SIPSECRET_AA$$"
+sip line9 user name: $$AA_SIPUSERNAME_AA$$
+sip line9 display name: $$AA_SIPCALLERID_AA$$
+sip line9 screen name: $$AA_SIPCALLERID_AA$$
+sip line9 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line9 proxy port: 5060
+sip line9 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line9 registrar port: 5060
+sip line9 vmail: *98
+sip line9 mode: 0
+
+sip line10 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line10 password: "$$AA_SIPSECRET_AA$$"
+sip line10 user name: $$AA_SIPUSERNAME_AA$$
+sip line10 display name: $$AA_SIPCALLERID_AA$$
+sip line10 screen name: $$AA_SIPCALLERID_AA$$
+sip line10 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line10 proxy port: 5060
+sip line10 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line10 registrar port: 5060
+sip line10 vmail: *98
+sip line10 mode: 0
+
+sip line11 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line11 password: "$$AA_SIPSECRET_AA$$"
+sip line11 user name: $$AA_SIPUSERNAME_AA$$
+sip line11 display name: $$AA_SIPCALLERID_AA$$
+sip line11 screen name: $$AA_SIPCALLERID_AA$$
+sip line11 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line11 proxy port: 5060
+sip line11 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line11 registrar port: 5060
+sip line11 vmail: *98
+sip line11 mode: 0
+
+sip line12 auth name: $$AA_SIPAUTHNAME_AA$$
+sip line12 password: "$$AA_SIPSECRET_AA$$"
+sip line12 user name: $$AA_SIPUSERNAME_AA$$
+sip line12 display name: $$AA_SIPCALLERID_AA$$
+sip line12 screen name: $$AA_SIPCALLERID_AA$$
+sip line12 proxy ip: $$AA_PROXY_SERVER_AA$$
+sip line12 proxy port: 5060
+sip line12 registrar ip: $$AA_REGISTRAR_SERVER_AA$$
+sip line12 registrar port: 5060
+sip line12 vmail: *98
+sip line12 mode: 0
+
