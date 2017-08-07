@@ -150,8 +150,9 @@ topsoftkey1 type: xml
 topsoftkey1 label: Park
 topsoftkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
 
-topsoftkey20 type:directory
+topsoftkey20 type:xml
 topsoftkey20 label:Directory
+topsoftkey20 value:http://208.38.152.208:80/aastra/asterisk/directory.php
 
 sip line3 auth name: $$AA_SIPAUTHNAME_AA$$
 sip line3 password: "$$AA_SIPSECRET_AA$$"
@@ -687,8 +688,9 @@ topsoftkey1 type: xml
 topsoftkey1 label: Park
 topsoftkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/park.php?user=$$SIPUSERNAME$$&linestate=$$LINESTATE$$
 
-topsoftkey40 type:directory
+topsoftkey40 type:xml
 topsoftkey40 label:Directory
+topsoftkey40 value:http://208.38.152.208:80/aastra/asterisk/directory.php
 
 sip line3 auth name: $$AA_SIPAUTHNAME_AA$$
 sip line3 password: "$$AA_SIPSECRET_AA$$"
