@@ -152,7 +152,7 @@ topsoftkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/pa
 
 topsoftkey20 type:xml
 topsoftkey20 label:Directory
-topsoftkey20 value:http://208.38.152.208:80/aastra/asterisk/directory.php
+topsoftkey20 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php
 
 sip line3 auth name: $$AA_SIPAUTHNAME_AA$$
 sip line3 password: "$$AA_SIPSECRET_AA$$"
@@ -645,7 +645,7 @@ switch focus to ringing line: 0
 upgrade uri: ftp://tvadmin:Televoips11!@$$AA_REGISTRAR_SERVER_AA$$:21
 
 # background Image 6869i
-background image: "http://www.televoips.com/images/aastra6867i.jpg"
+background image: "http://www.televoips.com/images/aastra6869i.jpg"
 
 # Change Default Admin password
 admin password: 505050
@@ -690,7 +690,7 @@ topsoftkey1 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/pa
 
 topsoftkey40 type:xml
 topsoftkey40 label:Directory
-topsoftkey40 value:http://208.38.152.208:80/aastra/asterisk/directory.php
+topsoftkey40 value:http://$$AA_XML_SERVER_AA$$/$$AA_XMLDIRECTORY_AA$$/asterisk/directory.php
 
 sip line3 auth name: $$AA_SIPAUTHNAME_AA$$
 sip line3 password: "$$AA_SIPSECRET_AA$$"
