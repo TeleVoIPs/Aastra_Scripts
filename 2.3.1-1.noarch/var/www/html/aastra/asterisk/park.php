@@ -80,7 +80,7 @@ switch($action)
     # Park (does not work on 6739i 3.0.1)
 	case 'park':
 		# Retrieve parking lot
-		$parking=Aastra_get_park_config_Asterisk();
+		$parking=Aastra_get_park_config_Asterisk($user);
 		# Parking lot configured
 		if($parking['parkext']!='')
 		{
@@ -150,6 +150,15 @@ switch($action)
 	case 'list':
 		# Get Parked calls
 		$park=Aastra_get_parked_calls_Asterisk();
+    $parking=Aastra_get_park_config_Asterisk($user);
+    if(isset($parking['parkpos'])) {
+      foreach($park as $key => $value) {
+        if($value[0] < $parking['parkmin'] || $value[0] > $parking['parkmax']) {
+          unset($park[$key]);
+        }
+      }
+    }
+
 		$count=count($park);
 
     	# Update display
