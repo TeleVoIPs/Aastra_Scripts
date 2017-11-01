@@ -7,12 +7,12 @@
 #
 # Public functions
 # 	Aastra_get_callerid_Asterisk(user)
-# 		This function retrieves the user callerID of a user in the Asterisk registry 
+# 		This function retrieves the user callerID of a user in the Asterisk registry
 #		(FreePBX 2.3)
 # 	Aastra_get_username_Asterisk(user)
 #		This function retrieves the username of a user in the Asterisk registry (FreePBX 2.3)
 # 	Aastra_get_secret_Asterisk(user)
-# 		This function retrieves the SIP password (secret) of a user in the Asterisk 
+# 		This function retrieves the SIP password (secret) of a user in the Asterisk
 #		configuration
 # 	Aastra_verify_user_Asterisk(extension,password,mode)
 #		This function checks the user credentials for vm or sip.
@@ -51,7 +51,7 @@
 # 	Aastra_meetme_action_Asterisk(confno,action,user-id)
 #		This function sends a meetme command such as kick, mute or unmute,
 # 	Aastra_get_meetme_rooms_Asterisk()
-#		This function returns the list of configured meetme rooms on the platform and the 
+#		This function returns the list of configured meetme rooms on the platform and the
 #		current status.
 # 	Aastra_get_park_config_Asterisk()
 #		This function returns the current parking configuration
@@ -60,14 +60,14 @@
 #	Aastra_get_version_Asterisk()
 # 		This function returns the current Asterisk version.
 # 	Aastra_get_registry_Asterisk()
-#		This function returns the list of registered SIP phones 
+#		This function returns the list of registered SIP phones
 #      Aastra_get_userdevice_Asterisk(device)
 #		This function returns the user attached to a device
 #      Aastra_get_device_info_Asterisk(device)
 #		This function returns all the configuration data regarding a device. This is used in
 # 		the user and device freePBX mode.
 #      Aastra_get_user_info_Asterisk(user)
-#		This function returns all the configuration data regarding a user. This is used in 
+#		This function returns all the configuration data regarding a user. This is used in
 #		the user and device freePBX mode.
 # 	Aastra_check_user_login_Asterisk(user,password)
 #		This function tests the user credentials in the device and user mode.
@@ -78,7 +78,7 @@
 #      Aastra_is_daynight_notify_allowed_Asterisk(user)
 #		This function checks if a user is allowed to have the Day/Night notification.
 #      Aastra_check_signature_Asterisk(user)
-#       	This function checks if the request is coming from the same phone. If not a message 
+#       	This function checks if the request is coming from the same phone. If not a message
 #  		is displayed to the user.
 # 	Aastra_manage_presence_Asterisk(user,action,type,value)
 # 		This function manage the user presence records in the Asterisk database
@@ -102,11 +102,11 @@
 # 		This function gets the callerID for a directory array
 # 	Aastra_get_bulk_registry_Asterisk(array)
 # 		This function gets the registry status for a directory array
-# 	Aastra_queue_pause_Asterisk(agent,queue,pause)  
+# 	Aastra_queue_pause_Asterisk(agent,queue,pause)
 # 		This function sets the pause status for an agent in a queue.
-# 	Aastra_queue_add_Asterisk(agent,queue)  
+# 	Aastra_queue_add_Asterisk(agent,queue)
 # 		This function adds a dynamic agent in a queue.
-# 	Aastra_queue_remove_Asterisk(agent,queue)  
+# 	Aastra_queue_remove_Asterisk(agent,queue)
 # 		This function removes a dynamic agent from a queue.
 # 	Aastra_send_message_Asterisk(user,long_message,short_message,uri)
 #		This function immediately sends a message to a user.
@@ -126,8 +126,8 @@
 # 		This function returns information on the languages configured for the phone and if it
 # 		is needed to ask the user to select a language.
 # 	Aastra_get_startup_profile_Asterisk(user)
-# 		This function returns the profile to use for self-configuration for any given 
-#		user/device based on the configuration in asterisk.conf. If user/device is not 
+# 		This function returns the profile to use for self-configuration for any given
+#		user/device based on the configuration in asterisk.conf. If user/device is not
 #		configured, default profile is returned.
 #
 # Private functions
@@ -140,6 +140,7 @@
 ###################################################################################################
 require_once('AastraAsterisk.class.php');
 require_once('AastraCommon.php');
+require_once('CustomDnd.php');
 require_once('DB.php');
 
 ###################################################################################################
@@ -175,7 +176,7 @@ $AA_VM_MAXMSG='99';
 
 # Asterisk Proxy Server
 if($array_config_asterisk['General']['proxy']!='') $AA_PROXY_SERVER = $array_config_asterisk['General']['proxy'];
-else 
+else
 	{
 	if(isset($_SERVER['SERVER_ADDR'])) $AA_PROXY_SERVER=$_SERVER['SERVER_ADDR'];
 	else $AA_PROXY_SERVER='AA_PROXY_SERVER';
@@ -183,13 +184,13 @@ else
 
 # Asterisk Registrar Server
 if($array_config_asterisk['General']['registrar']!='') $AA_REGISTRAR_SERVER = $array_config_asterisk['General']['registrar'];
-else 
+else
 	{
 	if(isset($_SERVER['SERVER_ADDR'])) $AA_REGISTRAR_SERVER=$_SERVER['SERVER_ADDR'];
 	else $AA_REGISTRAR_SERVER='AA_REGISTRAR_SERVER';
 	}
 
-# Phone signature 
+# Phone signature
 $AA_PHONE_SIGNATURE=True;
 if($array_config_asterisk['General']['signature']=='0') $AA_PHONE_SIGNATURE = False;
 
@@ -288,7 +289,7 @@ $res=$as->connect();
 # Get value in the database
 $callerid=$as->database_get('AMPUSER',$user.'/cidname');
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Return Caller ID
@@ -328,7 +329,7 @@ else
 	$res=$as->database_get('DEVICE',$user.'/user');
 	if($res) $username=$res;
 
-	# Disconnect properly	
+	# Disconnect properly
 	$as->disconnect();
 	}
 
@@ -398,7 +399,7 @@ switch($mode)
 				{
 				# Get all the user data
 				$sip_array=Aastra_readINIfile($ASTERISK_LOCATION.'sip_additional.conf',';','=');
-	
+
 				# Check user and password
 				if($sip_array[$extension]!=NULL) $return=True;
 				}
@@ -413,9 +414,9 @@ switch($mode)
 				{
 				$line=rtrim($line);
 				if(preg_match("/^\s*\[([a-z]*)\]\s*$/i", $line, $m)) $section=$m[1];
-				if(($section==$AA_VM_CONTEXT) && preg_match("/^([0-9]*)\s*=>?\s*([0-9]*)\s*,(.*)$/",$line,$m)) 
+				if(($section==$AA_VM_CONTEXT) && preg_match("/^([0-9]*)\s*=>?\s*([0-9]*)\s*,(.*)$/",$line,$m))
 					{
-			        	if ($m[1]==$extension) 
+			        	if ($m[1]==$extension)
 						{
 						$vm=True;
 						if($m[2]==$password) $return=True;
@@ -433,7 +434,7 @@ switch($mode)
 				{
 				# Get all the user data
 				$sip_array=Aastra_readINIfile($ASTERISK_LOCATION.'sip_additional.conf',';','=');
-	
+
 				# Check user and password
 				if($sip_array[$extension]!=NULL) $return=True;
 				}
@@ -502,17 +503,17 @@ foreach($folders as $folder)
 		umask(0000);
 		mkdir($AA_VM_BOXBASE.'/'.$user,$AA_VM_DIRMODE);
 		}
-	if(!is_dir($AA_VM_BOXBASE.'/'.$user.'/'.$folder)) 
+	if(!is_dir($AA_VM_BOXBASE.'/'.$user.'/'.$folder))
 		{
 		umask(0000);
 		mkdir($AA_VM_BOXBASE.'/'.$user.'/'.$folder,$AA_VM_DIRMODE);
 		}
 
 	# Read directory
-	if($handle=@opendir($dir.'/'.$folder)) 
+	if($handle=@opendir($dir.'/'.$folder))
 		{
-	    	while (false!==($file=@readdir($handle))) 
-			{ 
+	    	while (false!==($file=@readdir($handle)))
+			{
 			if (preg_match("/^(msg(.*))\.txt$/",$file, $m))
 				{
 				$info=array();
@@ -524,7 +525,7 @@ foreach($folders as $folder)
 					{
 	  				foreach($lines as $line)
 						{
-		    				if(preg_match("/^([a-z]*)=(.*)$/",rtrim($line),$m) || preg_match("/^([a-z]*) = (.*)$/",rtrim($line),$m)) $info[$m[1]]=$m[2]; 
+		    				if(preg_match("/^([a-z]*)=(.*)$/",rtrim($line),$m) || preg_match("/^([a-z]*) = (.*)$/",rtrim($line),$m)) $info[$m[1]]=$m[2];
 	  					}
 	  				$messages[]=$info;
 					}
@@ -561,10 +562,10 @@ Global $AA_VM_BOXBASE;
 
 $dir=$AA_VM_BOXBASE.'/'.$user.'/'.$folder;
 $deleted=False;
-if($handle=@opendir($dir)) 
+if($handle=@opendir($dir))
 	{
-    	while(false!==($file=@readdir($handle))) 
-		{ 
+    	while(false!==($file=@readdir($handle)))
+		{
       		if (preg_match("/^msg".$msg_id.'/',$file,$m))
 			{
 			if(@unlink($dir.'/'.$file)) $deleted = True;
@@ -601,10 +602,10 @@ $srcPath=$AA_VM_BOXBASE.'/'.$user.'/'.$srcFolder;
 $dstPath=$AA_VM_BOXBASE.'/'.$user.'/'.$dstFolder;
 
 # Find new message ID
-for($i=0;$i<=$AA_VM_MAXMSG;$i++) 
+for($i=0;$i<=$AA_VM_MAXMSG;$i++)
 	{
     	$dstMessage=sprintf('msg%04d',$i);
-    	if(!@file_exists($dstPath.'/'.$dstMessage.'.txt') ) 
+    	if(!@file_exists($dstPath.'/'.$dstMessage.'.txt') )
 		{
 		$return=sprintf('%04d-%s',$i,$dstFolder);
 		break;
@@ -615,7 +616,7 @@ for($i=0;$i<=$AA_VM_MAXMSG;$i++)
 # Move if found
 if($return!='')
 	{
-	foreach(array('wav','WAV','gsm','txt') as $extension) 
+	foreach(array('wav','WAV','gsm','txt') as $extension)
 		{
     		$src=$srcPath.'/msg'.$message.'.'.$extension;
 	    	$dst=$dstPath.'/'.$dstMessage.'.'.$extension;
@@ -664,15 +665,15 @@ if(!@file_exists($dstPath))
   	}
 
 # Find next message number
-for($i=0;$i<=$AA_VM_MAXMSG;$i++) 
+for($i=0;$i<=$AA_VM_MAXMSG;$i++)
 	{
     	$dstMessage=sprintf('msg%04d',$i);
     	if(!@file_exists($dstPath.'/'.$dstMessage.'.txt') ) break;
-	if($i >= $AA_VM_MAXMSG) return(False);  
+	if($i >= $AA_VM_MAXMSG) return(False);
   	}
 
 # Move files
-foreach(array('wav','WAV','gsm','txt') as $extension) 
+foreach(array('wav','WAV','gsm','txt') as $extension)
 	{
     	$src=$srcPath.'/msg'.$msg.'.'.$extension;
     	$dst=$dstPath.'/'.$dstMessage.'.'.$extension;
@@ -711,17 +712,17 @@ $res = $as->Command('sip show peer '.$user.' load');
 $line=split("\n", $res['data']);
 foreach($line as $parameter)
 	{
-	if(strstr($parameter,'Addr->IP')) 
+	if(strstr($parameter,'Addr->IP'))
 		{
 		$ip=split(' ', $parameter);
-		if(!strstr($ip[8],'Unspecified')) 
+		if(!strstr($ip[8],'Unspecified'))
 			{
 			if($ip[8]!='') $return=True;
 			}
 		}
 	}
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Return answer
@@ -750,7 +751,7 @@ $as=new AGI_AsteriskManager();
 $res=$as->connect();
 
 # Process each chunk
-while(count($array_user) > 0) 
+while(count($array_user) > 0)
 	{
 	# Create the chunks
 	$array_user_slice=array_slice($array_user,0,$EXT_NUM_LIMIT);
@@ -784,14 +785,14 @@ $as->disconnect();
 # Returns
 #   Array
 ###################################################################################################
-function Aastra_parse_conf_Asterisk($filename) 
+function Aastra_parse_conf_Asterisk($filename)
 {
 $file = file($filename);
 $index=0;
-foreach ($file as $line) 
+foreach ($file as $line)
 	{
 	if (preg_match("/^\s*([a-zA-Z0-9]+)\s* => \s*([^|#;]*)\s*([;#].*)?/",$line,$matches))
-		{ 
+		{
 		$value= split(",", $matches[2]);
 		$conf[$value[0]]=0;
 		$index++;
@@ -834,7 +835,7 @@ return($return);
 # Parameters
 #   @user		user extension
 #   @action		action to be performed, cancel, set or anything
-#   @value		value 
+#   @value		value
 #
 # Returns
 #   Current CF value
@@ -845,7 +846,7 @@ Global $AA_FREEPBX_MODE;
 Global $AA_FREEPBX_USEDEVSTATE;
 
 # Translate user if needed
-if($AA_FREEPBX_MODE=='2') 
+if($AA_FREEPBX_MODE=='2')
 	{
 	$user=Aastra_get_userdevice_Asterisk($user);
 	$array_user=Aastra_get_user_info_Asterisk($user);
@@ -888,8 +889,8 @@ switch($action)
 		if($res) $cf=$res;
 		break;
 	}
-	
-# Disconnect properly	
+
+# Disconnect properly
 $as->disconnect();
 
 # Return CF
@@ -904,7 +905,7 @@ return($cf);
 # Parameters
 #   @user		user extension
 #   @action		action to be performed, cancel, set or anything
-#   @value		value 
+#   @value		value
 #
 # Returns
 #   Current CF value
@@ -915,7 +916,7 @@ Global $AA_FREEPBX_MODE;
 Global $AA_FREEPBX_USEDEVSTATE;
 
 # Translate user if needed
-if($AA_FREEPBX_MODE=='2') 
+if($AA_FREEPBX_MODE=='2')
 	{
 	$user=Aastra_get_userdevice_Asterisk($user);
 	$array_user=Aastra_get_user_info_Asterisk($user);
@@ -948,8 +949,8 @@ switch($action)
 		if($res) $cf=$res;
 		break;
 	}
-	
-# Disconnect properly	
+
+# Disconnect properly
 $as->disconnect();
 
 # Return CF
@@ -964,7 +965,7 @@ return($cf);
 # Parameters
 #   @user		user extension
 #   @action		action to be performed, cancel, set or anything
-#   @value		value 
+#   @value		value
 #
 # Returns
 #   Current CF value
@@ -975,7 +976,7 @@ Global $AA_FREEPBX_MODE;
 Global $AA_FREEPBX_USEDEVSTATE;
 
 # Translate user if needed
-if($AA_FREEPBX_MODE=='2') 
+if($AA_FREEPBX_MODE=='2')
 	{
 	$user=Aastra_get_userdevice_Asterisk($user);
 	$array_user=Aastra_get_user_info_Asterisk($user);
@@ -1008,8 +1009,8 @@ switch($action)
 		if($res) $cf=$res;
 		break;
 	}
-	
-# Disconnect properly	
+
+# Disconnect properly
 $as->disconnect();
 
 # Return CF
@@ -1034,7 +1035,7 @@ Global $AA_FREEPBX_MODE;
 Global $AA_FREEPBX_USEDEVSTATE;
 
 # Translate user if needed
-if($AA_FREEPBX_MODE=='2') 
+if($AA_FREEPBX_MODE=='2')
 	{
 	$user=Aastra_get_userdevice_Asterisk($user);
 	$array_user=Aastra_get_user_info_Asterisk($user);
@@ -1048,23 +1049,34 @@ else $devices=array($user);
 $as=new AGI_AsteriskManager();
 $res=$as->connect();
 
+$dnddb = new CustomDnd();
+
 # DND GET
 if(($action=='get') or ($action=='change'))
 	{
 	$res=$as->database_get('DND',$user);
 	if($res)
 		{
-		if($res=='YES') $dnd=1;
-		else $dnd=0;
-		} 
-	else $dnd=0;
+			if($res=='YES'){
+				$dnd=1;
+				$dnddb->enableDnd($user);
+			}
+			else {
+				$dnd=0;
+				$dnddb->disableDnd($user);
+			}
+		}
+	else {
+		$dnd=0;
+		$dnddb->disableDnd($user);
+	}
 	}
 
 # Process change
 if($action=='change')
 	{
-	if($dnd==0) $action='enable';
-	else $action='disable';
+		if($dnd==0) $action='enable';
+		else $action='disable';
 	}
 
 # Process rest of the actions
@@ -1079,6 +1091,7 @@ switch($action)
 			foreach($devices as $device) Aastra_set_devstate_asterisk('Custom:DEVDND'.$device,'BUSY',$as);
 			Aastra_set_devstate_asterisk('Custom:DND'.$user,'BUSY',$as);
 			}
+		$dnddb->enableDnd($user);
 		break;
 
 	# Enable
@@ -1090,10 +1103,11 @@ switch($action)
 			foreach($devices as $device) Aastra_set_devstate_asterisk('Custom:DEVDND'.$device,'NOT_INUSE',$as);
 			Aastra_set_devstate_asterisk('Custom:DND'.$user,'NOT_INUSE',$as);
 			}
+		$dnddb->disableDnd($user);
 		break;
 	}
-		
-# Disconnect properly	
+
+# Disconnect properly
 $as->disconnect();
 
 # Return DND
@@ -1135,13 +1149,13 @@ switch($action)
 			else $night=0;
 			}
 		else $night=0;
-	      	if($night==0)  
+	      	if($night==0)
 			{
 	   		$res=$as->database_put('DAYNIGHT','C'.$index,'NIGHT');
 			Aastra_set_devstate_asterisk('Custom:DAYNIGHT'.$index,'INUSE',$as);
 	     		$night=1;
 		  	}
-	      else  
+	      else
 			{
         		$res=$as->database_put('DAYNIGHT','C'.$index,'DAY');
 			Aastra_set_devstate_asterisk('Custom:DAYNIGHT'.$index,'NOT_INUSE',$as);
@@ -1177,7 +1191,7 @@ switch($action)
 			}
 		break;
 
-	# Get status for index	
+	# Get status for index
 	default:
 		# Single index
 		if($index!='ALL')
@@ -1205,7 +1219,7 @@ switch($action)
 						$res=$as->database_get('DAYNIGHT','C'.$value['ext']);
 						if($res)
 							{
-							if($res=='NIGHT') 
+							if($res=='NIGHT')
 								{
 								$night=1;
 								break;
@@ -1218,7 +1232,7 @@ switch($action)
 		break;
 	}
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Return Day/Night
@@ -1234,7 +1248,7 @@ return($night);
 #   None
 #
 # Returns
-#   Array 
+#   Array
 ###################################################################################################
 function Aastra_get_parked_calls_Asterisk()
 {
@@ -1252,7 +1266,7 @@ if(Aastra_compare_version_Asterisk('1.6'))
 	$command2='core show channel';
 	$parameter=1;
 	}
-else 
+else
 	{
 	$command1='show parkedcalls';
 	$command2='show channel';
@@ -1292,7 +1306,7 @@ foreach($line as $myline)
 		}
 	}
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Return answer
@@ -1329,7 +1343,7 @@ if(Aastra_compare_version_Asterisk('1.6'))
 	$param_channel=1;
 	$param_timeout=6;
 	}
-else 
+else
 	{
 	$command1='show parkedcalls';
 	$command2='show channel';
@@ -1373,7 +1387,7 @@ foreach ($line as $myline)
 				}
 			for($i=0;$i<4;$i++)
 				{
-				if($temp[$i]!='') 
+				if($temp[$i]!='')
 					{
 					$park[$count]['user']=$temp[$i];
 					break;
@@ -1385,7 +1399,7 @@ foreach ($line as $myline)
 		}
 	}
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Get Park config
@@ -1394,7 +1408,7 @@ $conf_park=Aastra_get_park_config_Asterisk();
 # Find the right call
 $timeout=0;
 $repark=0;
-if(($number>=$conf_park['parkposmin']) and ($number<=$conf_park['parkposmax'])) 
+if(($number>=$conf_park['parkposmin']) and ($number<=$conf_park['parkposmax']))
 	{
 	$repark=1;
 	$timeout=$conf_park['parkingtime']-20;
@@ -1405,7 +1419,7 @@ if(count($park)>0)
 		{
 		if($repark==0)
 			{
-			if(($value['number']==$number) and ($value['user']==$user) and ($value['timeout']>$timeout)) 
+			if(($value['number']==$number) and ($value['user']==$user) and ($value['timeout']>$timeout))
 				{
 				$timeout=$value['timeout'];
 				$return=$value['orbit'];
@@ -1413,7 +1427,7 @@ if(count($park)>0)
 			}
 		else
 			{
-			if(($value['user']==$user) and ($value['timeout']>$timeout)) 
+			if(($value['user']==$user) and ($value['timeout']>$timeout))
 				{
 				$timeout=$value['timeout'];
 				$return=$value['orbit'];
@@ -1432,18 +1446,18 @@ return($return);
 # This function originates a call from the platform
 #
 # Parameters
-#    @channel		Channel on which to originate the call (The same as you specify in the Dial 
-#                    application command) 
-#    @context		Context to use on connect (must use Exten & Priority with it) 
-#    @exten		Extension to use on connect (must use Context & Priority with it) 
-#    @priority	Priority to use on connect (must use Context & Exten with it) 
-#    @timeout		Timeout (in milliseconds) for the connection to happen(defaults to 30000 
-#                    milliseconds) 
-#    @callerID 	CallerID to use for the call 
-#    @variable 	Channels variables to set (max 32). Variables will be set for both channels 
-#                   (local and connected). 
-#    @account		Account code for the call 
-#    @application	Application to use on connect (use Data for parameters) 
+#    @channel		Channel on which to originate the call (The same as you specify in the Dial
+#                    application command)
+#    @context		Context to use on connect (must use Exten & Priority with it)
+#    @exten		Extension to use on connect (must use Context & Priority with it)
+#    @priority	Priority to use on connect (must use Context & Exten with it)
+#    @timeout		Timeout (in milliseconds) for the connection to happen(defaults to 30000
+#                    milliseconds)
+#    @callerID 	CallerID to use for the call
+#    @variable 	Channels variables to set (max 32). Variables will be set for both channels
+#                   (local and connected).
+#    @account		Account code for the call
+#    @application	Application to use on connect (use Data for parameters)
 #    @data		Data if Application parameters are used, passed as an array
 #
 # Returns
@@ -1497,7 +1511,7 @@ $res=$as->connect();
 # AGI command meetme list
 $res=$as->Command('meetme list '.$confno);
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Process result
@@ -1514,7 +1528,7 @@ foreach($line as $myline)
 		$meetmechannel[$nbuser][4]=False;
 		$name=array();
 		$count=count($linevalue);
-		for($i=4;$i<$count;$i++) 
+		for($i=4;$i<$count;$i++)
 			{
 			if($linevalue[$i]!='Channel:') $name[]=$linevalue[$i];
 			else break;
@@ -1554,9 +1568,9 @@ $res = $as->connect();
 
 # Send command
 $res = $as->Command('meetme '.$action.' '.$confno.' '.$user_id);
-sleep(1);		
+sleep(1);
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 }
 
@@ -1581,7 +1595,7 @@ $datasource=$amp_conf['']['ampdbengine'].'://'.$amp_conf['']['ampdbuser'].':'.$a
 $db=DB::connect($datasource);
 
 # Check connection
-if(DB::isError($db)) 
+if(DB::isError($db))
 	{
 	# Debug message
 	Aastra_debug('Cannot connect to freePBX database, error message='.$db->getMessage());
@@ -1648,7 +1662,7 @@ if($db!=NULL)
 				{
 				$linevalue= preg_split("/ /", $myline,-1,PREG_SPLIT_NO_EMPTY);
 				if (substr($myline,0,1)=='*') $trace=0;
-				else 
+				else
 					{
 					if(isset($conf_array[$linevalue[0]])) $conf_array[$linevalue[0]]['parties']=intval($linevalue[1]);
 					}
@@ -1656,7 +1670,7 @@ if($db!=NULL)
 			}
 		}
 
-	# Disconnect properly	
+	# Disconnect properly
 	$as->disconnect();
 	}
 
@@ -1820,7 +1834,7 @@ else return False;
 ###################################################################################################
 # Aastra_get_registry_Asterisk()
 #
-# This function returns the list of registered SIP phones 
+# This function returns the list of registered SIP phones
 #
 # Parameters
 #    None
@@ -1839,7 +1853,7 @@ $res=$as->connect();
 # GET Registry
 $res=$as->Command('database show SIP/Registry');
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Process the answer
@@ -1847,7 +1861,7 @@ $line=split("\n", $res['data']);
 $nb_lines=count($line);
 for ($i=0;$i<$nb_lines;$i++)
 	{
-	if(stristr($line[$i],'SIP/Registry')) 
+	if(stristr($line[$i],'SIP/Registry'))
 		{
 		$value=split(':', $line[$i]);
 		$prompt[]=array(	'ext'=>trim(substr($value[0],strlen('/SIP/Registry/')),' '),
@@ -1894,9 +1908,9 @@ if($AA_FREEPBX_MODE=='2')
 		{
 		$data=split(" ", $line[1]);
 		if($data[0]=="Value:") $user=$data[1];
-		}	
-		
-	# Disconnect properly	
+		}
+
+	# Disconnect properly
 	$as->disconnect();
 
 	# Return empty if 'none'
@@ -1910,14 +1924,14 @@ return($user);
 ###################################################################################################
 # Aastra_get_device_info_Asterisk(device)
 #
-# This function returns all the configuration data regarding a device. This is used in the user 
+# This function returns all the configuration data regarding a device. This is used in the user
 # and device freePBX mode.
 #
 # Parameters
 #    device		device ID
 #
 # Returns
-#    Array		
+#    Array
 #	default_user	default user for the device
 #      dial		how to dial the device
 #	type		adhoc or fixed
@@ -1934,8 +1948,8 @@ $res = $as->connect();
 
 # All the requests
 foreach($array_in as $key=>$value) $array_out[$value]=$as->database_get('DEVICE',$device.'/'.$value);
-		
-# Disconnect properly	
+
+# Disconnect properly
 $as->disconnect();
 
 # Return user
@@ -1945,14 +1959,14 @@ return($array_out);
 ###################################################################################################
 # Aastra_get_user_info_Asterisk(user)
 #
-# This function returns all the configuration data regarding a user. This is use in the user 
+# This function returns all the configuration data regarding a user. This is use in the user
 # and device freePBX mode.
 #
 # Parameters
 #    user		user ID
 #
 # Returns
-#    Array		
+#    Array
 #	cidname	Caller ID name
 #	cidnum		Caller ID number
 #	device		List of devices the user is attached to
@@ -1974,8 +1988,8 @@ $res = $as->connect();
 
 # All the requests
 foreach($array_in as $key=>$value) $array_out[$value]=$as->database_get('AMPUSER',$user.'/'.$value);
-		
-# Disconnect properly	
+
+# Disconnect properly
 $as->disconnect();
 
 # Return user
@@ -2022,7 +2036,7 @@ return($return);
 #    mode		'user' or 'admin' optional
 #
 # Returns
-#    Array[]	
+#    Array[]
 #	name		callerid
 #	number		extension
 #	mailbox	mailbox context
@@ -2038,21 +2052,21 @@ $res = $as->connect();
 $raw=$as->database_show('AMPUSER');
 
 # Purge the answers
-foreach($raw as $key=>$value) 
+foreach($raw as $key=>$value)
 	{
-	if(strstr($key,'cidname')) 
+	if(strstr($key,'cidname'))
 		{
 		$number=preg_replace(array('/\/AMPUSER\//','/\/cidname/'),array('',''),$key);
-		$array_out[$number]['number']=$number; 
-		$array_out[$number]['name']=$value; 
+		$array_out[$number]['number']=$number;
+		$array_out[$number]['name']=$value;
 		$array_out[$number]['status']=AA_PRESENCE_AVAILABLE;
 		$array_out[$number]['voicemail']='novm';
 		}
-	if(strstr($key,'presence/status')) $array_out[preg_replace(array('/\/AMPUSER\//','/\/presence\/status/'),array('',''),$key)]['status']=$value; 
-	if(strstr($key,'voicemail')) $array_out[preg_replace(array('/\/AMPUSER\//','/\/voicemail/'),array('',''),$key)]['voicemail']=$value; 
+	if(strstr($key,'presence/status')) $array_out[preg_replace(array('/\/AMPUSER\//','/\/presence\/status/'),array('',''),$key)]['status']=$value;
+	if(strstr($key,'voicemail')) $array_out[preg_replace(array('/\/AMPUSER\//','/\/voicemail/'),array('',''),$key)]['voicemail']=$value;
 	}
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # User mode
@@ -2060,12 +2074,12 @@ if($mode=='user')
 	{
 	# Retrieve configuration file
 	$array_config_asterisk=Aastra_readINIfile(AASTRA_CONFIG_DIRECTORY.'asterisk.conf','#','=');
-	if($array_config_asterisk['Directory']['hidden']!='') 
+	if($array_config_asterisk['Directory']['hidden']!='')
 		{
 		$array_hidden=explode(',',$array_config_asterisk['Directory']['hidden']);
 		foreach($array_hidden as $key=>$value)
 			{
-			if(strstr($value,'-')) 
+			if(strstr($value,'-'))
 				{
 				$array_tmp=explode('-',$value);
 				if($array_tmp['0']!='') $array_check[$key]['min']=$array_tmp[0];
@@ -2079,13 +2093,13 @@ if($mode=='user')
 				$array_check[$key]['max']=$value;
 				}
 			}
-		foreach($array_out as $key=>$value) 
+		foreach($array_out as $key=>$value)
 			{
 			foreach($array_check as $key2=>$value2)
 				{
 				if(($value['number']>=$value2['min']) and ($value['number']<=$value2['max']))
 					{
-					unset($array_out[$key]); 
+					unset($array_out[$key]);
 					break;
 					}
 				}
@@ -2251,7 +2265,7 @@ return($return);
 ###################################################################################################
 # Aastra_check_signature_Asterisk(user)
 #
-# This function checks if the request is coming from the same phone. If not a message is displayed 
+# This function checks if the request is coming from the same phone. If not a message is displayed
 # to the user.
 #
 # Parameters
@@ -2336,7 +2350,7 @@ switch($action)
 		$array_action=array(AA_PRESENCE_AWAY,AA_PRESENCE_ATLUNCH,AA_PRESENCE_INMEETING,AA_PRESENCE_OUTOFOFFICE,AA_PRESENCE_ATHOME,AA_PRESENCE_DISCONNECTED);
 		$get=$as->database_get('AMPUSER',$user.'/presence/actions');
 		if($get)
-			{ 
+			{
 			$return['action']=unserialize(base64_decode($get));
 			foreach($array_action as $state)
 				{
@@ -2389,7 +2403,7 @@ switch($action)
 		$array_action=array(AA_PRESENCE_AWAY,AA_PRESENCE_ATLUNCH,AA_PRESENCE_INMEETING,AA_PRESENCE_OUTOFOFFICE,AA_PRESENCE_ATHOME,AA_PRESENCE_DISCONNECTED);
 		$get=$as->database_get('AMPUSER',$user.'/presence/actions');
 		if($get)
-			{ 
+			{
 			$return['action']=unserialize(base64_decode($get));
 			foreach($array_action as $state)
 				{
@@ -2431,7 +2445,7 @@ switch($action)
 			case 'status':
 				# Not available
 				if($value!=AA_PRESENCE_AVAILABLE) $res=$as->database_put('AMPUSER',$user.'/presence/status',$value);
-				else 
+				else
 					{
 					# Delete from database as well as date, time and notifications
 					$res=$as->database_del('AMPUSER',$user.'/presence/status');
@@ -2472,9 +2486,9 @@ switch($action)
 				else $notify='';
 
 				# No existing value
-				if($value!='') 
+				if($value!='')
 					{
-					if($notify!='') 
+					if($notify!='')
 						{
 						$explode=explode(',',$notify);
 						if(!in_array($value,$explode)) $notify.=','.Aastra_get_userdevice_Asterisk($value);
@@ -2483,7 +2497,7 @@ switch($action)
 					if($type=='notifym') $res=$as->database_put('AMPUSER',$user.'/presence/notifym',$notify);
 					else $res=$as->database_put('AMPUSER',$user.'/presence/notifyv',$notify);
 					}
-				else 
+				else
 					{
 					if($type=='notifym') $res=$as->database_del('AMPUSER',$user.'/presence/notifym');
 					else $res=$as->database_del('AMPUSER',$user.'/presence/notifyv');
@@ -2503,20 +2517,20 @@ switch($action)
 			else $get=$as->database_get('AMPUSER',$user.'/presence/notifyv');
 			if($get) $notify=$get;
 			else $notify='';
-			if($notify!='') 
+			if($notify!='')
 				{
 				$explode=explode(',',$notify);
-				if(in_array($value,$explode)) 
+				if(in_array($value,$explode))
 					{
 					unset($explode[array_search($value,$explode)]);
 					$notify=implode(',',$explode);
 					}
 				if($notify!='')
-					{ 
+					{
 					if($type=='notifym') $res=$as->database_put('AMPUSER',$user.'/presence/notifym',$notify);
 					else $res=$as->database_put('AMPUSER',$user.'/presence/notifyv',$notify);
 					}
-				else 
+				else
 					{
 					if($type=='notifym') $res=$as->database_del('AMPUSER',$user.'/presence/notifym');
 					else $res=$as->database_del('AMPUSER',$user.'/presence/notifyv');
@@ -2526,7 +2540,7 @@ switch($action)
 		break;
 	}
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Return
@@ -2564,12 +2578,12 @@ if($time!='0')
 				'5'=>Aastra_get_label('Fri',$language),
 				'6'=>Aastra_get_label('Sat',$language)
 			   );
-	if($AA_FORMAT_DT=='US') 
+	if($AA_FORMAT_DT=='US')
 		{
 		$date_screen=$array_day[date('w',$time)].' '.date('m/d/y',$time);
 		$time_screen=date('h:i A',$time);
 		}
-	else 
+	else
 		{
 		$date_screen=$array_day[date('w',$time)].' '.date('d/m/y',$time);
 		$time_screen=date('H:i',$time);
@@ -2619,7 +2633,7 @@ switch($action)
 	case 'get':
 	       # No answer
        	$return=array();
-        
+
 		# Cell Phone
 		$get=$as->database_get('AMPUSER',$user.'/info/cell');
 		if($get) $return['cell']=$get;
@@ -2666,9 +2680,9 @@ return($return);
 #
 # Parameters
 #    user		user extension
-#    action		action to perform 
-#				get_status, 		
-#				enable, 
+#    action		action to perform
+#				get_status,
+#				enable,
 #				disable,
 # 				change_status,
 #				get_all,
@@ -2696,7 +2710,7 @@ Global $AA_FREEPBX_MODE;
 Global $AA_FREEPBX_USEDEVSTATE;
 
 # Translate user if needed
-if($AA_FREEPBX_MODE=='2') 
+if($AA_FREEPBX_MODE=='2')
 	{
 	$user=Aastra_get_userdevice_Asterisk($user);
 	$array_user=Aastra_get_user_info_Asterisk($user);
@@ -2715,7 +2729,7 @@ if(($action=='get_status') or ($action=='change_status') or ($action=='get_all')
 	{
 	$res=$as->Command('database get AMPUSER '.$user.'/followme/ddial');
 	$data=strpos($res['data'],'Value:');
-	if ($data!==false) 
+	if ($data!==false)
 		{
 		$temp=trim(substr($res['data'],6+$data));
 		switch($temp)
@@ -2734,7 +2748,7 @@ if(($action=='get_status') or ($action=='change_status') or ($action=='get_all')
 				break;
 			}
 		}
-	else 
+	else
 		{
 		if($action!='get_all') $followme='2';
 		else $followme['status']='2';
@@ -2760,7 +2774,7 @@ switch($action)
 
 			case '1':
 				$res=$as->Command('database put AMPUSER/'.$user.'/followme ddial EXTENSION');
-				if($AA_FREEPBX_USEDEVSTATE) 
+				if($AA_FREEPBX_USEDEVSTATE)
 					{
 					foreach($devices as $device) Aastra_set_devstate_asterisk('Custom:FOLLOWME'.$device,'NOT_INUSE',$as);
 					}
@@ -2772,7 +2786,7 @@ switch($action)
 	# Enable
 	case 'enable':
 		$res=$as->Command('database put AMPUSER/'.$user.'/followme ddial DIRECT');
-		if($AA_FREEPBX_USEDEVSTATE) 
+		if($AA_FREEPBX_USEDEVSTATE)
 			{
 			foreach($devices as $device)
 				{
@@ -2785,7 +2799,7 @@ switch($action)
 	# Disable
 	case 'disable':
 		$res=$as->Command('database put AMPUSER/'.$user.'/followme ddial EXTENSION');
-		if($AA_FREEPBX_USEDEVSTATE) 
+		if($AA_FREEPBX_USEDEVSTATE)
 			{
 			foreach($devices as $device)
 				{
@@ -2794,7 +2808,7 @@ switch($action)
 			}
 		$followme=0;
 		break;
-	
+
 	# Get complete configuration
 	case 'get_all':
 		$res=$as->Command('database get AMPUSER '.$user.'/followme/prering');
@@ -2807,7 +2821,7 @@ switch($action)
 		else $followme['grptime']='';
 		$res=$as->Command('database get AMPUSER '.$user.'/followme/grpconf');
 		$data=strpos($res['data'],'Value:');
-		if ($data!==false) 
+		if ($data!==false)
 			{
 			if(trim(substr($res['data'],6+$data))=='ENABLED') $followme['grpconf']=True;
 			else $followme['grpconf']=False;
@@ -2861,8 +2875,8 @@ switch($action)
 		$db->disconnect();
 		break;
 	}
-		
-# Disconnect properly	
+
+# Disconnect properly
 $as->disconnect();
 
 # Return value
@@ -3043,7 +3057,7 @@ return($return);
 ###################################################################################################
 function Aastra_dial_number_Asterisk($user,$dial)
 {
-if($dial)  
+if($dial)
 	{
 	# Retrieve true user
 	$user=Aastra_get_userdevice_Asterisk($user);
@@ -3089,17 +3103,17 @@ foreach($array as $key=>$value)
 		{
 		if($AA_FREEPBX_MODE=='1') $name=Aastra_get_label('Unknown',$language);
 		}
-	else 
+	else
 		{
 		# FreePBX old school
-		if(!strstr($sip_array[$value['number']]['callerid'],'device')) 
+		if(!strstr($sip_array[$value['number']]['callerid'],'device'))
 			{
 			# Retrieve the value
 			$temp=explode(" <",$sip_array[$value['number']]['callerid'],2);
 			$number=$temp[0];
 			}
 		}
-	
+
 	# Still not found
 	if($name=='')
 		{
@@ -3111,7 +3125,7 @@ foreach($array as $key=>$value)
 	$array[$key]['name']=$name;
 	}
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Return Caller ID
@@ -3138,7 +3152,7 @@ $res=$as->connect();
 # GET Registry
 $res=$as->Command('database show SIP/Registry');
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Process the answer
@@ -3146,7 +3160,7 @@ $line=split("\n", $res['data']);
 $nb_lines=count($line);
 for ($i=0;$i<$nb_lines;$i++)
 	{
-	if(stristr($line[$i],'SIP/Registry')) 
+	if(stristr($line[$i],'SIP/Registry'))
 		{
 		$value=split(':', $line[$i]);
 		$registry[trim(substr($value[0],strlen('/SIP/Registry/')),' ')]=True;
@@ -3154,7 +3168,7 @@ for ($i=0;$i<$nb_lines;$i++)
 	}
 
 # All false by default
-foreach($array as $key=>$value) 
+foreach($array as $key=>$value)
 	{
 	if($registry[$value['number']]) $array[$key]['registry']=True;
 	else $array[$key]['registry']=False;
@@ -3165,7 +3179,7 @@ return($array);
 }
 
 ###################################################################################################
-# Aastra_queue_pause_Asterisk(agent,queue,pause)  
+# Aastra_queue_pause_Asterisk(agent,queue,pause)
 #
 # This function sets the pause status for an agent in a queue.
 #
@@ -3177,7 +3191,7 @@ return($array);
 # Returns
 #    None
 ###################################################################################################
-function Aastra_queue_pause_Asterisk($agent,$queue,$pause)  
+function Aastra_queue_pause_Asterisk($agent,$queue,$pause)
 {
 $asm=new AGI_AsteriskManager();
 $asm->connect();
@@ -3187,7 +3201,7 @@ $asm->disconnect();
 }
 
 ###################################################################################################
-# Aastra_queue_add_Asterisk(agent,queue)  
+# Aastra_queue_add_Asterisk(agent,queue)
 #
 # This function adds a dynamic agent in a queue.
 #
@@ -3198,7 +3212,7 @@ $asm->disconnect();
 # Returns
 #    None
 ###################################################################################################
-function Aastra_queue_add_Asterisk($agent,$queue,$penalty=0)  
+function Aastra_queue_add_Asterisk($agent,$queue,$penalty=0)
 {
 $asm=new AGI_AsteriskManager();
 $asm->connect();
@@ -3207,7 +3221,7 @@ $asm->disconnect();
 }
 
 ###################################################################################################
-# Aastra_queue_remove_Asterisk(agent,queue)  
+# Aastra_queue_remove_Asterisk(agent,queue)
 #
 # This function removes a dynamic agent from a queue.
 #
@@ -3218,7 +3232,7 @@ $asm->disconnect();
 # Returns
 #    None
 ###################################################################################################
-function Aastra_queue_remove_Asterisk($agent,$queue)  
+function Aastra_queue_remove_Asterisk($agent,$queue)
 {
 $asm=new AGI_AsteriskManager();
 $asm->connect();
@@ -3282,7 +3296,7 @@ if(($long_message!='') and ($short_message!=''))
 			$message['uri']=$uri;
 			Aastra_save_user_context($user,'message',$message);
 			}
-		
+
 		# Notify everybody
 		Aastra_send_SIP_notify_Asterisk('aastra-xml',$array_device);
 		}
@@ -3309,7 +3323,7 @@ if(Aastra_is_parking_notify_allowed_Asterisk(Aastra_get_userdevice_Asterisk($use
 	$data=Aastra_get_user_context('parking','user');
 
 	# Not already there
-	if(!in_array($user,$data)) 
+	if(!in_array($user,$data))
 		{
 		# Save the user
 		$data[]=$user;
@@ -3338,7 +3352,7 @@ function Aastra_remove_parking_Asterisk($user)
 $data=Aastra_get_user_context('parking','user');
 
 # User is there
-if(in_array($user,$data)) 
+if(in_array($user,$data))
 	{
 	# Remove the user
 	$data=array_flip($data);
@@ -3407,12 +3421,12 @@ if(!in_array($vmbox,$data))
 	$data[$vmbox]['count']=0;
 	$data[$vmbox]['msg']=0;
 	$update=True;
-	} 
+	}
 
 # Not already there
 if(isset($data[$vmbox]['user']))
 	{
-	if(!in_array($user,$data[$vmbox]['user'])) 
+	if(!in_array($user,$data[$vmbox]['user']))
 		{
 		# Save the user
 		$data[$vmbox]['user'][]=$user;
@@ -3428,7 +3442,7 @@ else
 
 # Add counting if needed
 if($count)
-	{ 
+	{
 	$data[$vmbox]['count']++;
 	$update=True;
 	}
@@ -3467,20 +3481,20 @@ foreach($array as $vmbox=>$value)
 	{
 	if(isset($data[$vmbox]['user']))
 		{
-		if(in_array($user,$data[$vmbox]['user'])) 
+		if(in_array($user,$data[$vmbox]['user']))
 			{
 			# Remove the user
 			$temp=array_flip($data[$vmbox]['user']);
 			unset($temp[$user]);
 			$temp=array_flip($temp);
-			if(count($temp)!=0) 
+			if(count($temp)!=0)
 				{
 				$data[$vmbox]['user']=$temp;
 				if($count and $data[$vmbox]['count']>0) $data[$vmbox]['count']--;
 				}
 			else unset($data[$vmbox]);
 
-			# Update needed 
+			# Update needed
 			$update=True;
 			}
 		}
@@ -3511,7 +3525,7 @@ $res=$as->connect();
 if(Aastra_compare_version_Asterisk('1.6')) $command='voicemail show users';
 else $command='show voicemail users';
 
-# AGI command 
+# AGI command
 $res=$as->Command($command);
 
 # Process result
@@ -3522,7 +3536,7 @@ foreach ($line as $myline)
 	if((!strstr($myline,'Privilege')) && (!strstr($myline,'Context')) && ($myline!='')) $array[trim(substr($myline,11,6))]=trim(substr($myline,54,6));
 	}
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Return result
@@ -3532,7 +3546,7 @@ return($array);
 ###################################################################################################
 # Aastra_ask_language_Asterisk()
 #
-# This function returns information on the languages configured for the phone and if it is needed 
+# This function returns information on the languages configured for the phone and if it is needed
 # to ask the user to select a language.
 #
 # Parameters
@@ -3548,11 +3562,11 @@ function Aastra_ask_language_Asterisk()
 {
 $return[0]=False;
 $array=Aastra_readCFGfile(AASTRA_TFTP_DIRECTORY.'/aastra.cfg','#',':');
-if($array['']['ask_language']=='1') 
+if($array['']['ask_language']=='1')
 	{
 	$return[0]=True;
 	$return[1][0]='en';
-	for($i=1;$i<5;$i++) 
+	for($i=1;$i<5;$i++)
 		{
 		if($array['']['language '.$i]!='')
 			{
@@ -3568,7 +3582,7 @@ return($return);
 ###################################################################################################
 # Aastra_get_startup_profile_Asterisk(user)
 #
-# This function returns the profile to use for self-configuration for any givem user/device based 
+# This function returns the profile to use for self-configuration for any givem user/device based
 # on the configuration in asterisk.conf. If user/device is not configured, default profile is
 # returned.
 #
@@ -3594,7 +3608,7 @@ if(isset($array_config_asterisk['Profiles']))
 		$array_users=explode(',',$users);
 		foreach($array_users as $key=>$value)
 			{
-			if(strstr($value,'-')) 
+			if(strstr($value,'-'))
 				{
 				$array_tmp=explode('-',$value);
 				if($array_tmp['0']!='') $array_check[$key]['min']=$array_tmp[0];
@@ -3644,7 +3658,7 @@ return($profile);
 function Aastra_get_status_index_Asterisk($function)
 {
 $array=array('dnd','cfwd','away','follow','daynight_0','daynight_1','daynight_2','daynight_3','daynight_4','daynight_5','daynight_6','daynight_7','daynight_8','daynight_9','logout');
-if($function!='') 
+if($function!='')
 	{
 	$array=array_flip($array);
 	return($array[$function]);
@@ -3672,14 +3686,14 @@ $res=$as->connect();
 # SIP show peer
 $res=$as->Command('core show hints');
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Process answer
 $line=split("\n", $res['data']);
 foreach($line as $parameter)
 	{
-	if(strstr($parameter,'ext-local')) 
+	if(strstr($parameter,'ext-local'))
 		{
 		$status=preg_split('/ /', $parameter,NULL,PREG_SPLIT_NO_EMPTY);
 		$extension=split('@',$status[0]);
@@ -3725,7 +3739,7 @@ $res = $as->connect();
 if(Aastra_compare_version_Asterisk('1.6')) $res = $as->Command('core show hint '.$user);
 else $res = $as->Command('core show hints');
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Process answer
@@ -3734,7 +3748,7 @@ foreach($line as $parameter)
 	{
 	if(Aastra_compare_version_Asterisk('1.6')) $test=strstr($parameter,'ext-local');
 	else $test=(strstr($parameter,'ext-local') && strstr($parameter,$user));
-	if($test) 
+	if($test)
 		{
 		$status=preg_split('/ /', $parameter,NULL,PREG_SPLIT_NO_EMPTY);
 		$extension=split('@',$status[0]);
@@ -3815,12 +3829,12 @@ else
 	# Split name/number
 	if($name!='') $return['name']=$name;
 	else $return['name']='';
-	if($number!='') 
+	if($number!='')
 		{
 		$return['number']=$number;
 		$return['dial']=True;
 		}
-	else 
+	else
 		{
 		$return['number']='';
 		$return['dial']=False;
@@ -3916,12 +3930,12 @@ $db=Aastra_connect_freePBX_db_Asterisk();
 
 # Process the list of queues
 $index=0;
-for($i=0;$i<sizeof($queue_details);$i++)  
+for($i=0;$i<sizeof($queue_details);$i++)
 	{
 	# Valid queue
 	if(isset($queue_details[$i]['Queue']))
 		{
-	      	if(($queue_details[$i]['Queue']!='') && ($queue_details[$i]['Queue']!='default'))  
+	      	if(($queue_details[$i]['Queue']!='') && ($queue_details[$i]['Queue']!='default'))
 			{
 			# Collect information
 			$queues[$index]['Queue']=$queue_details[$i]['Queue'];
@@ -3948,7 +3962,7 @@ $asm->disconnect();
 return($queues);
 }
 
-function Aastra_get_queue_members_Asterisk($queue)  
+function Aastra_get_queue_members_Asterisk($queue)
 {
 global $queue_members;
 
@@ -3962,7 +3976,7 @@ $asm->add_event_handler('queuemember','Aastra_asm_event_agents_Asterisk');
 
 # Retrieve info
 $count=0;
-while(!$queue_members)  
+while(!$queue_members)
 	{
       	$asm->QueueStatus();
       	$count++;
@@ -3973,11 +3987,11 @@ while(!$queue_members)
 $index=0;
 if(count($queue_members)>0)
 	{
-	foreach($queue_members as $agent_a)  
+	foreach($queue_members as $agent_a)
 		{
 		if($agent_a['Queue']==$queue)
 			{
-			if(preg_match('@^(?:Local/)?([^\@from\-internal/n]+)@i',$agent_a['Location'], $matches)) 
+			if(preg_match('@^(?:Local/)?([^\@from\-internal/n]+)@i',$agent_a['Location'], $matches))
 				{
 				$members[$index]['agent']=$matches[1];
 			      	if($agent_a['Paused']=='1') $members[$index]['paused']=True;
@@ -3985,7 +3999,7 @@ if(count($queue_members)>0)
 				$members[$index]['type']=$agent_a['Membership'];
 				$index++;
 				}
-			} 
+			}
 		}
 	}
 
@@ -3997,7 +4011,7 @@ if(isset($members)) return($members);
 else return(NULL);
 }
 
-function Aastra_get_queue_entries_Asterisk($queue)  
+function Aastra_get_queue_entries_Asterisk($queue)
 {
 global $queue_entries;
 
@@ -4011,7 +4025,7 @@ $asm->add_event_handler('queueentry','Aastra_asm_event_entries_Asterisk');
 
 # Retrieve info
 $count=0;
-while(!$queue_entries)  
+while(!$queue_entries)
 	{
       	$asm->QueueStatus();
       	$count++;
@@ -4022,13 +4036,13 @@ while(!$queue_entries)
 $index=0;
 if(count($queue_entries)>0)
 	{
-	foreach($queue_entries as $entry)  
+	foreach($queue_entries as $entry)
 		{
 		if($entry['Queue']==$queue)
 			{
 			$entries[$index]=$entry;
 			$index++;
-			} 
+			}
 		}
 	}
 
@@ -4040,30 +4054,30 @@ if(isset($entries)) return($entries);
 else return(NULL);
 }
 
-function Aastra_asm_event_queues_Asterisk($e,$parameters,$server,$port)  
+function Aastra_asm_event_queues_Asterisk($e,$parameters,$server,$port)
 {
 global $queue_details;
-if(sizeof($parameters))  
+if(sizeof($parameters))
 	{
       	if($parameters['Event']='QueueParams') $queue_details[]=$parameters;
     	}
 }
 
-function Aastra_asm_event_agents_Asterisk($e,$parameters,$server,$port)  
+function Aastra_asm_event_agents_Asterisk($e,$parameters,$server,$port)
 {
 global $queue_members;
 
-if(sizeof($parameters))  
+if(sizeof($parameters))
 	{
       	if($parameters['Event']='QueueMember') $queue_members[]=$parameters;
     	}
 }
 
-function Aastra_asm_event_entries_Asterisk($e,$parameters,$server,$port)  
+function Aastra_asm_event_entries_Asterisk($e,$parameters,$server,$port)
 {
 global $queue_entries;
 
-if(sizeof($parameters))  
+if(sizeof($parameters))
 	{
       	if($parameters['Event']='QueueEntry') $queue_entries[]=$parameters;
     	}
@@ -4108,9 +4122,9 @@ foreach($lines as $line)
 	{
 	$line=rtrim($line);
 	if(preg_match("/^\s*\[([a-z]*)\]\s*$/i", $line, $m)) $section=$m[1];
-	if(($section==$AA_VM_CONTEXT) && preg_match("/^([0-9]*)\s*=>?\s*([0-9]*)\s*,(.*)$/",$line,$m)) 
+	if(($section==$AA_VM_CONTEXT) && preg_match("/^([0-9]*)\s*=>?\s*([0-9]*)\s*,(.*)$/",$line,$m))
 		{
-	      	if ($m[1]==$user) 
+	      	if ($m[1]==$user)
 			{
 			$dump=False;
 			$output[]=$m[1].' => '.$password.','.$m[3];
@@ -4124,7 +4138,7 @@ foreach($lines as $line)
 # Rewrite the file
 if($return)
 	{
-	if ($fd = fopen($ASTERISK_LOCATION.'voicemail.conf','w')) 
+	if ($fd = fopen($ASTERISK_LOCATION.'voicemail.conf','w'))
 		{
 		fwrite($fd,implode("\n",$output)."\n");
 		fclose($fd);
@@ -4179,7 +4193,7 @@ return($return);
 #    None
 #
 # Returns
-#    Array[]	
+#    Array[]
 #	name		callerid
 #	number		extension
 #	mailbox	mailbox context
@@ -4195,14 +4209,14 @@ $res=$as->connect();
 $raw=$as->database_show('AMPUSER');
 
 # Purge the answers
-foreach($raw as $key=>$value) 
+foreach($raw as $key=>$value)
 	{
-	if(strstr($key,'info/cell')) $array_out[$value]=preg_replace(array('/\/AMPUSER\//','/\/info\/cell/'),array('',''),$key); 
-	if(strstr($key,'info/home')) $array_out[$value]=preg_replace(array('/\/AMPUSER\//','/\/info\/home/'),array('',''),$key); 
-	if(strstr($key,'info/other')) $array_out[$value]=preg_replace(array('/\/AMPUSER\//','/\/info\/other/'),array('',''),$key); 
+	if(strstr($key,'info/cell')) $array_out[$value]=preg_replace(array('/\/AMPUSER\//','/\/info\/cell/'),array('',''),$key);
+	if(strstr($key,'info/home')) $array_out[$value]=preg_replace(array('/\/AMPUSER\//','/\/info\/home/'),array('',''),$key);
+	if(strstr($key,'info/other')) $array_out[$value]=preg_replace(array('/\/AMPUSER\//','/\/info\/other/'),array('',''),$key);
 	}
 
-# Disconnect properly	
+# Disconnect properly
 $as->disconnect();
 
 # Return directory array
@@ -4232,7 +4246,7 @@ if($asm==NULL)
 else $as=$asm;
 
 if(Aastra_compare_version_Asterisk('1.6')) $res=$as->Command('devstate change '.$device.' '.$state);
-else 
+else
 	{
 	$res = $as->Command('core set global DEVSTATE('.$device.') '.$state);
 	$res = $as->Command('core set global DEVICE_STATE('.$device.') '.$state);
@@ -4337,9 +4351,9 @@ foreach($lines as $line)
 	{
 	$line=rtrim($line);
 	if(preg_match("/^\s*\[([a-z]*)\]\s*$/i", $line, $m)) $section=$m[1];
-	if(($section==$AA_VM_CONTEXT) && preg_match("/^([0-9]*)\s*=>?\s*([0-9]*)\s*,(.*)$/",$line,$m)) 
+	if(($section==$AA_VM_CONTEXT) && preg_match("/^([0-9]*)\s*=>?\s*([0-9]*)\s*,(.*)$/",$line,$m))
 		{
-       	if ($m[1]==$extension) 
+       	if ($m[1]==$extension)
 			{
 			$return[0]=True;
 			$return[1]=$m[2];
