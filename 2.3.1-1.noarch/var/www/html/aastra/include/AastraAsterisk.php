@@ -354,6 +354,11 @@ Global $ASTERISK_LOCATION;
 # Get all the user data
 $array=Aastra_readINIfile($ASTERISK_LOCATION.'sip_additional.conf',';','=');
 
+if(!isset($array[$user]['secret'])) {
+	$array=Aastra_readINIfile($ASTERISK_LOCATION.'pjsip.auth.conf',';','=');
+	$array[$user]['secret'] = $array[$user.'-auth']['password'];
+}
+
 # Return answer
 return($array[$user]['secret']);
 }
