@@ -140,6 +140,7 @@
 ###################################################################################################
 require_once('AastraAsterisk.class.php');
 require_once('AastraCommon.php');
+require_once('CustomDnd.php');
 require_once('DB.php');
 
 ###################################################################################################
@@ -1053,23 +1054,34 @@ else $devices=array($user);
 $as=new AGI_AsteriskManager();
 $res=$as->connect();
 
+$dnddb = new CustomDnd();
+
 # DND GET
 if(($action=='get') or ($action=='change'))
 	{
 	$res=$as->database_get('DND',$user);
 	if($res)
 		{
-		if($res=='YES') $dnd=1;
-		else $dnd=0;
+			if($res=='YES'){
+				$dnd=1;
+				$dnddb->enableDnd($user);
+			}
+			else {
+				$dnd=0;
+				$dnddb->disableDnd($user);
+			}
 		}
-	else $dnd=0;
+	else {
+		$dnd=0;
+		$dnddb->disableDnd($user);
+	}
 	}
 
 # Process change
 if($action=='change')
 	{
-	if($dnd==0) $action='enable';
-	else $action='disable';
+		if($dnd==0) $action='enable';
+		else $action='disable';
 	}
 
 # Process rest of the actions
@@ -1084,6 +1096,7 @@ switch($action)
 			foreach($devices as $device) Aastra_set_devstate_asterisk('Custom:DEVDND'.$device,'BUSY',$as);
 			Aastra_set_devstate_asterisk('Custom:DND'.$user,'BUSY',$as);
 			}
+		$dnddb->enableDnd($user);
 		break;
 
 	# Enable
@@ -1095,6 +1108,7 @@ switch($action)
 			foreach($devices as $device) Aastra_set_devstate_asterisk('Custom:DEVDND'.$device,'NOT_INUSE',$as);
 			Aastra_set_devstate_asterisk('Custom:DND'.$user,'NOT_INUSE',$as);
 			}
+		$dnddb->disableDnd($user);
 		break;
 	}
 
@@ -1253,7 +1267,7 @@ $res = $as->connect();
 # Prepare command
 if(Aastra_compare_version_Asterisk('1.6'))
 	{
-	$command1='parkedcalls show';
+	$command1='parking show default';
 	$command2='core show channel';
 	$parameter=1;
 	}
@@ -1271,28 +1285,27 @@ $count=0;
 $found=False;
 foreach($line as $myline)
 	{
-	if((Aastra_compare_version_Asterisk('1.6')) and (!$found))
+	if(Aastra_compare_version_Asterisk('1.6'))
 		{
-		if(strstr($myline,'Extension') and strstr($myline,'Channel'))
-			{
- 			$linevalue= preg_split('/ /', $myline,-1,PREG_SPLIT_NO_EMPTY);
-			if(($parameter=array_search('Channel',$linevalue))!==false) $found=True;
-			}
+		if(strpos($myline,'Space') !== false) {
+			$linevalue= explode(':', $myline);
+			$space = trim($linevalue[1]);
 		}
-	if((!strstr($myline,'Privilege')) && (!strstr($myline,'Extension')) && (!strstr($myline,'parked')) && (!strstr($myline,'Parking')) && ($myline!=''))
-		{
- 		$linevalue= preg_split('/ /', $myline,-1,PREG_SPLIT_NO_EMPTY);
-		if(($linevalue[0]!='') and (is_numeric($linevalue[0])))
+		if(strpos($myline,'Channel') !== false)
 			{
-			$park[$count][0]=$linevalue[0];
-			$res_i=$as->Command($command2.' '.$linevalue[$parameter]);
-			$line_i=@split("\n", $res_i['data']);
-			foreach($line_i as $myline_i)
-				{
-				if(strstr($myline_i,'Caller ID Name:') and !strstr($myline_i,'(N/A)')) $park[$count][1]=substr(substr(strrchr($myline_i,':'),1),1);
-				else if(strstr($myline_i,'Caller ID:')) $park[$count][1]=substr(substr(strrchr($myline_i,':'),1),1);
+		 		$linevalue= explode(':', $myline);
+				if($linevalue[1]!='')
+					{
+					$park[$count][0]=$space;
+					$res_i=$as->Command($command2.' '.$linevalue[1]);
+					$line_i=@split("\n", $res_i['data']);
+					foreach($line_i as $myline_i)
+						{
+						if(strstr($myline_i,'Caller ID Name:') and !strstr($myline_i,'(N/A)')) $park[$count][1]=substr(substr(strrchr($myline_i,':'),1),1);
+						else if(strstr($myline_i,'Caller ID:')) $park[$count][1]=substr(substr(strrchr($myline_i,':'),1),1);
+						}
+					$count++;
 				}
-			$count++;
 			}
 		}
 	}
@@ -1721,38 +1734,20 @@ else return(NULL);
 #    	[parkposmax]		Last parking slot
 #    	[parkingtime]		Parking timeout
 ###################################################################################################
-function Aastra_get_park_config_Asterisk($user = '')
+function Aastra_get_park_config_Asterisk()
 {
 Global $ASTERISK_LOCATION;
 
 # FreePBX 2.4 implementation
-if(file_exists($ASTERISK_LOCATION.'features_general_additional.conf'))
+if(file_exists($ASTERISK_LOCATION.'res_parking_additional.conf'))
 	{
-		# Read config file
-		$conf_array = Aastra_readINIfile($ASTERISK_LOCATION.'features_general_additional.conf',';','=');
-		if($user != '') {
-			$sips = Aastra_readINIfile($ASTERISK_LOCATION.'sip_additional.conf',';','=');
-		}
+	# Read config file
+	$conf_array=Aastra_readINIfile($ASTERISK_LOCATION.'res_parking_additional.conf',';','=');
 
-		# Process config file
-		if($sips[$user]['parkinglot'] != '') {
-			foreach($conf_array as $key => $parking) {
-				if($key == $sips[$user]['parkinglot'] || ($sips[$user]['parkinglot'] == 'default' && $key == '')) {
-					$return['parkext']=$parking['parkext'];
-					sscanf($parking['parkpos'],'%d-%d',$return['parkposmin'],$return['parkposmax']);
-					$return['parkingtime']=$parking['parkingtime'];
-					$return['parkpos'] = $parking['parkpos'];
-					$positions  = explode('-', $parking['parkpos']);
-					$return['parkmin'] = $positions[0];
-					$return['parkmax'] = $positions[1];
-				}
-			}
-		}
-		else {
-			$return['parkext']=$conf_array['']['parkext'];
-			sscanf($conf_array['']['parkpos'],'%d-%d',$return['parkposmin'],$return['parkposmax']);
-			$return['parkingtime']=$conf_array['']['parkingtime'];
-		}
+	# Process config file
+	$return['parkext']=$conf_array['default']['parkext'];
+	sscanf($conf_array['default']['parkpos'],'%d-%d',$return['parkposmin'],$return['parkposmax']);
+	$return['parkingtime']=$conf_array['default']['parkingtime'];
 	}
 else
 	{

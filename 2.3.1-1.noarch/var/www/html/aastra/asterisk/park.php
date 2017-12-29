@@ -80,7 +80,7 @@ switch($action)
     # Park (does not work on 6739i 3.0.1)
 	case 'park':
 		# Retrieve parking lot
-		$parking=Aastra_get_park_config_Asterisk($user);
+		$parking=Aastra_get_park_config_Asterisk();
 		# Parking lot configured
 		if($parking['parkext']!='')
 		{
@@ -89,8 +89,8 @@ switch($action)
 			# Send key sequence
 			require_once('AastraIPPhoneExecute.class.php');
 			$object=new AastraIPPhoneExecute();
-			$object->addEntry('Key:KeyPadStar');
-			$object->addEntry('Key:KeyPad'.'2');
+			$object->addEntry('Key:KeyPadPound');
+			$object->addEntry('Key:KeyPadPound');
 			foreach($chars as $value)
 			{
 			    switch($value)
@@ -150,15 +150,6 @@ switch($action)
 	case 'list':
 		# Get Parked calls
 		$park=Aastra_get_parked_calls_Asterisk();
-    $parking=Aastra_get_park_config_Asterisk($user);
-    if(isset($parking['parkpos'])) {
-      foreach($park as $key => $value) {
-        if($value[0] < $parking['parkmin'] || $value[0] > $parking['parkmax']) {
-          unset($park[$key]);
-        }
-      }
-    }
-
 		$count=count($park);
 
     	# Update display
@@ -181,8 +172,8 @@ switch($action)
                 }
                 elseif($nb_softkeys==6)
 				{
-					$object->addSoftkey(4,Aastra_get_label('Refresh',$language),$XML_SERVER.'&action=list');
-					$object->addSoftkey(6,Aastra_get_label('Exit',$language),'SoftKey:Exit');
+					$object->addSoftkey(1,Aastra_get_label('Refresh',$language),$XML_SERVER.'&action=list');
+					$object->addSoftkey(4,Aastra_get_label('Exit',$language),'SoftKey:Exit');
 				}
 				else
 				{
@@ -248,8 +239,8 @@ switch($action)
                         }
 						elseif($nb_softkeys==6)
 						{
-							$object->addSoftkey(4,Aastra_get_label('Refresh',$language),$XML_SERVER.'&action=list');
-							$object->addSoftkey(6,Aastra_get_label('Exit',$language),'SoftKey:Exit');
+							$object->addSoftkey(1,Aastra_get_label('Refresh',$language),$XML_SERVER.'&action=list');
+							$object->addSoftkey(4,Aastra_get_label('Exit',$language),'SoftKey:Exit');
 						}
 						else
 						{

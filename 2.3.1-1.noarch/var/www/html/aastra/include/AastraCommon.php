@@ -1,4 +1,4 @@
-<?php 
+<?php
 ###################################################################################################
 # Aastra XML API - AastraCommon.php
 # Copyright Aastra Telecom 2005-2010
@@ -54,10 +54,10 @@
 #     Aastra_read_session(appli)
 #        This function reads the temporary session file and retrieve the data if the TTL has not expired.
 #     Aastra_get_user_context(user,appli)
-#        This function reads the file which contains the user context parameters under /var/cache/aastra 
+#        This function reads the file which contains the user context parameters under /var/cache/aastra
 #        for each application.
 #     Aastra_save_user_context(user,appli,data)
-#        This function writes the file with the user context parameters under /var/cache/aastra 
+#        This function writes the file with the user context parameters under /var/cache/aastra
 #        for each application.
 #     Aastra_natsort2d(array,index)
 #        Performs a natural sort in a multi-dimensional array
@@ -68,10 +68,10 @@
 #     Aastra_get_label(label,language,file)
 #        Get a label in the proper language. If label does not exist the Englsih version is returned.
 #     Aastra_get_key_function(search,mac)
-#        Returns the key where a specific script is located, the script looks in the MAC.cfg of the 
+#        Returns the key where a specific script is located, the script looks in the MAC.cfg of the
 #        phone on the TFTP server.
 #     Aastra_getphone_fingerprint()
-#         This function returns the phone fingerprint which is a md5 hash of its model, MAC address and 
+#         This function returns the phone fingerprint which is a md5 hash of its model, MAC address and
 #         IP address.
 #     Aastra_update_HDconfig_file(config,extension,header)
 #         This function updates the configuration file that holds all the login/logout status.
@@ -118,18 +118,18 @@ else define('AASTRA_LANGUAGE_FILE','language.ini');
 if(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on' && $_GET['aastra_forced_https']=='') $XML_HTTP='https://';
 else $XML_HTTP='http://';
 $os=strtolower(PHP_OS);
-if(strpos($os,'win') === false) 
+if(strpos($os,'win') === false)
 	{
 	if(file_exists(AASTRA_CONFIG_DIRECTORY.'server.conf')) $array_config_server=Aastra_readINIfile(AASTRA_CONFIG_DIRECTORY.'server.conf','#','=');
 	else $array_config_server=Aastra_readINIfile('/etc/aastra-xml.conf','#','=');
 	}
 else $array_config_server=Aastra_readINIfile(AASTRA_CONFIG_DIRECTORY.'server.conf','#','=');
-if($array_config_server['General']['public']!='') 
+if($array_config_server['General']['public']!='')
 	{
 	$XML_SERVER=$XML_HTTP.$array_config_server['General']['public'].Aastra_getvar_safe('SCRIPT_NAME','','SERVER');
 	$XML_IP=$array_config_server['General']['public'];
 	}
-else 
+else
 	{
 	$XML_SERVER=$XML_HTTP.Aastra_getvar_safe('HTTP_HOST','','SERVER').Aastra_getvar_safe('SCRIPT_NAME','','SERVER');
 	$XML_IP=Aastra_getvar_safe('SERVER_ADDR','','SERVER');
@@ -240,7 +240,7 @@ Global $TEST;
 if($TEST) return;
 
 # Get MAC address
-if($user=='') 
+if($user=='')
 	{
 	$header=Aastra_decode_HTTP_header();
 	$user=$header['mac'];
@@ -318,7 +318,7 @@ if($handle)
 # Parameters
 #    @function 	php function to test
 #    @message 	Error message to be displayed if test fails
-# 
+#
 # Returns
 #   None
 #
@@ -348,7 +348,7 @@ if(!function_exists($function))
 # Parameters
 #    @version 	name of the script
 #    @string 		string to trace
-# 
+#
 # Returns
 #    None
 ###################################################################################################
@@ -361,7 +361,7 @@ if($TRACE)
 	{
 	# Check if target directory is present
 	if (!is_dir(AASTRA_PATH_CACHE))@mkdir(AASTRA_PATH_CACHE);
-	
+
 	# Trace in the file
 	$date=AASTRA_PATH_CACHE.date('mdY').'.log';
 	$time=date('H:i:s A');
@@ -381,7 +381,7 @@ if($TRACE)
 #
 # Parameters
 #    @string 		string to trace
-# 
+#
 # Returns
 #    None
 ###################################################################################################
@@ -417,7 +417,7 @@ if($DEBUG)
 # Returns
 #   Array with the content of the entry file
 ###################################################################################################
-function Aastra_readINIfile ($filename, $commentchar, $delim) 
+function Aastra_readINIfile ($filename, $commentchar, $delim)
 {
 # Get file content with a shared lock to avoid race conditions
 $array1 = array();
@@ -428,19 +428,19 @@ if ($handle)
 		{
 		while (!feof($handle)) $array1[] = fgets($handle);
 		flock($handle, LOCK_UN);
-		}   
+		}
 	fclose($handle);
 	}
 $section='';
 $array2=NULL;
-foreach($array1 as $filedata) 
+foreach($array1 as $filedata)
 	{
    	$dataline=trim($filedata);
    	$firstchar=substr($dataline, 0, 1);
-   	if ($firstchar!=$commentchar && $dataline!='') 
+   	if ($firstchar!=$commentchar && $dataline!='')
 		{
      		#It's an entry (not a comment and not a blank line)
-     		if ($firstchar == '[' && substr($dataline, -1, 1) == ']') 
+     		if ($firstchar == '[' && substr($dataline, -1, 1) == ']')
 			{
        		#It's a section
 			$section = substr($dataline, 1, -1);
@@ -449,7 +449,7 @@ foreach($array1 as $filedata)
 			{
 		       #It's a key...
        		$delimiter = strpos($dataline, $delim);
-       		if ($delimiter > 0) 
+       		if ($delimiter > 0)
 				{
          			#...with a value
          			$key = strtolower(trim(substr($dataline, 0, $delimiter)));
@@ -487,20 +487,20 @@ return $array2;
 # Returns
 #   Array with the content of the entry file
 ###################################################################################################
-function Aastra_readCFGfile ($filename, $commentchar, $delim) 
+function Aastra_readCFGfile ($filename, $commentchar, $delim)
 {
 $array1=@file($filename);
 $section='';
 if(isset($array1))
 	{
-	foreach($array1 as $filedata) 
+	foreach($array1 as $filedata)
 		{
 	   	$dataline = trim($filedata);
    		$firstchar = substr($dataline, 0, 1);
-	   	if ($firstchar!=$commentchar && $dataline!='') 
+	   	if ($firstchar!=$commentchar && $dataline!='')
 			{
      			#It's an entry (not a comment and not a blank line)
-	     		if ($firstchar == '[' && substr($dataline, -1, 1) == ']') 
+	     		if ($firstchar == '[' && substr($dataline, -1, 1) == ']')
 				{
        			#It's a section
 				$section = substr($dataline, 1, -1);
@@ -509,7 +509,7 @@ if(isset($array1))
 				{
 		       	#It's a key...
 	       		$delimiter = strpos($dataline, $delim);
-       			if ($delimiter > 0) 
+       			if ($delimiter > 0)
 					{
          				#...with a value
          				$key = trim(substr($dataline, 0, $delimiter));
@@ -538,7 +538,7 @@ else return(NULL);
 
 ###################################################################################################
 # Aastra_mail_attachment ($from , $to, $subject, $message, $attachment, $format)
-# 
+#
 # Sends an email with an attachment
 #
 # Parameters
@@ -570,36 +570,36 @@ $fileatt_name = substr($attachment, $start, strlen($attachment));
 # Create enveloppe of the email
 $email_from = $from;
 $email_subject =  $subject;
-$email_txt = $message; 
-$email_to = $to; 
+$email_txt = $message;
+$email_to = $to;
 $headers = 'From: '.$email_from;
-$file = @fopen($fileatt,'rb'); 
-$data = @fread($file,filesize($fileatt)); 
-@fclose($file); 
-$semi_rand = md5(time()); 
-$mime_boundary = "==Multipart_Boundary_x{$semi_rand}x"; 
+$file = @fopen($fileatt,'rb');
+$data = @fread($file,filesize($fileatt));
+@fclose($file);
+$semi_rand = md5(time());
+$mime_boundary = "==Multipart_Boundary_x{$semi_rand}x";
 
-# Prepare headers    
-$headers .= "\nMIME-Version: 1.0\n" . 
-            "Content-Type: multipart/mixed;\n" . 
-            " boundary=\"{$mime_boundary}\""; 
+# Prepare headers
+$headers .= "\nMIME-Version: 1.0\n" .
+            "Content-Type: multipart/mixed;\n" .
+            " boundary=\"{$mime_boundary}\"";
 $email_message .= "This is a multi-part message in MIME format.\n\n" . "--{$mime_boundary}\n" ;
 if($format=="html")$email_message .= "Content-Type:text/html; charset=\"iso-8859-1\"\n";
-else $email_message .= "Content-Type:text; charset=\"iso-8859-1\"\n"; 
-$email_message .= "Content-Transfer-Encoding: 7bit\n\n" . 
-$email_txt . "\n\n"; 
-$data = chunk_split(base64_encode($data)); 
+else $email_message .= "Content-Type:text; charset=\"iso-8859-1\"\n";
+$email_message .= "Content-Transfer-Encoding: 7bit\n\n" .
+$email_txt . "\n\n";
+$data = chunk_split(base64_encode($data));
 
 # Add mime
-$email_message .= "--{$mime_boundary}\n" . 
-                  "Content-Type: {$fileatt_type};\n" . 
-                  " name=\"{$fileatt_name}\"\n" . 
-                  "Content-Transfer-Encoding: base64\n\n" . 
-                 $data . "\n\n" . 
-                  "--{$mime_boundary}--\n"; 
+$email_message .= "--{$mime_boundary}\n" .
+                  "Content-Type: {$fileatt_type};\n" .
+                  " name=\"{$fileatt_name}\"\n" .
+                  "Content-Transfer-Encoding: base64\n\n" .
+                 $data . "\n\n" .
+                  "--{$mime_boundary}--\n";
 
 # Send the mail
-@mail($email_to, $email_subject, $email_message, $headers); 
+@mail($email_to, $email_subject, $email_message, $headers);
 }
 
 ###################################################################################################
@@ -644,7 +644,7 @@ function Aastra_save_session($appli,$expire,$array,$filename=NULL)
 if (!is_dir(AASTRA_PATH_CACHE))@mkdir(AASTRA_PATH_CACHE);
 
 # Save the session file
-if($filename==NULL) 
+if($filename==NULL)
 	{
 	$header=Aastra_decode_HTTP_header();
 	$filename=$header['mac'];
@@ -678,7 +678,7 @@ if($handle)
 ###################################################################################################
 function Aastra_read_session($appli,$filename=NULL)
 {
-if($filename==NULL) 
+if($filename==NULL)
 	{
 	$header=Aastra_decode_HTTP_header();
 	$filename=$header['mac'];
@@ -695,7 +695,7 @@ return($array);
 ###################################################################################################
 # Aastra_get_user_context($user,$appli)
 #
-# This function reads the file which contains the user context parameters under /var/cache/aastra 
+# This function reads the file which contains the user context parameters under /var/cache/aastra
 # for each application.
 #
 # Parameters
@@ -725,7 +725,7 @@ else return(NULL);
 ###################################################################################################
 # Aastra_save_user_context($user,$appli,$data)
 #
-# This function writes the file with the user context parameters under /var/cache/aastra 
+# This function writes the file with the user context parameters under /var/cache/aastra
 # for each application.
 #
 # Parameters
@@ -746,7 +746,7 @@ $file=AASTRA_PATH_CACHE.$user.'.context';
 
 # File exists?
 if(is_file($file)) $array=Aastra_readINIfile($file,'#','=');
-else 
+else
 	{
 	touch($file);
 	chmod($file,0666);
@@ -777,7 +777,7 @@ if($handle)
 
 ###################################################################################################
 # Aastra_natsort2d(&$arrIn,$index=null)
-# 
+#
 # Performs a natural sort in a multi-dimensional array
 #
 # Parameters
@@ -791,14 +791,14 @@ function Aastra_natsort2d(&$arrIn,$index=null)
 {
 $arrTemp = array();
 $arrOut = array();
-foreach ( $arrIn as $key=>$value ) 
+foreach ( $arrIn as $key=>$value )
 	{
    	reset($value);
        $arrTemp[$key] = is_null($index)
                            ? current($value)
                            : $value[$index];
    	}
-   
+
 natsort($arrTemp);
 foreach ( $arrTemp as $key=>$value ) $arrOut[$key] = $arrIn[$key];
 $arrIn = $arrOut;
@@ -806,7 +806,7 @@ $arrIn = $arrOut;
 
 ###################################################################################################
 # Aastra_search2d(array,search,index)
-# 
+#
 # Performs a search in a 2 dimensional array
 #
 # Parameters
@@ -840,7 +840,7 @@ return($return);
 
 ###################################################################################################
 # Aastra_array_multi_sort(array,index,order,natural_sort,case_sensitive)
-# 
+#
 # Performs a natural sort in a multi-dimensional array recreating indexes
 #
 # Parameters
@@ -930,7 +930,7 @@ if($AA_ARRAY_LANGUAGE[$label][$language]!='') $return=$AA_ARRAY_LANGUAGE[$label]
 else
  	{
   	# check if language code has format like fr_eu or fr_ca (European or Canadian French)
-  	if (preg_match('/^([a-z]+)_[a-z]+$/i',$language,$matches)) 
+  	if (preg_match('/^([a-z]+)_[a-z]+$/i',$language,$matches))
   		{
 	   	# if yes, strip _xy suffix and fallback to general language (e.g. fr_eu --> fr)
    		$language=$matches[1];
@@ -1009,7 +1009,7 @@ function Aastra_update_HDconfig_file($config,$extension,$header=NULL)
 $array=Aastra_read_HDconfig_file($config);
 
 # Update value
-if($header) 
+if($header)
 	{
 	$array[$extension]=$header;
 	$array[$extension]['time']=time();
@@ -1023,7 +1023,7 @@ if($handle)
 	foreach($array as $key=>$value)
 		{
 		fputs($handle,'['.$key.']'."\n");
-		foreach($value as $key2=>$value2) 
+		foreach($value as $key2=>$value2)
 			{
 			if($key2!='module') fputs($handle,$key2.'='.$value2."\n");
 			else fputs($handle,$key2.'='.implode(',',$value2)."\n");
@@ -1031,7 +1031,7 @@ if($handle)
 		}
 
 	fclose($handle);
-	@chmod($config,0777);   
+	@chmod($config,0777);
 	}
 else Aastra_debug('Cannot open '.$config.' in write mode');
 }
@@ -1177,7 +1177,7 @@ return(Aastra_get_user_context($user,'signature'));
 # Return
 #    array
 #       0		Boolean, success or failure of the search
-# 	 array		Array with the geolocation data	
+# 	 array		Array with the geolocation data
 #       	city
 #       	region
 #		country_code
@@ -1194,7 +1194,7 @@ $return[0]=True;
 # Open and retrieve XML answer
 $handle = @fopen('http://www.geoplugin.net/xml.gp?ip='.$ip, 'r');
 if($handle)
-	{	
+	{
 	while ($line=fgets($handle,1000)) $data.=$line;
 	fclose($handle);
 	}
@@ -1207,13 +1207,13 @@ if($return[0])
 	$p = xml_parser_create('ISO-8859-1');
 	xml_parse_into_struct($p, $data, $vals, $index);
 	xml_parser_free($p);
-	
+
 	# Check data
 	if($vals!=NULL)
 		{
 		# Save data
 		$array['city']=$vals[$index['GEOPLUGIN_CITY'][0]]['value'];
-		if($array['city']=='(null)') $array['city']=''; 
+		if($array['city']=='(null)') $array['city']='';
 		$array['region']=$vals[$index['GEOPLUGIN_REGION'][0]]['value'];
 		if($array['region']=='(null)') $array['region']='';
 		$array['country_code']=$vals[$index['GEOPLUGIN_COUNTRYCODE'][0]]['value'];
@@ -1255,7 +1255,7 @@ $parser=xml_parser_create('');
 
 # Read content
 ini_set('user_agent', $_SERVER['HTTP_USER_AGENT']);
-if(!($fp=@fopen($url,'rb'))) 
+if(!($fp=@fopen($url,'rb')))
 	{
 	Aastra_debug('Failed to open URL='.$url.' HTTP header='.print_r($http_response_header,True));
 	return array();
@@ -1278,7 +1278,7 @@ $parents=array();
 $opened_tags=array();
 $arr=array();
 $current=& $xml_array;
-$repeated_tag_index=array (); 
+$repeated_tag_index=array ();
 
 # Browse the values
 foreach ($xml_values as $data)
@@ -1301,7 +1301,7 @@ foreach ($xml_values as $data)
             		}
         	}
         if($type=='open')
-        	{ 
+        	{
             	$parent[$level -1]= &$current;
             	if (!is_array($current) or (!in_array($tag, array_keys($current))))
             		{
@@ -1318,11 +1318,11 @@ foreach ($xml_values as $data)
                     		$repeated_tag_index[$tag.'_'.$level]++;
                 		}
                 	else
-                		{ 
+                		{
                     		$current[$tag]=array (
                         				$current[$tag],
                         				$result
-                    					); 
+                    					);
                     		$repeated_tag_index[$tag.'_'.$level]=2;
                     		if(isset($current[$tag.'_attr']))
                     			{
@@ -1356,12 +1356,12 @@ foreach ($xml_values as $data)
                     		$current[$tag]=array(
                         				$current[$tag],
                         				$result
-                    					); 
+                    					);
                     		$repeated_tag_index[$tag.'_'.$level]=1;
                     		if($priority=='tag' and $get_attributes)
                     			{
                         		if (isset ($current[$tag . '_attr']))
-                        			{ 
+                        			{
                             		$current[$tag]['0_attr']=$current[$tag.'_attr'];
                             		unset($current[$tag.'_attr']);
                         			}
@@ -1384,7 +1384,7 @@ return ($xml_array);
 # This function switches the uri from http to https to secure the next HTTP GET.
 #
 # Parameters
-#   @uri		URI 
+#   @uri		URI
 #   @port		SSL port to use (optional 443 by default)
 #
 # Return
@@ -1423,7 +1423,7 @@ return($uri);
 # Debug mode using php-cli
 if(php_sapi_name()=='cli')
 	{
-	for($i=1;$i<$argc;$i++) 
+	for($i=1;$i<$argc;$i++)
 		{
 		$things=split('=',$argv[$i]);
 		$_GET[$things[0]]=$things[1];
