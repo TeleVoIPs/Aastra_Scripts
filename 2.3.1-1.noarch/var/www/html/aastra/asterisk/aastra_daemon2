@@ -1,5 +1,5 @@
 #!/usr/bin/php -q
-<?php 
+<?php
 #############################################################################
 # Asterisk daemon 2 for Aastra SIP Phones
 #
@@ -30,10 +30,79 @@ chdir(dirname(__FILE__));
 #############################################################################
 require_once('AastraCommon.php');
 require_once('AastraAsterisk.php');
+require_once('DB.php');
 
 #############################################################################
 # Private functions
 #############################################################################
+
+function get_device_types() {
+	# Connect to database
+	$conf=Aastra_readINIfile('/etc/amportal.conf','#','=');
+	$datasource=$conf['']['ampdbengine'].'://'.$conf['']['ampdbuser'].':'.$conf['']['ampdbpass'].'@'.$conf['']['ampdbhost'].'/asterisk';
+	$devicedb=DB::connect($datasource);
+
+	# Check connection
+	if(DB::isError($devicedb))
+		{
+		# Debug message
+		Aastra_debug('Cannot connect to Asterisk database, error message='.$devicedb->getMessage());
+		$devicedb=NULL;
+		}
+
+	$types = array();
+	$query=$devicedb->getAssoc('SELECT id, tech, user FROM devices');
+	if (!PEAR::isError($query)) {
+		foreach($query as $key => $value) {
+			$types[$value[1]] = $value[0];
+		}
+	}
+	return $types;
+}
+
+function send_notify($event,$array_user) {
+	$types = get_device_types();
+	$sips = array();
+	$pjsips = array();
+	foreach($array_user as $user) {
+		if($types[$user] == 'sip') {
+			$sips[] = $user;
+		}
+		elseif($types[$user] == 'pjsip') {
+			$pjsips[] = $user;
+		}
+	}
+	send_SIP_notify($event,$sips);
+	send_PJSIP_notify($event,$pjsips);
+}
+
+function send_PJSIP_notify($event,$array_user)
+{
+Global $asm;
+
+# Max number of extensions per command
+$EXT_NUM_LIMIT=50;
+
+# Process each chunk
+while(count($array_user) > 0)
+	{
+	# Create the chunks
+	$array_user_slice=array_slice($array_user,0,$EXT_NUM_LIMIT);
+
+  	# Prepare command
+  	$command='pjsip send notify '.$event.' endpoint';
+  	foreach($array_user_slice as $value) $command.=' '.$value;
+
+  	# Send command
+  	$res=$asm->Command($command);
+
+	# Next chunk
+  	$array_user=array_slice($array_user,$EXT_NUM_LIMIT);
+
+	# Next chunk
+  	$array_user=array_slice($array_user, $EXT_NUM_LIMIT);
+	}
+}
 
 function send_SIP_notify($event,$array_user)
 {
@@ -43,7 +112,7 @@ Global $asm;
 $EXT_NUM_LIMIT=50;
 
 # Process each chunk
-while(count($array_user) > 0) 
+while(count($array_user) > 0)
 	{
 	# Create the chunks
 	$array_user_slice=array_slice($array_user,0,$EXT_NUM_LIMIT);
@@ -57,6 +126,9 @@ while(count($array_user) > 0)
 
 	# Next chunk
   	$array_user=array_slice($array_user,$EXT_NUM_LIMIT);
+
+	# Next chunk
+  	$array_user=array_slice($array_user, $EXT_NUM_LIMIT);
 	}
 }
 
@@ -85,7 +157,7 @@ if($init)
 		if($status_mbox[$key]==0) $array_mbox[$key]['status']='off';
 		else $array_mbox[$key]['status']='on';
 		if($array_mbox[$key]['count']>0) $array_mbox[$key]['msg']=$status_mbox[$key];
-		foreach($array_mbox[$key]['user'] as $key2=>$value2) 
+		foreach($array_mbox[$key]['user'] as $key2=>$value2)
 			{
 			if(!in_array($value2,$array_update)) $array_update[]=$value2;
 			}
@@ -96,23 +168,23 @@ else
 	foreach($array_mbox as $key=>$value)
 		{
 		$update=False;
-		if($status_mbox[$key]==0) 
+		if($status_mbox[$key]==0)
 			{
-			if($array_mbox[$key]['status']=='on') 
+			if($array_mbox[$key]['status']=='on')
 				{
 				$array_mbox[$key]['status']='off';
 				$update=True;
 				}
 			}
-		else 
+		else
 			{
-			if($array_mbox[$key]['status']=='off') 
+			if($array_mbox[$key]['status']=='off')
 				{
 				$array_mbox[$key]['status']='on';
 				$update=True;
 				}
 			}
-		if($array_mbox[$key]['count']>0) 
+		if($array_mbox[$key]['count']>0)
 			{
 			if($array_mbox[$key]['msg']!=$status_mbox[$key])
 				{
@@ -122,7 +194,7 @@ else
 			}
 		if($update)
 			{
-			foreach($array_mbox[$key]['user'] as $key2=>$value2) 
+			foreach($array_mbox[$key]['user'] as $key2=>$value2)
 				{
 				if(!in_array($value2,$array_update)) $array_update[]=$value2;
 				}
@@ -146,7 +218,7 @@ if(count($array_update)!=0)
 		}
 
 	# Notify in bulk
-	send_SIP_notify('aastra-xml',$array_update);
+	send_notify('aastra-xml',$array_update);
 	}
 }
 
@@ -156,9 +228,9 @@ Global $asm;
 
 # Retrieve current logout times
 $raw=$asm->database_show('AMPUSER');
-foreach($raw as $key=>$value) 
+foreach($raw as $key=>$value)
 	{
-	if(strstr($key,'presence/logout')) $data[preg_replace(array('/\/AMPUSER\//','/\/presence\/logout/'),array('',''),$key)]=$value; 
+	if(strstr($key,'presence/logout')) $data[preg_replace(array('/\/AMPUSER\//','/\/presence\/logout/'),array('',''),$key)]=$value;
 	}
 
 # Remove the ones that are not in the range
@@ -168,7 +240,7 @@ foreach($data as $key=>$value)
 	$split=explode('-',$value);
 	$test_time=mktime($split[0],$split[1],0,date('n'),date('j'),date('Y'));
 	if($current_time<$test_time) unset($data[$key]);
-	else 
+	else
 		{
 		if(($current_time-$test_time)>60) unset($data[$key]);
 		}
@@ -189,7 +261,7 @@ if(count($data)!=0)
 		$line=split("\n", $res['data']);
 		foreach($line as $parameter)
 			{
-			if(strstr($parameter,'ext-local')) 
+			if(strstr($parameter,'ext-local'))
 				{
 				$status=explode(' ', $parameter);
 				$state=explode(':',$status[34]);
@@ -252,7 +324,7 @@ while(1)
 
 	# Update VM + LOGOUT
 	$socket=$asm->get_socket();
-	if($socket) 
+	if($socket)
 		{
 		update_vm_status($init);
 		if($AA_AUTOLOGOUT and ($AA_FREEPBX_MODE=='1'))
