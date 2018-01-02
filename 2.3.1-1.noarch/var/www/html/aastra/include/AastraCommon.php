@@ -145,7 +145,7 @@ if(isset($_GET['aastra_forced_https']))
 	}
 $XML_SERVER_PATH = substr($XML_SERVER,0,(strlen($XML_SERVER)-strlen(strrchr($XML_SERVER, '/'))+1));
 if($array_config_server['General']['public']!='') $AA_XML_SERVER = $array_config_server['General']['public'];
-else $AA_XML_SERVER = Aastra_getvar_safe('HTTP_HOST','','SERVER');
+else $AA_XML_SERVER = Aastra_getvar_safe('SERVER_NAME','','SERVER');
 
 ###################################################################################################
 # PATHS for LOCAL APPLICATIONS
