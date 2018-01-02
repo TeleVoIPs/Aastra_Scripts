@@ -30,6 +30,7 @@ chdir(dirname(__FILE__));
 #############################################################################
 require_once('AastraCommon.php');
 require_once('AastraAsterisk.php');
+require_once('DB.php');
 
 #############################################################################
 # Private functions
