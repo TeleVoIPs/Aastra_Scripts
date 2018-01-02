@@ -30,12 +30,10 @@ chdir(dirname(__FILE__));
 #############################################################################
 require_once('AastraCommon.php');
 require_once('AastraAsterisk.php');
-require_once('DB.php');
 
 #############################################################################
 # Private functions
 #############################################################################
-
 function get_device_types() {
 	# Connect to database
 	$conf=Aastra_readINIfile('/etc/amportal.conf','#','=');
@@ -126,9 +124,6 @@ while(count($array_user) > 0)
 
 	# Next chunk
   	$array_user=array_slice($array_user,$EXT_NUM_LIMIT);
-
-	# Next chunk
-  	$array_user=array_slice($array_user, $EXT_NUM_LIMIT);
 	}
 }
 
