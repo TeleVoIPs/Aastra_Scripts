@@ -30,78 +30,10 @@ chdir(dirname(__FILE__));
 #############################################################################
 require_once('AastraCommon.php');
 require_once('AastraAsterisk.php');
-require_once('DB.php');
 
 #############################################################################
 # Private functions
 #############################################################################
-function get_device_types() {
-	# Connect to database
-	$conf=Aastra_readINIfile('/etc/amportal.conf','#','=');
-	$datasource=$conf['']['ampdbengine'].'://'.$conf['']['ampdbuser'].':'.$conf['']['ampdbpass'].'@'.$conf['']['ampdbhost'].'/asterisk';
-	$devicedb=DB::connect($datasource);
-
-	# Check connection
-	if(DB::isError($devicedb))
-		{
-		# Debug message
-		Aastra_debug('Cannot connect to Asterisk database, error message='.$devicedb->getMessage());
-		$devicedb=NULL;
-		}
-
-	$types = array();
-	$query=$devicedb->getAssoc('SELECT id, tech, user FROM devices');
-	if (!PEAR::isError($query)) {
-		foreach($query as $key => $value) {
-			$types[$value[1]] = $value[0];
-		}
-	}
-	return $types;
-}
-
-function send_notify($event,$array_user) {
-	$types = get_device_types();
-	$sips = array();
-	$pjsips = array();
-	foreach($array_user as $user) {
-		if($types[$user] == 'sip') {
-			$sips[] = $user;
-		}
-		elseif($types[$user] == 'pjsip') {
-			$pjsips[] = $user;
-		}
-	}
-	send_SIP_notify($event,$sips);
-	send_PJSIP_notify($event,$pjsips);
-}
-
-function send_PJSIP_notify($event,$array_user)
-{
-Global $asm;
-
-# Max number of extensions per command
-$EXT_NUM_LIMIT=50;
-
-# Process each chunk
-while(count($array_user) > 0)
-	{
-	# Create the chunks
-	$array_user_slice=array_slice($array_user,0,$EXT_NUM_LIMIT);
-
-  	# Prepare command
-  	$command='pjsip send notify '.$event.' endpoint';
-  	foreach($array_user_slice as $value) $command.=' '.$value;
-
-  	# Send command
-  	$res=$asm->Command($command);
-
-	# Next chunk
-  	$array_user=array_slice($array_user,$EXT_NUM_LIMIT);
-
-	# Next chunk
-  	$array_user=array_slice($array_user, $EXT_NUM_LIMIT);
-	}
-}
 
 function send_SIP_notify($event,$array_user)
 {
@@ -116,12 +48,17 @@ while(count($array_user) > 0)
 	# Create the chunks
 	$array_user_slice=array_slice($array_user,0,$EXT_NUM_LIMIT);
 
-  	# Prepare command
-  	$command='sip notify '.$event;
-  	foreach($array_user_slice as $value) $command.=' '.$value;
+	# Prepare commands
+	$command='sip notify '.$event;
+	$pjcommand='pjsip send notify '.$event.' endpoint';
+	foreach($array_user_slice as $value){
+		$command.=' '.$value;
+		$pjcommand.=' '.$value;
+	}
 
-  	# Send command
-  	$res=$asm->Command($command);
+	# Send commands
+	$res=$asm->Command($command);
+	$pjres=$asm->Command($pjcommand);
 
 	# Next chunk
   	$array_user=array_slice($array_user,$EXT_NUM_LIMIT);
@@ -214,7 +151,7 @@ if(count($array_update)!=0)
 		}
 
 	# Notify in bulk
-	send_notify('aastra-xml',$array_update);
+	send_SIP_notify('aastra-xml',$array_update);
 	}
 }
 
