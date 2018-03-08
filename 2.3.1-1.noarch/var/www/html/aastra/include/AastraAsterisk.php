@@ -165,7 +165,7 @@ $AA_ASTERISK_VERSION=Aastra_get_version_Asterisk();
 # FreePBX variables
 $AA_FREEPBX_MODE='1';
 if($array_config_freepbx['']['ampextensions']=='deviceanduser') $AA_FREEPBX_MODE='2';
-if(strcasecmp($array_config_freepbx['']['usedevstate'],'true')==0) $AA_FREEPBX_USEDEVSTATE=True;
+if(strcasecmp($array_config_freepbx['']['usedevstate'],'1')==0) $AA_FREEPBX_USEDEVSTATE=True;
 
 # Voice Mail variables
 $AA_VM_CONTEXT='default';
@@ -761,12 +761,17 @@ while(count($array_user) > 0)
 	# Create the chunks
 	$array_user_slice=array_slice($array_user,0,$EXT_NUM_LIMIT);
 
-  	# Prepare command
+		# Prepare commands
   	$command='sip notify '.$event;
-  	foreach($array_user_slice as $value) $command.=' '.$value;
+		$pjcommand='pjsip send notify '.$event.' endpoint';
+  	foreach($array_user_slice as $value){
+			$command.=' '.$value;
+			$pjcommand.=' '.$value;
+		}
 
-  	# Send command
-  	$res = $as->Command($command);
+  	# Send commands
+  	$res=$as->Command($command);
+		$pjres=$as->Command($pjcommand);
 
 	# Next chunk
   	$array_user=array_slice($array_user, $EXT_NUM_LIMIT);
@@ -4252,8 +4257,8 @@ else $as=$asm;
 if(Aastra_compare_version_Asterisk('1.6')) $res=$as->Command('devstate change '.$device.' '.$state);
 else
 	{
-	$res = $as->Command('core set global DEVSTATE('.$device.') '.$state);
-	$res = $as->Command('core set global DEVICE_STATE('.$device.') '.$state);
+	$res = $as->Command('dialplan set global DEVSTATE('.$device.') '.$state);
+	$res = $as->Command('dialplan set global DEVICE_STATE('.$device.') '.$state);
 	}
 
 # Disconnect properly
