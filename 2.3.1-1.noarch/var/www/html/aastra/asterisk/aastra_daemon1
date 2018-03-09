@@ -488,7 +488,7 @@ $socket=False;
 $init=True;
 
 # Global parameters
-if(Aastra_compare_version_Asterisk('1.6')) $command='parkedcalls show';
+if(Aastra_compare_version_Asterisk('1.6')) $command='parking show default';
 else
 	{
 	$command='show parkedcalls';
@@ -555,10 +555,35 @@ while(1)
 				$line=split("\n", $res['data']);
 				foreach ($line as $myline)
 					{
-					if((!strstr($myline,'Privilege')) && (!strstr($myline,'Extension')) && (!strstr($myline,'parked')) && (!strstr($myline,'Parking')) && ($myline!=''))
-						{
-				 		$linevalue= preg_split('/ /', $myline,-1,PREG_SPLIT_NO_EMPTY);
-						if(($linevalue[0]!='') and (is_numeric($linevalue[0]))) $park++;
+						if(Aastra_compare_version_Asterisk('1.6'))
+							{
+							if(strpos($myline,'Space') !== false) {
+								$linevalue= explode(':', $myline);
+								$space = trim($linevalue[1]);
+							}
+							if(strpos($myline,'Channel') !== false)
+								{
+							 		$linevalue= explode(':', $myline);
+									if($linevalue[1]!='')
+										{
+										$park[$count][0]=$space;
+										$res_i=$as->Command($command2.' '.$linevalue[1]);
+										$line_i=@split("\n", $res_i['data']);
+										foreach($line_i as $myline_i)
+											{
+											if(strstr($myline_i,'Caller ID Name:') and !strstr($myline_i,'(N/A)')) $park[$count][1]=substr(substr(strrchr($myline_i,':'),1),1);
+											else if(strstr($myline_i,'Caller ID:')) $park[$count][1]=substr(substr(strrchr($myline_i,':'),1),1);
+											}
+										$count++;
+									}
+								}
+							}
+						else {
+							if((!strstr($myline,'Privilege')) && (!strstr($myline,'Extension')) && (!strstr($myline,'parked')) && (!strstr($myline,'Parking')) && ($myline!=''))
+								{
+						 		$linevalue= preg_split('/ /', $myline,-1,PREG_SPLIT_NO_EMPTY);
+								if(($linevalue[0]!='') and (is_numeric($linevalue[0]))) $park++;
+								}
 						}
 					}
 
