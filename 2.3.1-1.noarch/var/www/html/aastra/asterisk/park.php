@@ -158,6 +158,7 @@ switch($action)
         }
       }
     }
+    $park = array_values($park);
 
 		$count=count($park);
 

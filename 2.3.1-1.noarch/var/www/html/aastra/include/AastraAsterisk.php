@@ -1266,7 +1266,7 @@ $count=0;
 $found=False;
 foreach($line as $myline)
 	{
-	if((Aastra_compare_version_Asterisk('1.6')) and (!$found))
+	if((Aastra_compare_version_Asterisk('1.6')))
 		{
 		if(strstr($myline,'Extension') and strstr($myline,'Channel'))
 			{
@@ -1280,7 +1280,7 @@ foreach($line as $myline)
 		if(($linevalue[0]!='') and (is_numeric($linevalue[0])))
 			{
 			$park[$count][0]=$linevalue[0];
-			$res_i=$as->Command($command2.' '.$linevalue[$parameter]);
+			$res_i=$as->Command($command2.' '.$linevalue[1]);
 			$line_i=@split("\n", $res_i['data']);
 			foreach($line_i as $myline_i)
 				{
