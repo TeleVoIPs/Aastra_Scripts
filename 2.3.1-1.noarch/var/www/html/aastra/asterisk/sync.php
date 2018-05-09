@@ -855,6 +855,11 @@ switch($action)
 				if(($parking['key']!='') and Aastra_is_ledcontrol_supported()) $object->addEntry('Led: '.$parking['key'].'='.$status);
 				$data['parking']='0';
 				}
+			else
+				{
+					$parking=Aastra_get_user_context($user,'parking');
+					if(($parking['key']!='') and Aastra_is_ledcontrol_supported()) $object->addEntry('Led: '.$parking['key'].'=off');
+				}
 			}
 		if(isset($data['vmail']))
 			{

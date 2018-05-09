@@ -76,8 +76,16 @@ $data=Aastra_get_user_context('parking','user');
 foreach($data as $user)
 	{
 	# Send to a single user
+	$park=Aastra_get_parked_calls_Asterisk();
+	$parking=Aastra_get_park_config_Asterisk($user);
 	$notify=Aastra_get_user_context($user,'notify');
-	$notify['parking']='1';
+	if(isset($parking['parkpos'])) {
+		foreach($park as $key => $value) {
+			if($value[0] >= $parking['parkmin'] && $value[0] <= $parking['parkmax']) {
+				$notify['parking']='1';
+			}
+		}
+	}
 	Aastra_save_user_context($user,'notify',$notify);
 	}
 
